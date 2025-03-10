@@ -7,8 +7,9 @@ library(data.table)
 
 df <- fread("data/raw/issued-building-permits.csv",select=c("TypeOfWork","SpecificUseCategory","IssueDate","Address","geo_point_2d"))
 # make two variables, streetNumber and streetRest by splitting Address
-df[,c("civicAddress",paste("a",1:6)):=tstrsplit(Address,",")]
-df[,c("civicAddress","chum","other"):=tstrsplit(civicAddress," #")]
+df <- df[grepl("New Build",TypeOfWork)==TRUE]
+df[,c("civicAddress",paste("a",1:2)):=tstrsplit(Address,",")]
+df[,c("civicAddress","chum"):=tstrsplit(civicAddress," #")]
 df[,c("dropper","postal"):=tstrsplit(Address,", BC ")]
 df[,c("lat","lon"):=tstrsplit(geo_point_2d,",",fixed=TRUE)]
 df[,laneway:=grepl("aneway",SpecificUseCategory)==TRUE]
