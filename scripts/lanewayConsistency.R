@@ -32,6 +32,7 @@ fullify <- function(x) {
     y <- gsub(" AV"," AVENUE",x)
     y <- gsub(" AVE"," AVENUE",y)
     y <- gsub(" AVENUENUE"," AVENUE",y)
+    y <- gsub(" AVENUEE"," AVENUE",y)
     y <- gsub(" ST"," STREET",y)
     y <- gsub(" BLVD","BOULEVARD",y)
     y <- gsub(" DR"," DRIVE",y)
@@ -48,6 +49,14 @@ dT[,civicAddress:=paste(str_no,fullify(str_name))]
 
 dLT <- merge(dL,dT,by="civicAddress",all=TRUE)
 # lots of no laneway reported when yes permit
-summary(dLT[haslaneway==1 ,(IssueDate>as.Date("2023-01-01"))])
+print(summary(dLT[(IssueDate<as.Date("2023-01-01")),haslaneway==1 ]))
 # But almost all permit when laneway reported
-summary(dLT[haslaneway==1 ,(IssueDate<as.Date("2023-01-01"))])
+print(summary(dLT[haslaneway==1 ,(IssueDate<as.Date("2023-01-01"))]))
+
+# create data.table with laneway/ #is.na issue data combo
+dLT[,lanewayNoPermit:=is.na(IssueDate) & haslaneway==1]
+dLT[,noLanewayPermit:=!is.na(IssueDate) & haslaneway==0]
+dLT[,lanewayPermit:=!is.na(IssueDate) & haslaneway==1]
+dLT[,noLanewayNoPermit:=is.na(IssueDate) & haslaneway==0]
+dLT <- dLT[!is.na(roll_num) & roll_num!="",.(civicAddress,postal,roll_num,lanewayNoPermit,noLanewayPermit,lanewayPermit,noLanewayNoPermit)]
+fwrite(dLT[,],"data/derived/lanewayConsistency.csv")

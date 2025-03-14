@@ -30,13 +30,27 @@ dSales[,ROLL_NUMBER:=as.character(as.numeric(ROLL_NUMBER))] # gets rid of leadin
 dRoll <- merge(dSales,dRoll,by.x="ROLL_NUMBER",by.y="Roll_Number",all.y=TRUE)
 summary(dRoll[,is.na(CONVEYANCE_PRICE)])
 
+
+dLane <- fread("data/derived/lanewayConsistency.csv")
+dRoll[,roll_num:=as.character(as.numeric(ROLL_NUMBER))]
+dLane[,roll_num:=as.character(as.numeric(roll_num))]
+dRoll <- merge(dRoll,dLane,by="roll_num")
+dRoll[,laneway:=lanewayNoPermit
+print(summary(dRoll))
+
+
+
+## NOT DONE
+if (1>2) {
 dLane <- fread("data/derived/lanewayPermitAddress.csv")
 print(summary(dLane))
+
 
 # replace ST with STREET, AVE with AVENUE, etc. in STREET_TYPE
 # make a data.table with the fullified street types
 dFull <- data.table(shortStreet=character(),fullStreet=character())
 dFull <- rbind(dFull,data.table(shortStreet=c("ST","AV","AVE","BLVD","DR","PL","RD","HWY","CRES","CRT","TER","PLZ"),fullStreet=c("STREET","AVENUE","AVENUE","BOULEVARD","DRIVE","PLACE","ROAD","HIGHWAY","CRESCENT","COURT","TERRACE","PLAZA")))
+
 
 dRoll <- merge(dRoll,dFull,by.x="STREET_TYPE",by.y="shortStreet",all.x=TRUE)
 dRoll[,civicAddress:=paste(STREET_NUMBER,STREET_DIRECTION_PREFIX,STREET_DIRECTION_SUFFIX,STREET_NAME,fullStreet)]
@@ -75,3 +89,4 @@ dRoll <- merge(dRoll,dOkay,by="civicAddress",all.x=TRUE)
 
 
 print(dRoll[,mean(laneway),by=laneok])
+}
