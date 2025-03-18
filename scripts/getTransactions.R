@@ -6,19 +6,30 @@
 library(data.table)
 library(fixest)
 
-dSales <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_sales_20240331_REVD24.csv",select=c("ROLL_NUMBER","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION","JURISDICTION"))
+dSales <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_sales_20240331_REVD24.csv",select=c("ROLL_NUMBER","FOLIO_ID","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION","JURISDICTION"))
 dSales <- dSales[JURISDICTION=="City of Vancouver"]
 print(summary(dSales))
 print(table(dSales[,JURISDICTION])) # but keep all here
 dSales[,CONVEYANCE_DATE:=floor(CONVEYANCE_DATE/1000000)]
 dSales <- dSales[CONVEYANCE_DATE>20150101]
 
-# Get COV roll -- will have all duplexes,verify with laneway data
-dRoll <- fread("~/docs/data/bca/Residential_inventory_202501/20250101_A09_Residential_Inventory_Extract.txt",select=c("Roll_Number","MB_Year_Built","Land_Width_Width","Land_Depth_Depth","Land_Area_Total","Zoning"))
-print(summary(dRoll))
-print(table(dRoll[,Zoning]))
-dRoll <- dRoll[Zoning=="R1-1" & abs(Land_Depth_Depth-120)<3 & (abs(Land_Depth_Depth-50)<3 | abs(Land_Width_Width-33)<3) & MB_Year_Built>2014] 
+dDesc <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_descriptions_20240331_REVD24.csv",select=c("ROLL_NUMBER","FOLIO_ID","LAND_DEPTH","LAND_WIDTH","ACTUAL_USE_DESCRIPTION","MANUAL_CLASS_DESCRIPTION"))
+print(table(dDesc[,ACTUAL_USE_DESCRIPTION]))
+dDesc[,duplex:=grepl("Duplex,",ACTUAL_USE_DESCRIPTION)]
+dDesc[,single:=(grepl("Residential Dwelling with Suite",ACTUAL_USE_DESCRIPTION)) | (grepl("Single Family Dwelling",ACTUAL_USE_DESCRIPTION))]
+dDesc <- dDesc[,JURISDICTION:="City of Vancouver"]
+
+print(summary(dDesc[duplex==1,.(LAND_WIDTH,LAND_DEPTH)]))
+print(summary(dDesc[single==1,.(LAND_WIDTH,LAND_DEPTH)]))
 dRoll[,thirtyThree:=abs(Land_Width_Width-33)<3]
+print(table(dDesc[duplex==1,MANUAL_CLASS_DESCRIPTION]))
+# Laneway not great here
+print(table(dDesc[single==1,MANUAL_CLASS_DESCRIPTION]))
+dDesc[,ROLL_NUMBER:=NULL]
+
+# Get COV roll -- will have all duplexes,verify with laneway data
+dRoll <- fread("~/docs/data/bca/Residential_inventory_202501/20250101_A09_Residential_Inventory_Extract.txt",select=c("Roll_Number","MB_Year_Built","Zoning"))
+dRoll <- dRoll[Zoning=="R1-1"] 
 print(dRoll[,.N])
 dRoll[,Roll_Number:=as.character(Roll_Number)]
 
@@ -27,7 +38,11 @@ dSales <- merge(dSales,dAddress,by="ROLL_NUMBER",all.x=TRUE)
 
 dSales[,ROLL_NUMBER:=as.character(as.numeric(ROLL_NUMBER))] # gets rid of leading zeros
 
+print("PRESALES")
+print(dRoll[,.N])
 dRoll <- merge(dSales,dRoll,by.x="ROLL_NUMBER",by.y="Roll_Number",all.y=TRUE)
+print("POSTSALES")
+print(dRoll[,.N])
 summary(dRoll[,is.na(CONVEYANCE_PRICE)])
 
 
@@ -35,10 +50,21 @@ dLane <- fread("data/derived/lanewayConsistency.csv")
 dRoll[,roll_num:=as.character(as.numeric(ROLL_NUMBER))]
 dLane[,roll_num:=as.character(as.numeric(roll_num))]
 dRoll <- merge(dRoll,dLane,by="roll_num")
-dRoll[,laneway:=lanewayNoPermit
-print(summary(dRoll))
+print("POSTLANES")
+print(dRoll[,.N])
+dRoll[,laneway:=(lanewayNoPermit | lanewayPermit)]
 
-
+dRoll[,fsa:=substr(POSTAL_CODE,1,3)]
+dRoll[,year:=substr(as.character(CONVEYANCE_DATE),1,4)]
+dRoll[,yearMonth:=substr(as.character(CONVEYANCE_DATE),1,6)]
+dRoll[,postSale:=(year==MB_Year_Built) | (year==MB_Year_Built+1)]
+print(summary(feols(log(CONVEYANCE_PRICE) ~ laneway | MB_Year_Built+fsa,data=dRoll[ postSale==1 & thirtyThree==1])))
+print(summary(feols(log(CONVEYANCE_PRICE) ~ laneway | MB_Year_Built+fsa,data=dRoll[ postSale==1 & thirtyThree==0])))
+print(summary(feols(log(CONVEYANCE_PRICE) ~ laneway | thirtyThree^MB_Year_Built^fsa,data=dRoll[ postSale==1 & fsa=="V6K"])))
+print(mean(dRoll[,postSale],na.rm=TRUE ))
+print(dRoll[,mean(laneway),by=MB_Year_Built])
+dZ <- dRoll[,.(hasPost=max(postSale),laneway=max(laneway)),by="roll_num"]
+table(dZ[,.(hasPost,laneway)])
 
 ## NOT DONE
 if (1>2) {
@@ -57,7 +83,6 @@ dRoll[,civicAddress:=paste(STREET_NUMBER,STREET_DIRECTION_PREFIX,STREET_DIRECTIO
 dRoll[,civicAddress:=gsub("   "," ",civicAddress)]
 dRoll[,civicAddress:=gsub("  "," ",civicAddress)]
 dRoll <- merge(dRoll,dLane,by="civicAddress",all.x=TRUE)
-dRoll[,fsa:=substr(POSTAL_CODE,1,3)]
 print(summary(feols(log(CONVEYANCE_PRICE) ~ laneway | fsa^MB_Year_Built,data=dRoll[single==1])))
 
 # function to fullify street type
