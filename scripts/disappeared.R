@@ -19,10 +19,20 @@ da <- dbGetQuery(con, "SELECT folioID,streetNumber,streetDirectionPrefix,streetN
 df <- dbGetQuery(con,"SELECT folioID,rollNumber from folio")
 da <- merge(da,df,by="folioID")
 
+dfd <- dbGetQuery(con,"SELECT folioID, actualUseDescription from folioDescription")
+da <- merge(da,dfd,by="folioID")
+
+
 dI <- merge(dI,da,by.x="roll_number",by.y="rollNumber")
+
 # close connection
 dbDisconnect(con)
 df <- data.table(dI) 
+df[,streetNumber16:=as.numeric(streetNumber)]
+df[,fullStreet:=paste(streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix)]
+df[,streetNoNumber:=paste(streetDirectionPrefix,streetName,streetType,streetDirectionSuffix)]
+print(table(df[,actualUseDescription]))
+df <- df[actualUseDescription=="Single Family Dwelling" | actualUseDescription=="Residential Dwelling with Suite",]
 print(summary(df))
 
 df[,nchar:=nchar(as.character(roll_number))]
@@ -32,16 +42,28 @@ df[,rollEnd:=substr(roll_number,splitspot+1,nchar)]
 print(df[1:10,.(roll_number,rollStart,rollEnd)])
 
 
-# 2024/5 disappeared lots
-dI <- fread("~/docs/data/bca/Residential_inventory_202401/20240101_AA09_Residential_Inventory_Extract.txt",select=c("Roll_Number","MB_Year_Built","Zoning","Jurisdiction"),colClasses=c(Roll_Number="character"))
+# 2024/5 disappeared lots -- what is the current use?
+d24 <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_descriptions_20240331_REVD24.csv",select=c("FOLIO_ID","ROLL_NUMBER","ACTUAL_USE_DESCRIPTION","JURISDICTION_CODE"))
+d24 <- d24[JURISDICTION_CODE==200]
 #dI <- dI[Zoning=="R1-1" & Jurisdiction==200]
-dI[,nchar:=nchar(as.character(Roll_Number))]
-dI[,splitspot:=nchar-4]
-dI[,rollStart:=substr(Roll_Number,1,splitspot)]
-dI[,rollEnd25:=substr(Roll_Number,splitspot+1,nchar)]
-dI[,Roll_Number:=NULL]
+d24[,nchar:=nchar(as.character(ROLL_NUMBER))]
+d24[,splitspot:=nchar-4]
+d24[,rollStart:=substr(ROLL_NUMBER,1,splitspot)]
+d24[,rollEnd24:=substr(ROLL_NUMBER,splitspot+1,nchar)]
+d24[,ROLL_NUMBER:=NULL]
+
+da <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_addresses_20240331_REVD24.csv",select=c("FOLIO_ID","STREET_NUMBER","STREET_DIRECTION_PREFIX","STREET_NAME","STREET_TYPE","STREET_DIRECTION_SUFFIX","POSTAL_CODE"),colClasses=c(FOLIO_ID="character"))
+da[,fullStreet24:=paste(STREET_NUMBER,STREET_DIRECTION_PREFIX,STREET_NAME,STREET_TYPE,STREET_DIRECTION_SUFFIX)]
+da[,streetNoNumber:=paste(STREET_DIRECTION_PREFIX,STREET_NAME,STREET_TYPE,STREET_DIRECTION_SUFFIX)]
+da[,streetNumber24:=as.numeric(STREET_NUMBER)]
+
+# GET YEAR BUILT!!
+
+d24 <- merge(d24,da,by="FOLIO_ID")
 
 # merge with 2016
-df <- merge(df,dI,by.x="rollStart",by.y="rollStart",all.x=TRUE)
-# note 1811 don't work. Try address trick
-df[,fullStreet:=paste(streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix)]
+df <- merge(df,d24,by="rollStart",all.x=TRUE)
+
+# find street numbers that are missing in 2024
+dfk <- df[is.na(streetNumber24),]
+print(table(dfk[,fullStreet %in% d24[i,fullStreet24]]))
