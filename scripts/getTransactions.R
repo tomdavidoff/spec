@@ -12,6 +12,9 @@ print(summary(dSales))
 print(table(dSales[,JURISDICTION])) # but keep all here
 dSales[,CONVEYANCE_DATE:=floor(CONVEYANCE_DATE/1000000)]
 dSales <- dSales[CONVEYANCE_DATE>20150101]
+dMaxSale <- dSales[,.(maxSale=max(CONVEYANCE_DATE)),by="ROLL_NUMBER"]
+fwrite(dMaxSale,"data/derived/maxSale.csv")
+q("no")
 
 dDesc <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_descriptions_20240331_REVD24.csv",select=c("ROLL_NUMBER","FOLIO_ID","LAND_DEPTH","LAND_WIDTH","ACTUAL_USE_DESCRIPTION","MANUAL_CLASS_DESCRIPTION"))
 print(table(dDesc[,ACTUAL_USE_DESCRIPTION]))

@@ -13,6 +13,7 @@ library(RSQLite)
 # 2016 lots, see which have disappeared and become duplexes
 
 # read from sqlite3 file "~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3" "residentialInventory", get fields: RollNumber, zoning, land_width, land_depth, MB_year_built; and select on  jurisdiction=="City of Vancouver"
+
 # open connection first
 con <- dbConnect(RSQLite::SQLite(), "~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3")
 dI <- dbGetQuery(con, "SELECT  roll_number, zoning, land_width, land_depth, MB_year_built FROM residentialInventory WHERE jurisdiction=='200' AND (zoning=='RS1' OR zoning=='RS2' OR zoning=='RS3' OR zoning=='RS3A' OR zoning=='RS4' OR zoning=='RS5' OR zoning=='RS6' OR zoning=='RS7' )")
@@ -29,6 +30,7 @@ df <- dbGetQuery(con,"SELECT folioID,rollNumber from folio")
 da <- merge(da,df,by="folioID")
 
 dfd <- dbGetQuery(con,"SELECT folioID, actualUseDescription from folioDescription")
+dfd <- dfd[,actualUseDescription== "Single Family Dwelling" | actualUseDescription=="Residential Dwelling with Suite"]
 da <- merge(da,dfd,by="folioID")
 
 
@@ -55,8 +57,11 @@ dI[is.na(laneok) & meanLaneok==0,laneok:=0]
 print(table(dI[,.(is.na(laneok),streetType)]))
 dI[is.na(laneok) & meanLaneok==1,laneok:=1]
 print(table(dI[,.(is.na(laneok),streetType)]))
+print(table(dI[,actualUseDescription]))
 
+fwrite(dI[,.(folioID,roll_number,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,actualUseDescription,thirty,fifty,laneok)],"data/derived/disappeared.csv")
 dfdf
+
 
 # close connection
 dbDisconnect(con)
