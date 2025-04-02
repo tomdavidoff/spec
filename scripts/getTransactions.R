@@ -13,7 +13,16 @@ print(table(dSales[,JURISDICTION])) # but keep all here
 dSales[,CONVEYANCE_DATE:=floor(CONVEYANCE_DATE/10000000000)]
 # note do not delete sales after 2015, as some non-Specs!
 print(table(dSales[,CONVEYANCE_DATE]))
-dMaxSale <- dSales[,.(sale2016=max(CONVEYANCE_DATE==2016),sale2017=max(CONVEYANCE_DATE==2017),sale2018=max(CONVEYANCE_DATE==2018),sale2019=max(CONVEYANCE_DATE==2019),sale2020=max(CONVEYANCE_DATE==2020),sale2021=max(CONVEYANCE_DATE==2021),sale2022=max(CONVEYANCE_DATE==2022),sale2023=max(CONVEYANCE_DATE==2023)),by="ROLL_NUMBER"]
+# vectorize the following dMaxSale <- dSales[,.(sale2016=max(CONVEYANCE_DATE==2016),sale2017=max(CONVEYANCE_DATE==2017),sale2018=max(CONVEYANCE_DATE==2018),sale2019=max(CONVEYANCE_DATE==2019),sale2020=max(CONVEYANCE_DATE==2020),sale2021=max(CONVEYANCE_DATE==2021),sale2022=max(CONVEYANCE_DATE==2022),sale2023=max(CONVEYANCE_DATE==2023)),by="ROLL_NUMBER"]
+for (y in 2010:2023) {
+   dSales[,paste0("sale",y):=max(CONVEYANCE_DATE==y),by="ROLL_NUMBER"]
+}
+print(summary(dSales))
+dMaxSale <- dSales[,.(ROLL_NUMBER,sale2010,sale2011,sale2012,sale2013,sale2014,sale2015,sale2016,sale2017,sale2018,sale2019,sale2020,sale2021,sale2022,sale2023)]
+dMaxSale <- unique(dMaxSale)
+print(summary(dMaxSale))
+print(summary(dMaxSale[,.N,by=ROLL_NUMBER]))
+
 fwrite(dMaxSale,"data/derived/maxSale.csv")
 q("no")
 

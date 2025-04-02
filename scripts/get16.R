@@ -4,7 +4,8 @@
 # Tom Davidoff
 # March 17, 2025
 
-TOLERANCE <- 1.5 # 2 foot tolerance around tolerated lot sizes
+WIDTH_TOLERANCE <- 2 # 2 foot tolerance around tolerated lot sizes
+DEPTH_TOLERANCE <- 4 # 2 foot tolerance around tolerated lot sizes
 
 library(data.table)
 library(RSQLite)
@@ -19,8 +20,8 @@ con <- dbConnect(RSQLite::SQLite(), "~/docs/data/bca/REVD16_and_inventory_extrac
 dI <- dbGetQuery(con, "SELECT  roll_number, zoning, land_width, land_depth, MB_year_built FROM residentialInventory WHERE jurisdiction=='200' AND (zoning=='RS1' OR zoning=='RS2' OR zoning=='RS3' OR zoning=='RS3A' OR zoning=='RS4' OR zoning=='RS5' OR zoning=='RS6' OR zoning=='RS7' )")
 dI <- data.table(dI)
 print(summary(dI[,as.numeric(land_depth)]))
-dI[,thirty:=land_width<=33+TOLERANCE & land_width>=33-TOLERANCE & land_depth<=122+2*TOLERANCE & land_depth>=122-2*TOLERANCE]
-dI[,fifty:=land_width<=50+TOLERANCE & land_width>=50-TOLERANCE & land_depth<=122+2*TOLERANCE & land_depth>=122-2*TOLERANCE]
+dI[,thirty:=land_width<=33+WIDTH_TOLERANCE & land_width>=33-WIDTH_TOLERANCE & land_depth<=122+2*DEPTH_TOLERANCE & land_depth>=122-2*DEPTH_TOLERANCE]
+dI[,fifty:=land_width<=50+WIDTH_TOLERANCE & land_width>=50-WIDTH_TOLERANCE & land_depth<=122+2*DEPTH_TOLERANCE & land_depth>=122-2*DEPTH_TOLERANCE]
 print(table(dI[,.(thirty,fifty)]))
 dI <- dI[thirty==TRUE | fifty==TRUE]
 

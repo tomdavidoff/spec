@@ -1,5 +1,5 @@
 
-R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
 Copyright (C) 2024 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
@@ -33,34 +33,34 @@ Type 'q()' to quit R.
 > d16 <- fread("data/derived/baseline16.csv")
 > print(summary(d16))
    folioID           roll_number             MB_year_built  improvementValue 
- Length:18413       Min.   : 1023636540000   Min.   :1900   Min.   :      0  
- Class :character   1st Qu.: 4701073380000   1st Qu.:1941   1st Qu.:  54500  
- Mode  :character   Median :16216758570000   Median :1978   Median : 156000  
-                    Mean   :13892743410051   Mean   :1970   Mean   : 236794  
-                    3rd Qu.:20580277600000   3rd Qu.:1997   3rd Qu.: 291000  
-                    Max.   :25828251310000   Max.   :2020   Max.   :3801000  
-                                             NA's   :20                      
+ Length:25640       Min.   : 1023636540000   Min.   :1900   Min.   :      0  
+ Class :character   1st Qu.: 5731056220000   1st Qu.:1942   1st Qu.:  53500  
+ Mode  :character   Median :16741216240000   Median :1978   Median : 155000  
+                    Mean   :14145787111320   Mean   :1971   Mean   : 238800  
+                    3rd Qu.:20586300230000   3rd Qu.:1997   3rd Qu.: 293000  
+                    Max.   :25830270550000   Max.   :2020   Max.   :3801000  
+                                             NA's   :24                      
   streetNumber  streetDirectionPrefix  streetName         streetType       
- Min.   :   3   Mode:logical          Length:18413       Length:18413      
- 1st Qu.:2031   NA's:18413            Class :character   Class :character  
- Median :2906                         Mode  :character   Mode  :character  
- Mean   :3073                                                              
- 3rd Qu.:4028                                                              
+ Min.   :   3   Mode:logical          Length:25640       Length:25640      
+ 1st Qu.:1742   NA's:25640            Class :character   Class :character  
+ Median :2879                         Mode  :character   Mode  :character  
+ Mean   :3046                                                              
+ 3rd Qu.:4032                                                              
  Max.   :8571                                                              
-                                                                           
+ NA's   :2                                                                 
  streetDirectionSuffix  postalCode            city             thirty       
- Length:18413          Length:18413       Length:18413       Mode :logical  
- Class :character      Class :character   Class :character   FALSE:3022     
- Mode  :character      Mode  :character   Mode  :character   TRUE :15391    
+ Length:25640          Length:25640       Length:25640       Mode :logical  
+ Class :character      Class :character   Class :character   FALSE:4991     
+ Mode  :character      Mode  :character   Mode  :character   TRUE :20649    
                                                                             
                                                                             
                                                                             
                                                                             
    fifty           laneok       
  Mode :logical   Mode :logical  
- FALSE:15391     FALSE:267      
- TRUE :3022      TRUE :17065    
-                 NA's :1081     
+ FALSE:20649     FALSE:503      
+ TRUE :4991      TRUE :23474    
+                 NA's :1663     
                                 
                                 
                                 
@@ -132,15 +132,15 @@ Type 'q()' to quit R.
 > d24 <- merge(d24,d16,by.x=c("rollStart"),by.y=c("rollStart")) 
 > print(summary(d24))
    rollStart           FOLIO_ID         ACTUAL_USE_DESCRIPTION
- Min.   :1.024e+08   Length:22943       Length:22943          
- 1st Qu.:4.705e+08   Class :character   Class :character      
- Median :1.674e+09   Mode  :character   Mode  :character      
- Mean   :1.408e+09                                            
+ Min.   :1.024e+08   Length:31936       Length:31936          
+ 1st Qu.:5.737e+08   Class :character   Class :character      
+ Median :1.676e+09   Mode  :character   Mode  :character      
+ Mean   :1.436e+09                                            
  3rd Qu.:2.059e+09                                            
  Max.   :2.583e+09                                            
                                                               
  JURISDICTION_CODE NEIGHBOURHOOD          nchar      splitspot 
- Min.   :200       Length:22943       Min.   :15   Min.   :11  
+ Min.   :200       Length:31936       Min.   :15   Min.   :11  
  1st Qu.:200       Class :character   1st Qu.:15   1st Qu.:11  
  Median :200       Mode  :character   Median :15   Median :11  
  Mean   :200                          Mean   :15   Mean   :11  
@@ -148,23 +148,23 @@ Type 'q()' to quit R.
  Max.   :200                          Max.   :15   Max.   :11  
                                                                
    rollEnd24        Jurisdiction MB_Year_Built     Zoning         
- Min.   :0.00000   Min.   :200   Min.   :1900   Length:22943      
- 1st Qu.:0.00000   1st Qu.:200   1st Qu.:1948   Class :character  
- Median :0.00000   Median :200   Median :1988   Mode  :character  
- Mean   :0.01804   Mean   :200   Mean   :1979                     
+ Min.   :0.00000   Min.   :200   Min.   :1900   Length:31936      
+ 1st Qu.:0.00000   1st Qu.:200   1st Qu.:1949   Class :character  
+ Median :0.00000   Median :200   Median :1989   Mode  :character  
+ Mean   :0.01976   Mean   :200   Mean   :1979                     
  3rd Qu.:0.00000   3rd Qu.:200   3rd Qu.:2011                     
  Max.   :3.00000   Max.   :200   Max.   :2023                     
-                                 NA's   :107                      
+                                 NA's   :137                      
  ROLL_NUMBER24            STREET_NUMBER   STREET_DIRECTION_PREFIX
- Min.   : 1023636540000   Min.   :    3   Length:22943           
- 1st Qu.: 4705070210000   1st Qu.: 1848   Class :character       
- Median :16742216570000   Median : 2929   Mode  :character       
- Mean   :14083304058557   Mean   : 3076                          
- 3rd Qu.:20586274400000   3rd Qu.: 4054                          
- Max.   :25828251310000   Max.   :74088                          
-                                                                 
+ Min.   : 1023636540000   Min.   :    2   Length:31936           
+ 1st Qu.: 5737097260000   1st Qu.: 1551   Class :character       
+ Median :16758201410000   Median : 2887   Mode  :character       
+ Mean   :14362021408364   Mean   : 3041                          
+ 3rd Qu.:20587300480001   3rd Qu.: 4048                          
+ Max.   :25830270550000   Max.   :74088                          
+                          NA's   :4                              
  STREET_NAME        STREET_TYPE        STREET_DIRECTION_SUFFIX
- Length:22943       Length:22943       Length:22943           
+ Length:31936       Length:31936       Length:31936           
  Class :character   Class :character   Class :character       
  Mode  :character   Mode  :character   Mode  :character       
                                                               
@@ -172,42 +172,42 @@ Type 'q()' to quit R.
                                                               
                                                               
  POSTAL_CODE        fullStreet24       streetNoNumber24   streetNumber24 
- Length:22943       Length:22943       Length:22943       Min.   :    3  
- Class :character   Class :character   Class :character   1st Qu.: 1848  
- Mode  :character   Mode  :character   Mode  :character   Median : 2929  
-                                                          Mean   : 3076  
-                                                          3rd Qu.: 4054  
+ Length:31936       Length:31936       Length:31936       Min.   :    2  
+ Class :character   Class :character   Class :character   1st Qu.: 1551  
+ Mode  :character   Mode  :character   Mode  :character   Median : 2887  
+                                                          Mean   : 3041  
+                                                          3rd Qu.: 4048  
                                                           Max.   :74088  
-                                                                         
+                                                          NA's   :4      
    folioID           roll_number             MB_year_built  improvementValue 
- Length:22943       Min.   : 1023636540000   Min.   :1900   Min.   :      0  
- Class :character   1st Qu.: 4705070210000   1st Qu.:1944   1st Qu.:  54100  
- Mode  :character   Median :16742216570000   Median :1984   Median : 170000  
-                    Mean   :14083304058557   Mean   :1975   Mean   : 263876  
-                    3rd Qu.:20586274400000   3rd Qu.:2009   3rd Qu.: 343000  
-                    Max.   :25828251310000   Max.   :2020   Max.   :3801000  
-                                             NA's   :41                      
+ Length:31936       Min.   : 1023636540000   Min.   :1900   Min.   :      0  
+ Class :character   1st Qu.: 5737097260000   1st Qu.:1946   1st Qu.:  52900  
+ Mode  :character   Median :16758201410000   Median :1984   Median : 169000  
+                    Mean   :14362021408364   Mean   :1975   Mean   : 265909  
+                    3rd Qu.:20587300480000   3rd Qu.:2009   3rd Qu.: 348000  
+                    Max.   :25830270550000   Max.   :2020   Max.   :3801000  
+                                             NA's   :50                      
   streetNumber  streetDirectionPrefix  streetName         streetType       
- Min.   :   3   Mode:logical          Length:22943       Length:22943      
- 1st Qu.:1828   NA's:22943            Class :character   Class :character  
- Median :2928                         Mode  :character   Mode  :character  
- Mean   :3069                                                              
- 3rd Qu.:4051                                                              
+ Min.   :   3   Mode:logical          Length:31936       Length:31936      
+ 1st Qu.:1542   NA's:31936            Class :character   Class :character  
+ Median :2886                         Mode  :character   Mode  :character  
+ Mean   :3035                                                              
+ 3rd Qu.:4043                                                              
  Max.   :8571                                                              
-                                                                           
+ NA's   :4                                                                 
  streetDirectionSuffix  postalCode            city             thirty       
- Length:22943          Length:22943       Length:22943       Mode :logical  
- Class :character      Class :character   Class :character   FALSE:3767     
- Mode  :character      Mode  :character   Mode  :character   TRUE :19176    
+ Length:31936          Length:31936       Length:31936       Mode :logical  
+ Class :character      Class :character   Class :character   FALSE:6223     
+ Mode  :character      Mode  :character   Mode  :character   TRUE :25713    
                                                                             
                                                                             
                                                                             
                                                                             
    fifty           laneok          rollEnd16
  Mode :logical   Mode :logical   Min.   :0  
- FALSE:19176     FALSE:310       1st Qu.:0  
- TRUE :3767      TRUE :20272     Median :0  
-                 NA's :2361      Mean   :0  
+ FALSE:25713     FALSE:567       1st Qu.:0  
+ TRUE :6223      TRUE :27733     Median :0  
+                 NA's :3636      Mean   :0  
                                  3rd Qu.:0  
                                  Max.   :0  
                                             
@@ -1268,8 +1268,8 @@ logical(0)
 > print(table(d24[,.(is.na(hasLaneway),is.na(rollEnd24))])) # about 50% of laneways -- not bad as all 30 50
        V2
 V1      FALSE  TRUE
-  FALSE  3161  3150
-  TRUE  19782     0
+  FALSE  4417  2761
+  TRUE  27519     0
 > d24[,hasLaneway:=ifelse(is.na(hasLaneway),0,hasLaneway)]
 > 
 > # get max transaction date by roll rumber
@@ -1279,81 +1279,82 @@ V1      FALSE  TRUE
 > d24[,type:=ifelse(duplex==1,"duplex",ifelse(hasLaneway==1,"laneway","single"))]
 > print(summary(d24[,MB_Year_Built]))
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-   1900    1948    1988    1979    2011    2023    3257 
+   1900    1949    1989    1979    2011    2023    2898 
 > d24[,spec:=0]
 > d24[,sale2024:=0]
-> for (y in seq(2016,2022)) {
+> FIRST_BUILT <- 2016 # results weirdly stronger with 2016 than prior years -- dearth of laneway early messing with fixed effect?
+> for (y in seq(FIRST_BUILT,2022)) {
 +     #d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1 | get(paste0("sale",y+2))==1  ),spec:=1]
 +     d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1  ),spec:=1]
 +     #d24[MB_Year_Built==y & ( get(paste0("sale",y+1))==1  ),spec:=1]
 + }
-> for (y in seq(2016,2023)) {
+> for (y in seq(FIRST_BUILT,2023)) {
 +     print(y)
 +     print(table(d24[MB_Year_Built==y,.(type,spec)]))
 + }
 [1] 2016
          spec
 type        0   1
-  laneway 205  70
-  single   58  26
+  laneway 292  99
+  single   92  31
 [1] 2017
          spec
 type        0   1
   duplex    1   0
-  laneway 208  37
-  single   73  13
+  laneway 287  52
+  single  104  18
 [1] 2018
          spec
 type        0   1
-  laneway 226  52
-  single  115  11
+  laneway 335  77
+  single  141  12
 [1] 2019
          spec
 type        0   1
-  duplex    9   0
-  laneway 200  36
-  single   67   8
+  duplex   19   1
+  laneway 260  54
+  single   84   9
 [1] 2020
          spec
 type        0   1
-  duplex   26  63
-  laneway 142  19
-  single   45   9
+  duplex   38  79
+  laneway 180  25
+  single   62   9
 [1] 2021
          spec
-type       0  1
-  duplex  60 55
-  laneway 93 22
-  single  31 12
+type        0   1
+  duplex   79 101
+  laneway 123  40
+  single   48  15
 [1] 2022
          spec
 type        0   1
-  duplex  101  65
-  laneway 159  18
-  single   51  14
+  duplex  138 107
+  laneway 232  21
+  single   75  25
 [1] 2023
          spec
-type       0
-  duplex  74
-  laneway 80
-  single  51
+type        0
+  duplex   98
+  laneway 123
+  single   61
 > 
 > print(table(d24[MB_Year_Built>2016 & MB_Year_Built<2023,.(type,spec,STREET_DIRECTION_SUFFIX)]))
 , , STREET_DIRECTION_SUFFIX = 
 
          spec
 type        0   1
-  duplex   92  76
-  laneway 355  72
-  single   73   9
+  duplex  139 131
+  laneway 501 111
+  single  106  19
 
 , , STREET_DIRECTION_SUFFIX = E
 
          spec
 type        0   1
-  duplex   68  93
-  laneway 380  86
-  single   85  14
+  duplex   85 133
+  laneway 525 120
+  single  112  17
 
 , , STREET_DIRECTION_SUFFIX = N
 
@@ -1375,26 +1376,26 @@ type        0   1
 
          spec
 type        0   1
-  duplex   37  13
-  laneway 286  24
-  single  224  44
+  duplex   51  23
+  laneway 384  36
+  single  296  52
 
 > print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,STREET_DIRECTION_SUFFIX)]))
 , , STREET_DIRECTION_SUFFIX = 
 
          spec
 type        0   1
-  duplex   31  35
-  laneway 259  65
-  single   53   9
+  duplex   45  57
+  laneway 347 101
+  single   74  10
 
 , , STREET_DIRECTION_SUFFIX = E
 
          spec
 type        0   1
-  duplex   26  56
-  laneway 297  71
-  single   66   9
+  duplex   33  76
+  laneway 389  93
+  single   86   9
 
 , , STREET_DIRECTION_SUFFIX = N
 
@@ -1408,42 +1409,42 @@ type        0   1
 
          spec
 type        0   1
-  duplex   15   2
-  laneway 156  16
-  single  128  31
+  duplex   15   8
+  laneway 199  27
+  single  156  37
 
 > print(table(d24[thirty==0 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,STREET_DIRECTION_SUFFIX)]))
 , , STREET_DIRECTION_SUFFIX = 
 
          spec
-type       0  1
-  duplex  10 10
-  laneway 47  4
-  single   8  0
+type        0   1
+  duplex   22  16
+  laneway  75   7
+  single   15   1
 
 , , STREET_DIRECTION_SUFFIX = E
 
          spec
-type       0  1
-  duplex  13 15
-  laneway 27  7
-  single   9  2
+type        0   1
+  duplex   15  20
+  laneway  47  16
+  single   11   2
 
 , , STREET_DIRECTION_SUFFIX = SE
 
          spec
-type       0  1
-  duplex   0  0
-  laneway  3  0
-  single   0  0
+type        0   1
+  duplex    0   0
+  laneway   3   0
+  single    0   0
 
 , , STREET_DIRECTION_SUFFIX = W
 
          spec
-type       0  1
-  duplex   1  0
-  laneway 76  1
-  single  67  2
+type        0   1
+  duplex    7   4
+  laneway 121   2
+  single   97   4
 
 > print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,NEIGHBOURHOOD)]))
 , , NEIGHBOURHOOD = Arbutus Ridge - Mackenzie Heights
@@ -1451,16 +1452,16 @@ type       0  1
          spec
 type        0   1
   duplex    0   0
-  laneway  16   0
-  single    4   3
+  laneway  22   0
+  single    6   3
 
 , , NEIGHBOURHOOD = Cambie
 
          spec
 type        0   1
   duplex    5   0
-  laneway  36   4
-  single   25   6
+  laneway  42   4
+  single   26   6
 
 , , NEIGHBOURHOOD = Cedar Cottage
 
@@ -1474,17 +1475,17 @@ type        0   1
 
          spec
 type        0   1
-  duplex    0   5
-  laneway  17   0
-  single    2   0
+  duplex    4  12
+  laneway  26   3
+  single    4   0
 
 , , NEIGHBOURHOOD = Dunbar
 
          spec
 type        0   1
   duplex    0   0
-  laneway  28   0
-  single   37   7
+  laneway  31   3
+  single   46  10
 
 , , NEIGHBOURHOOD = Fraserview
 
@@ -1498,7 +1499,7 @@ type        0   1
 
          spec
 type        0   1
-  duplex    2   7
+  duplex    2  10
   laneway   3   0
   single    2   0
 
@@ -1506,25 +1507,25 @@ type        0   1
 
          spec
 type        0   1
-  duplex   17  10
-  laneway  75  24
-  single   12   0
+  duplex   17  12
+  laneway  87  30
+  single   24   1
 
 , , NEIGHBOURHOOD = Kerrisdale
 
          spec
 type        0   1
-  duplex    0   0
-  laneway   5   0
-  single    4   0
+  duplex    0   2
+  laneway  18   0
+  single    9   3
 
 , , NEIGHBOURHOOD = Killarney
 
          spec
 type        0   1
-  duplex    2  10
-  laneway  25   6
-  single    4   2
+  duplex    7  17
+  laneway  47   9
+  single    9   2
 
 , , NEIGHBOURHOOD = Kitsilano
 
@@ -1539,24 +1540,24 @@ type        0   1
          spec
 type        0   1
   duplex    3   7
-  laneway  66  15
-  single   12   0
+  laneway  79  15
+  single   14   0
 
 , , NEIGHBOURHOOD = Main & Fraser
 
          spec
 type        0   1
-  duplex    9  14
-  laneway  77  31
-  single   24   7
+  duplex   11  16
+  laneway  93  40
+  single   26   7
 
 , , NEIGHBOURHOOD = Marpole
 
          spec
 type        0   1
-  duplex    2   0
-  laneway  28   0
-  single    7   0
+  duplex    2   6
+  laneway  44   8
+  single   15   0
 
 , , NEIGHBOURHOOD = Oakridge
 
@@ -1571,24 +1572,24 @@ type        0   1
          spec
 type        0   1
   duplex    7   1
-  laneway  52   5
-  single   41   7
+  laneway  60   5
+  single   48   7
 
 , , NEIGHBOURHOOD = Renfrew
 
          spec
 type        0   1
-  duplex    9  12
-  laneway 114  24
-  single   22   2
+  duplex   13  18
+  laneway 146  51
+  single   24   2
 
 , , NEIGHBOURHOOD = Renfrew Heights
 
          spec
 type        0   1
   duplex    4  13
-  laneway  37  15
-  single    4   0
+  laneway  45  15
+  single    6   0
 
 , , NEIGHBOURHOOD = South Granville
 
@@ -1602,9 +1603,9 @@ type        0   1
 
          spec
 type        0   1
-  duplex    8   8
-  laneway  87  10
-  single    6   0
+  duplex   14  21
+  laneway 146  20
+  single   16   0
 
 , , NEIGHBOURHOOD = Southlands
 
@@ -1619,23 +1620,23 @@ type        0   1
 
          spec
 type       0  1
-  duplex   0  0
-  laneway 21  0
-  single  17  1
+  duplex   4  2
+  laneway 31  0
+  single  25  3
 
 , , NEIGHBOURHOOD = Cambie
 
          spec
 type       0  1
-  duplex   1  0
-  laneway  0  0
+  duplex   7  0
+  laneway  6  0
   single   1  0
 
 , , NEIGHBOURHOOD = Cedar Cottage
 
          spec
 type       0  1
-  duplex  10  0
+  duplex  12  1
   laneway 10  0
   single   4  2
 
@@ -1644,7 +1645,7 @@ type       0  1
          spec
 type       0  1
   duplex   0  0
-  laneway  6  0
+  laneway 12  3
   single   0  0
 
 , , NEIGHBOURHOOD = Dunbar
@@ -1652,16 +1653,16 @@ type       0  1
          spec
 type       0  1
   duplex   0  0
-  laneway 19  0
-  single   9  1
+  laneway 45  0
+  single  19  2
 
 , , NEIGHBOURHOOD = Fraserview
 
          spec
 type       0  1
   duplex   2  2
-  laneway 13  0
-  single   0  0
+  laneway 16  0
+  single   2  0
 
 , , NEIGHBOURHOOD = Grandview
 
@@ -1675,24 +1676,24 @@ type       0  1
 
          spec
 type       0  1
-  duplex   6  4
-  laneway  7  0
+  duplex  10  4
+  laneway  7  2
   single   0  0
 
 , , NEIGHBOURHOOD = Kerrisdale
 
          spec
 type       0  1
-  duplex   0  0
-  laneway 13  2
-  single  12  0
+  duplex   4  0
+  laneway 13  4
+  single  21  0
 
 , , NEIGHBOURHOOD = Killarney
 
          spec
 type       0  1
-  duplex   0  0
-  laneway  6 10
+  duplex   0  4
+  laneway  6 13
   single   0  0
 
 , , NEIGHBOURHOOD = Kitsilano
@@ -1708,14 +1709,14 @@ type       0  1
          spec
 type       0  1
   duplex   0  0
-  laneway  3  0
+  laneway  7  0
   single   6  0
 
 , , NEIGHBOURHOOD = Marpole
 
          spec
 type       0  1
-  duplex   0  4
+  duplex   0  8
   laneway  0  0
   single   1  0
 
@@ -1732,14 +1733,22 @@ type       0  1
          spec
 type       0  1
   duplex   0  0
-  laneway 19  0
-  single  13  0
+  laneway 22  0
+  single  15  0
 
 , , NEIGHBOURHOOD = Renfrew
 
          spec
 type       0  1
-  duplex   1  7
+  duplex   1 11
+  laneway  9  0
+  single   0  0
+
+, , NEIGHBOURHOOD = Renfrew Heights
+
+         spec
+type       0  1
+  duplex   0  0
   laneway  3  0
   single   0  0
 
@@ -1756,15 +1765,15 @@ type       0  1
          spec
 type       0  1
   duplex   0  0
-  laneway  0  0
-  single   3  0
+  laneway  6  0
+  single  10  0
 
 , , NEIGHBOURHOOD = South Vancouver
 
          spec
 type       0  1
   duplex   4  0
-  laneway  6  0
+  laneway 23  3
   single   0  0
 
 , , NEIGHBOURHOOD = Southlands
@@ -1772,14 +1781,14 @@ type       0  1
          spec
 type       0  1
   duplex   0  0
-  laneway  2  0
-  single   0  0
+  laneway  5  0
+  single   1  0
 
 > 
 > # Main regression
 > # Dummy for spec vs custom on property type dummies and share 
 > shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric())
-> for (y in seq(2016,2023)) {
+> for (y in seq(FIRST_BUILT,2023)) {
 + 	for (n in unique(d24$NEIGHBOURHOOD)) {
 + 		#for (s in c(0,1)) {
 + 		for (s in c(1)) {
@@ -1790,89 +1799,146 @@ type       0  1
 + 		    }
 +         }
 + }
+> print(summary(shares))
+     nbhd                year          thirty      type          
+ Length:552         Min.   :2016   Min.   :1   Length:552        
+ Class :character   1st Qu.:2018   1st Qu.:1   Class :character  
+ Mode  :character   Median :2020   Median :1   Mode  :character  
+                    Mean   :2020   Mean   :1                     
+                    3rd Qu.:2021   3rd Qu.:1                     
+                    Max.   :2023   Max.   :1                     
+                                                                 
+   shareType         typeSpec        specShare     
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000  
+ Median :0.2500   Median :0.0000   Median :0.0000  
+ Mean   :0.3333   Mean   :0.2048   Mean   :0.3333  
+ 3rd Qu.:0.5714   3rd Qu.:0.3583   3rd Qu.:0.7857  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+ NA's   :129      NA's   :269      NA's   :276     
 > 
-> dnew <- d24[MB_Year_Built>2016 & MB_Year_Built<2023]
-> print(dnew[,mean(spec),by=type])
+> 
+> dnew <- d24[MB_Year_Built>FIRST_BUILT & MB_Year_Built<2023]
+> print(dnew[MB_Year_Built>2016,mean(spec),by=type])
       type        V1
     <char>     <num>
-1:  single 0.1492205
-2:  duplex 0.4815789
-3: laneway 0.1518152
-> print(dnew[,mean(spec),by=MB_Year_Built])
+1:  single 0.1461794
+2:  duplex 0.5115453
+3: laneway 0.1595492
+> print(dnew[MB_Year_Built>2016,mean(spec),by=MB_Year_Built])
    MB_Year_Built        V1
            <int>     <num>
-1:          2019 0.1375000
-2:          2020 0.2993421
-3:          2018 0.1559406
-4:          2021 0.3260073
-5:          2022 0.2377451
-6:          2017 0.1506024
-> print(dnew[,quantile(improvementValue,na.rm=TRUE),by=.(spec)])
+1:          2019 0.1498829
+2:          2020 0.2875318
+3:          2018 0.1575221
+4:          2021 0.3842365
+5:          2022 0.2558528
+6:          2017 0.1515152
+> print(dnew[MB_Year_Built>2016,quantile(improvementValue,na.rm=TRUE),by=.(spec)])
      spec     V1
     <num>  <num>
  1:     0   6800
- 2:     0  25200
- 3:     0  33300
- 4:     0  65800
+ 2:     0  24800
+ 3:     0  34500
+ 4:     0  68600
  5:     0 591000
  6:     1   9200
- 7:     1  20100
- 8:     1  28000
- 9:     1  47725
+ 7:     1  22400
+ 8:     1  29300
+ 9:     1  46400
 10:     1 411000
-> print(dnew[,mean(improvementValue,na.rm=TRUE),by=.(spec)])
+> print(dnew[MB_Year_Built>2016,mean(improvementValue,na.rm=TRUE),by=.(spec)])
     spec       V1
    <num>    <num>
-1:     0 60542.13
-2:     1 43712.90
-> print(summary(feols(improvementValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew)))
+1:     0 59575.61
+2:     1 44648.06
+> print(summary(feols(improvementValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
 OLS estimation, Dep. Var.: improvementValue
-Observations: 2,041
-Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 174
+Observations: 2,851
+Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 196
 Standard-errors: Clustered (MB_Year_Built^NEIGHBOURHOOD^thirty) 
-     Estimate Std. Error  t value   Pr(>|t|)    
-spec -14229.6    3942.31 -3.60945 0.00040157 ***
+     Estimate Std. Error  t value  Pr(>|t|)    
+spec -9497.31    3591.09 -2.64468 0.0088429 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 49,637.2     Adj. R2: 0.385293
-                 Within R2: 0.010244
+RMSE: 49,937.0     Adj. R2: 0.325019
+                 Within R2: 0.004768
+> print(summary(feols(log(improvementValue)~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
+OLS estimation, Dep. Var.: log(improvementValue)
+Observations: 2,851
+Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 196
+Standard-errors: Clustered (MB_Year_Built^NEIGHBOURHOOD^thirty) 
+      Estimate Std. Error  t value Pr(>|t|)    
+spec -0.161608   0.055616 -2.90578 0.004087 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.618011     Adj. R2: 0.290685
+                 Within R2: 0.008976
+> dnew[,laneShare:=mean(type=="laneway"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
+> dnew[,singleShare:=mean(type=="single"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
+> dnew[,duplexShare:=mean(type=="duplex"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
+> dnew[,ownShare:=ifelse(type=="laneway",laneShare,ifelse(type=="single",singleShare,duplexShare))]
+> 
+> 
+> # note individual reg actually lower t-stat than group level
+> print(summary(feols(spec ~ ownShare + log(improvementValue)| MB_Year_Built ^ NEIGHBOURHOOD ^ thirty+type,data=dnew)))
+OLS estimation, Dep. Var.: spec
+Observations: 2,851
+Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 196,  type: 3
+Standard-errors: Clustered (MB_Year_Built^NEIGHBOURHOOD^thirty) 
+                       Estimate Std. Error  t value Pr(>|t|)    
+ownShare               0.144218   0.077968  1.84970 0.065870 .  
+log(improvementValue) -0.041099   0.019338 -2.12529 0.034821 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.349766     Adj. R2: 0.248688
+                 Within R2: 0.008809
 > 
 > print(summary(feols(typeSpec~shareType |year ^  type+nbhd+thirty,data=shares)))
-NOTE: 294 observations removed because of NA values (LHS: 294, RHS: 153, Fixed-effects: 24).
+NOTE: 269 observations removed because of NA values (LHS: 269, RHS: 129, Fixed-effects: 24).
 OLS estimation, Dep. Var.: typeSpec
-Observations: 258
+Observations: 283
 Fixed-effects: year^type: 21,  nbhd: 21,  thirty: 1
 Standard-errors: Clustered (year^type) 
           Estimate Std. Error t value Pr(>|t|)    
-shareType 0.185309   0.089681 2.06631 0.051995 .  
+shareType 0.150914   0.063071 2.39277 0.026651 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.228238     Adj. R2: 0.289611
-                 Within R2: 0.033703
-> print(summary(feols(typeSpec~shareType |year +type,data=shares,cluster="nbhd")))
-NOTE: 294 observations removed because of NA values (LHS: 294, RHS: 153, vcov: 24).
+RMSE: 0.227849     Adj. R2: 0.317764
+                 Within R2: 0.019839
+> print(summary(feols(typeSpec~shareType +i(year) + i(type)|nbhd,data=shares,cluster="nbhd")))
+NOTE: 269 observations removed because of NA values (LHS: 269, RHS: 129, Fixed-effects: 24).
 OLS estimation, Dep. Var.: typeSpec
-Observations: 258
-Fixed-effects: year: 8,  type: 3
+Observations: 283
+Fixed-effects: nbhd: 21
 Standard-errors: Clustered (nbhd) 
-          Estimate Std. Error t value Pr(>|t|)    
-shareType 0.150385   0.075289 1.99744 0.059564 .  
+               Estimate Std. Error   t value   Pr(>|t|)    
+shareType      0.146914   0.065218  2.252667 0.03566813 *  
+year::2017    -0.133311   0.069976 -1.905109 0.07124650 .  
+year::2018    -0.075338   0.069004 -1.091790 0.28790346    
+year::2019    -0.160220   0.067965 -2.357373 0.02870505 *  
+year::2020     0.027848   0.079339  0.351006 0.72925413    
+year::2021     0.077572   0.090788  0.854432 0.40298456    
+year::2022    -0.040422   0.092813 -0.435526 0.66784458    
+year::2023    -0.312000   0.073724 -4.231979 0.00040897 ***
+type::laneway -0.265753   0.052268 -5.084451 0.00005662 ***
+type::single  -0.235436   0.062866 -3.745015 0.00127611 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.254229     Adj. R2: 0.22922 
-                 Within R2: 0.023582
+RMSE: 0.243147     Adj. R2: 0.256987
+                 Within R2: 0.292412
 > 
 > ggplot(shares[type=="laneway",.(type,shareType,typeSpec,year),],aes(x=shareType,y=typeSpec,color=year)) +
 +     geom_point() 
 Warning message:
-Removed 72 rows containing missing values or values outside the scale range
+Removed 64 rows containing missing values or values outside the scale range
 (`geom_point()`). 
 > ggsave("text/shareCustom.png")
 Saving 7 x 7 in image
 Warning message:
-Removed 72 rows containing missing values or values outside the scale range
+Removed 64 rows containing missing values or values outside the scale range
 (`geom_point()`). 
 > 
 > proc.time()
    user  system elapsed 
-  1.768   0.126   1.898 
+  1.673   0.120   1.803 

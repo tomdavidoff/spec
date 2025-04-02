@@ -56,12 +56,13 @@ d24[,type:=ifelse(duplex==1,"duplex",ifelse(hasLaneway==1,"laneway","single"))]
 print(summary(d24[,MB_Year_Built]))
 d24[,spec:=0]
 d24[,sale2024:=0]
-for (y in seq(2016,2022)) {
+FIRST_BUILT <- 2016 # results weirdly stronger with 2016 than prior years -- dearth of laneway early messing with fixed effect?
+for (y in seq(FIRST_BUILT,2022)) {
     #d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1 | get(paste0("sale",y+2))==1  ),spec:=1]
     d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1  ),spec:=1]
     #d24[MB_Year_Built==y & ( get(paste0("sale",y+1))==1  ),spec:=1]
 }
-for (y in seq(2016,2023)) {
+for (y in seq(FIRST_BUILT,2023)) {
     print(y)
     print(table(d24[MB_Year_Built==y,.(type,spec)]))
 }
@@ -75,7 +76,7 @@ print(table(d24[thirty==0 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,
 # Main regression
 # Dummy for spec vs custom on property type dummies and share 
 shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric())
-for (y in seq(2016,2023)) {
+for (y in seq(FIRST_BUILT,2023)) {
 	for (n in unique(d24$NEIGHBOURHOOD)) {
 		#for (s in c(0,1)) {
 		for (s in c(1)) {
@@ -86,16 +87,27 @@ for (y in seq(2016,2023)) {
 		    }
         }
 }
+print(summary(shares))
 
-dnew <- d24[MB_Year_Built>2016 & MB_Year_Built<2023]
-print(dnew[,mean(spec),by=type])
-print(dnew[,mean(spec),by=MB_Year_Built])
-print(dnew[,quantile(improvementValue,na.rm=TRUE),by=.(spec)])
-print(dnew[,mean(improvementValue,na.rm=TRUE),by=.(spec)])
-print(summary(feols(improvementValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew)))
+
+dnew <- d24[MB_Year_Built>FIRST_BUILT & MB_Year_Built<2023]
+print(dnew[MB_Year_Built>2016,mean(spec),by=type])
+print(dnew[MB_Year_Built>2016,mean(spec),by=MB_Year_Built])
+print(dnew[MB_Year_Built>2016,quantile(improvementValue,na.rm=TRUE),by=.(spec)])
+print(dnew[MB_Year_Built>2016,mean(improvementValue,na.rm=TRUE),by=.(spec)])
+print(summary(feols(improvementValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
+print(summary(feols(log(improvementValue)~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
+dnew[,laneShare:=mean(type=="laneway"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
+dnew[,singleShare:=mean(type=="single"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
+dnew[,duplexShare:=mean(type=="duplex"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
+dnew[,ownShare:=ifelse(type=="laneway",laneShare,ifelse(type=="single",singleShare,duplexShare))]
+
+
+# note individual reg actually lower t-stat than group level
+print(summary(feols(spec ~ ownShare + log(improvementValue)| MB_Year_Built ^ NEIGHBOURHOOD ^ thirty+type,data=dnew)))
 
 print(summary(feols(typeSpec~shareType |year ^  type+nbhd+thirty,data=shares)))
-print(summary(feols(typeSpec~shareType |year +type,data=shares,cluster="nbhd")))
+print(summary(feols(typeSpec~shareType +i(year) + i(type)|nbhd,data=shares,cluster="nbhd")))
 
 ggplot(shares[type=="laneway",.(type,shareType,typeSpec,year),],aes(x=shareType,y=typeSpec,color=year)) +
     geom_point() 

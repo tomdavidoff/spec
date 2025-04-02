@@ -1,5 +1,5 @@
 
-R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
 Copyright (C) 2024 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
@@ -62,9 +62,101 @@ City of Vancouver
 13352 16504 14829 15816 13570 14576 15686 18171 18204 15977 14338 14073 13889 
  2021  2022  2023  2024 
 18915 15120 12841  1839 
-> dMaxSale <- dSales[,.(sale2016=max(CONVEYANCE_DATE==2016),sale2017=max(CONVEYANCE_DATE==2017),sale2018=max(CONVEYANCE_DATE==2018),sale2019=max(CONVEYANCE_DATE==2019),sale2020=max(CONVEYANCE_DATE==2020),sale2021=max(CONVEYANCE_DATE==2021),sale2022=max(CONVEYANCE_DATE==2022),sale2023=max(CONVEYANCE_DATE==2023)),by="ROLL_NUMBER"]
+> # vectorize the following dMaxSale <- dSales[,.(sale2016=max(CONVEYANCE_DATE==2016),sale2017=max(CONVEYANCE_DATE==2017),sale2018=max(CONVEYANCE_DATE==2018),sale2019=max(CONVEYANCE_DATE==2019),sale2020=max(CONVEYANCE_DATE==2020),sale2021=max(CONVEYANCE_DATE==2021),sale2022=max(CONVEYANCE_DATE==2022),sale2023=max(CONVEYANCE_DATE==2023)),by="ROLL_NUMBER"]
+> for (y in 2010:2023) {
++    dSales[,paste0("sale",y):=max(CONVEYANCE_DATE==y),by="ROLL_NUMBER"]
++ }
+> print(summary(dSales))
+ ROLL_NUMBER          FOLIO_ID         CONVEYANCE_DATE CONVEYANCE_PRICE   
+ Length:477940      Length:477940      Min.   :1904    Min.   :        0  
+ Class :character   Class :character   1st Qu.:1999    1st Qu.:   247302  
+ Mode  :character   Mode  :character   Median :2008    Median :   457278  
+                                       Mean   :2006    Mean   :   833261  
+                                       3rd Qu.:2016    3rd Qu.:   863000  
+                                       Max.   :2024    Max.   :889159000  
+                                                       NA's   :2003       
+ CONVEYANCE_TYPE_DESCRIPTION JURISDICTION          sale2010      
+ Length:477940               Length:477940      Min.   :0.00000  
+ Class :character            Class :character   1st Qu.:0.00000  
+ Mode  :character            Mode  :character   Median :0.00000  
+                                                Mean   :0.07972  
+                                                3rd Qu.:0.00000  
+                                                Max.   :1.00000  
+                                                                 
+    sale2011          sale2012          sale2013          sale2014      
+ Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Median :0.00000   Median :0.00000   Median :0.00000   Median :0.00000  
+ Mean   :0.08399   Mean   :0.07053   Mean   :0.07446   Mean   :0.08199  
+ 3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+ Max.   :1.00000   Max.   :1.00000   Max.   :1.00000   Max.   :1.00000  
+                                                                        
+    sale2015          sale2016          sale2017          sale2018      
+ Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Median :0.00000   Median :0.00000   Median :0.00000   Median :0.00000  
+ Mean   :0.09425   Mean   :0.09291   Mean   :0.08112   Mean   :0.06905  
+ 3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+ Max.   :1.00000   Max.   :1.00000   Max.   :1.00000   Max.   :1.00000  
+                                                                        
+    sale2019          sale2020          sale2021          sale2022      
+ Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Median :0.00000   Median :0.00000   Median :0.00000   Median :0.00000  
+ Mean   :0.06722   Mean   :0.06904   Mean   :0.09363   Mean   :0.07522  
+ 3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+ Max.   :1.00000   Max.   :1.00000   Max.   :1.00000   Max.   :1.00000  
+                                                                        
+    sale2023     
+ Min.   :0.0000  
+ 1st Qu.:0.0000  
+ Median :0.0000  
+ Mean   :0.0624  
+ 3rd Qu.:0.0000  
+ Max.   :1.0000  
+                 
+> dMaxSale <- dSales[,.(ROLL_NUMBER,sale2010,sale2011,sale2012,sale2013,sale2014,sale2015,sale2016,sale2017,sale2018,sale2019,sale2020,sale2021,sale2022,sale2023)]
+> dMaxSale <- unique(dMaxSale)
+> print(summary(dMaxSale))
+ ROLL_NUMBER           sale2010          sale2011          sale2012      
+ Length:204857      Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ Class :character   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Mode  :character   Median :0.00000   Median :0.00000   Median :0.00000  
+                    Mean   :0.06877   Mean   :0.07305   Mean   :0.06245  
+                    3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+                    Max.   :1.00000   Max.   :1.00000   Max.   :1.00000  
+    sale2013         sale2014          sale2015         sale2016      
+ Min.   :0.0000   Min.   :0.00000   Min.   :0.0000   Min.   :0.00000  
+ 1st Qu.:0.0000   1st Qu.:0.00000   1st Qu.:0.0000   1st Qu.:0.00000  
+ Median :0.0000   Median :0.00000   Median :0.0000   Median :0.00000  
+ Mean   :0.0673   Mean   :0.07292   Mean   :0.0839   Mean   :0.08385  
+ 3rd Qu.:0.0000   3rd Qu.:0.00000   3rd Qu.:0.0000   3rd Qu.:0.00000  
+ Max.   :1.0000   Max.   :1.00000   Max.   :1.0000   Max.   :1.00000  
+    sale2017          sale2018          sale2019          sale2020      
+ Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Median :0.00000   Median :0.00000   Median :0.00000   Median :0.00000  
+ Mean   :0.07333   Mean   :0.06586   Mean   :0.06504   Mean   :0.06383  
+ 3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+ Max.   :1.00000   Max.   :1.00000   Max.   :1.00000   Max.   :1.00000  
+    sale2021          sale2022          sale2023      
+ Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Median :0.00000   Median :0.00000   Median :0.00000  
+ Mean   :0.08772   Mean   :0.06959   Mean   :0.05846  
+ 3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+ Max.   :1.00000   Max.   :1.00000   Max.   :1.00000  
+> print(summary(dMaxSale[,.N,by=ROLL_NUMBER]))
+ ROLL_NUMBER              N    
+ Length:204857      Min.   :1  
+ Class :character   1st Qu.:1  
+ Mode  :character   Median :1  
+                    Mean   :1  
+                    3rd Qu.:1  
+                    Max.   :1  
+> 
 > fwrite(dMaxSale,"data/derived/maxSale.csv")
 > q("no")
 > proc.time()
    user  system elapsed 
-  3.735   0.176   3.922 
+  4.498   0.171   4.708 
