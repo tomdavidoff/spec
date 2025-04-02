@@ -10,9 +10,10 @@ dSales <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_sales_202
 dSales <- dSales[JURISDICTION=="City of Vancouver"]
 print(summary(dSales))
 print(table(dSales[,JURISDICTION])) # but keep all here
-dSales[,CONVEYANCE_DATE:=floor(CONVEYANCE_DATE/1000000)]
-dSales <- dSales[CONVEYANCE_DATE>20150101]
-dMaxSale <- dSales[,.(maxSale=max(CONVEYANCE_DATE)),by="ROLL_NUMBER"]
+dSales[,CONVEYANCE_DATE:=floor(CONVEYANCE_DATE/10000000000)]
+# note do not delete sales after 2015, as some non-Specs!
+print(table(dSales[,CONVEYANCE_DATE]))
+dMaxSale <- dSales[,.(sale2016=max(CONVEYANCE_DATE==2016),sale2017=max(CONVEYANCE_DATE==2017),sale2018=max(CONVEYANCE_DATE==2018),sale2019=max(CONVEYANCE_DATE==2019),sale2020=max(CONVEYANCE_DATE==2020),sale2021=max(CONVEYANCE_DATE==2021),sale2022=max(CONVEYANCE_DATE==2022),sale2023=max(CONVEYANCE_DATE==2023)),by="ROLL_NUMBER"]
 fwrite(dMaxSale,"data/derived/maxSale.csv")
 q("no")
 

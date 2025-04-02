@@ -1,0 +1,144 @@
+
+R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #disappeared.R
+> # Single family lots that aren't there any more but are duplexes
+> # Generally get 2024 status of 2016 lots; confine to 30' or 50' by 120 and have laneway
+> # Tom Davidoff
+> # March 17, 2025
+> 
+> TOLERANCE <- 1.5 # 2 foot tolerance around tolerated lot sizes
+> 
+> library(data.table)
+> library(RSQLite)
+> 
+> 
+> # 2016 lots, see which have disappeared and become duplexes
+> 
+> # read from sqlite3 file "~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3" "residentialInventory", get fields: RollNumber, zoning, land_width, land_depth, MB_year_built; and select on  jurisdiction=="City of Vancouver"
+> 
+> # open connection first
+> con <- dbConnect(RSQLite::SQLite(), "~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3")
+> dI <- dbGetQuery(con, "SELECT  roll_number, zoning, land_width, land_depth, MB_year_built FROM residentialInventory WHERE jurisdiction=='200' AND (zoning=='RS1' OR zoning=='RS2' OR zoning=='RS3' OR zoning=='RS3A' OR zoning=='RS4' OR zoning=='RS5' OR zoning=='RS6' OR zoning=='RS7' )")
+> dI <- data.table(dI)
+> print(summary(dI[,as.numeric(land_depth)]))
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    4.6   112.7   122.0   122.7   127.0   477.4      73 
+> dI[,thirty:=land_width<=33+TOLERANCE & land_width>=33-TOLERANCE & land_depth<=122+2*TOLERANCE & land_depth>=122-2*TOLERANCE]
+> dI[,fifty:=land_width<=50+TOLERANCE & land_width>=50-TOLERANCE & land_depth<=122+2*TOLERANCE & land_depth>=122-2*TOLERANCE]
+> print(table(dI[,.(thirty,fifty)]))
+       fifty
+thirty  FALSE  TRUE
+  FALSE 48036  2777
+  TRUE  14464     0
+> dI <- dI[thirty==TRUE | fifty==TRUE]
+> 
+> 
+> da <- dbGetQuery(con, "SELECT folioID,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city FROM address ")
+> 
+> df <- dbGetQuery(con,"SELECT folioID,rollNumber from folio")
+> da <- merge(da,df,by="folioID")
+> 
+> dfd <- dbGetQuery(con,"SELECT folioID, actualUseDescription from folioDescription")
+> da <- merge(da,dfd,by="folioID")
+> dv <- dbGetQuery(con, "SELECT folioID, improvementValue FROM valuation")
+> da <- merge(da,dv,by="folioID")
+> 
+> 
+> dI <- merge(dI,da,by.x="roll_number",by.y="rollNumber")
+> print("IS IT A DATATABLE?")
+[1] "IS IT A DATATABLE?"
+> print(is.data.table(dI))
+[1] TRUE
+> #print(table(dI[,streetType]))
+> #AVE   CRES DIVERS     DR    HWY     PL     RD     ST 
+> # print(table(dI[,streetDirectionPrefix])) empty
+> #print(table(dI[,streetDirectionSuffix]))        E    N   SE   SW    W 
+> 
+> dI[,streetTypeForLaneway:=ifelse(streetType=="AVE","AV",ifelse(streetType=="CRES","CRESCENT",ifelse(streetType=="DR","DRIVE",ifelse(streetType=="PL","PLACE",ifelse(streetType=="RD","ROAD",streetType)))))]
+> dI[,addressForLaneway:=trimws(paste(streetNumber,streetDirectionSuffix,streetName,streetTypeForLaneway))]
+> dI[,addressForLaneway:=gsub("  "," ",addressForLaneway)]
+> 
+> dLaneOk <- fread("data/derived/lanewaySpatial.csv")
+> dLaneOk[,addressForLaneway:=trimws(paste(streetNumber,streetName))]
+> dLaneOk[,streetNumber:=NULL]
+> dLaneOk[,streetName:=NULL]
+> dI <- merge(dI,dLaneOk,by="addressForLaneway",all.x=TRUE,all.y=TRUE)
+> # deal with NA laneok approximation
+> print("IS IT A DATATABLE?")
+[1] "IS IT A DATATABLE?"
+> print(is.data.table(dI))
+[1] TRUE
+> dI[,madeupLaneok:=is.na(laneok)]
+> dI[,roundNumber:=floor(as.numeric(streetNumber)/100)]
+> dI[,meanLaneok:=mean(laneok,na.rm=TRUE),by=roundNumber]
+> dI[is.na(laneok) & meanLaneok==0,laneok:=0]
+> print(table(dI[,.(is.na(laneok),streetType)]))
+       streetType
+V1               AV   AVE  CRES DIVERS    DR   HWY    PL    RD    ST
+  FALSE    37     0 11365    29      0   160     0    11     6  5512
+  TRUE     12     5   952     1      1    17    29     3     0   494
+> dI[is.na(laneok) & meanLaneok==1,laneok:=1]
+> print(table(dI[,.(is.na(laneok),streetType)]))
+       streetType
+V1               AV   AVE  CRES DIVERS    DR   HWY    PL    RD    ST
+  FALSE    37     3 11591    29      1   167     1    11     6  5675
+  TRUE     12     2   726     1      0    10    28     3     0   331
+> print(table(dI[,actualUseDescription]))
+
+      Bed & Breakfast Operation 4 Or More Units 
+                                              2 
+    Bed & Breakfast Operation Less Than 4 Units 
+                                              4 
+Duplex, Non-Strata Side by Side or Front / Back 
+                                             12 
+                   Duplex, Non-Strata Up / Down 
+                                              3 
+                    Duplex, Strata Front / Back 
+                                             10 
+                    Duplex, Strata Side by Side 
+                                              2 
+                      Multi-Family (Conversion) 
+                                             21 
+              Property Subject To Section 19(8) 
+                                             18 
+                Residential Dwelling with Suite 
+                                           9218 
+                   Residential Outbuilding Only 
+                                              4 
+                         Single Family Dwelling 
+                                           9195 
+           Vacant Residential Less Than 2 Acres 
+                                            145 
+> dI <- dI[actualUseDescription== "Single Family Dwelling" | actualUseDescription=="Residential Dwelling with Suite"]
+> print(names(dI))
+ [1] "addressForLaneway"     "roll_number"           "zoning"               
+ [4] "land_width"            "land_depth"            "MB_year_built"        
+ [7] "thirty"                "fifty"                 "folioID"              
+[10] "streetNumber"          "streetDirectionPrefix" "streetName"           
+[13] "streetType"            "streetDirectionSuffix" "postalCode"           
+[16] "city"                  "actualUseDescription"  "improvementValue"     
+[19] "streetTypeForLaneway"  "laneok"                "madeupLaneok"         
+[22] "roundNumber"           "meanLaneok"           
+> 
+> fwrite(dI[,.(folioID,roll_number,MB_year_built,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")
+> 
+> proc.time()
+   user  system elapsed 
+ 25.654   0.829  27.142 

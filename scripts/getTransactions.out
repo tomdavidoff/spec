@@ -1,0 +1,70 @@
+
+R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # getTransactions.R
+> # Get transactions from the sales file, merge with property info
+> # Tom Davidoff
+> # March 5, 2025
+> 
+> library(data.table)
+> library(fixest)
+> 
+> dSales <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_sales_20240331_REVD24.csv",select=c("ROLL_NUMBER","FOLIO_ID","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION","JURISDICTION"))
+> dSales <- dSales[JURISDICTION=="City of Vancouver"]
+> print(summary(dSales))
+ ROLL_NUMBER          FOLIO_ID         CONVEYANCE_DATE         
+ Length:477940      Length:477940      Min.   :19041123000000  
+ Class :character   Class :character   1st Qu.:19990224000000  
+ Mode  :character   Mode  :character   Median :20080814000000  
+                                       Mean   :20063288779360  
+                                       3rd Qu.:20160502000000  
+                                       Max.   :20240313000000  
+                                                               
+ CONVEYANCE_PRICE    CONVEYANCE_TYPE_DESCRIPTION JURISDICTION      
+ Min.   :        0   Length:477940               Length:477940     
+ 1st Qu.:   247302   Class :character            Class :character  
+ Median :   457278   Mode  :character            Mode  :character  
+ Mean   :   833261                                                 
+ 3rd Qu.:   863000                                                 
+ Max.   :889159000                                                 
+ NA's   :2003                                                      
+> print(table(dSales[,JURISDICTION])) # but keep all here
+
+City of Vancouver 
+           477940 
+> dSales[,CONVEYANCE_DATE:=floor(CONVEYANCE_DATE/10000000000)]
+> # note do not delete sales after 2015, as some non-Specs!
+> print(table(dSales[,CONVEYANCE_DATE]))
+
+ 1904  1905  1907  1972  1973  1974  1975  1976  1977  1978  1979  1980  1981 
+    1     3     1     1     1  1795  1966  2242  2259  2308  3021  3496  1900 
+ 1982  1983  1984  1985  1986  1987  1988  1989  1990  1991  1992  1993  1994 
+ 2481  3071  2867  3514  4016  5437  6513  7108  5437  6440  7880  6849  7869 
+ 1995  1996  1997  1998  1999  2000  2001  2002  2003  2004  2005  2006  2007 
+ 6867  7206  8628  7520  8330  7883  8338 11093 13438 13366 16682 15599 16814 
+ 2008  2009  2010  2011  2012  2013  2014  2015  2016  2017  2018  2019  2020 
+13352 16504 14829 15816 13570 14576 15686 18171 18204 15977 14338 14073 13889 
+ 2021  2022  2023  2024 
+18915 15120 12841  1839 
+> dMaxSale <- dSales[,.(sale2016=max(CONVEYANCE_DATE==2016),sale2017=max(CONVEYANCE_DATE==2017),sale2018=max(CONVEYANCE_DATE==2018),sale2019=max(CONVEYANCE_DATE==2019),sale2020=max(CONVEYANCE_DATE==2020),sale2021=max(CONVEYANCE_DATE==2021),sale2022=max(CONVEYANCE_DATE==2022),sale2023=max(CONVEYANCE_DATE==2023)),by="ROLL_NUMBER"]
+> fwrite(dMaxSale,"data/derived/maxSale.csv")
+> q("no")
+> proc.time()
+   user  system elapsed 
+  3.735   0.176   3.922 

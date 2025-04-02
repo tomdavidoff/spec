@@ -4,6 +4,8 @@
 
 library(data.table)
 library(readstata13)
+library(fixest)
+library(ggplot2)
 
 do16 <- 0
 if (do16==1)  {
@@ -18,6 +20,7 @@ if (do24==1)  {
 }
 d24 <- fread("data/derived/use24.csv")
 print(summary(d24))
+
 
 # merge on roll number fragment
 
@@ -48,19 +51,52 @@ d24[,hasLaneway:=ifelse(is.na(hasLaneway),0,hasLaneway)]
 # get max transaction date by roll rumber
 dMaxSale <- fread("data/derived/maxSale.csv")
 d24 <- merge(d24,dMaxSale,by.x="ROLL_NUMBER24",by.y="ROLL_NUMBER",all.x=TRUE)
-d24[,maxSale:=ifelse(is.na(maxSale),0,maxSale)]
-d24[,maxSale:=round(maxSale/10000)]
 d24[,duplex:=grepl("Duplex,",ACTUAL_USE_DESCRIPTION)]
 d24[,type:=ifelse(duplex==1,"duplex",ifelse(hasLaneway==1,"laneway","single"))]
 print(summary(d24[,MB_Year_Built]))
+d24[,spec:=0]
+d24[,sale2024:=0]
+for (y in seq(2016,2022)) {
+    #d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1 | get(paste0("sale",y+2))==1  ),spec:=1]
+    d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1  ),spec:=1]
+    #d24[MB_Year_Built==y & ( get(paste0("sale",y+1))==1  ),spec:=1]
+}
 for (y in seq(2016,2023)) {
     print(y)
-    print(table(d24[MB_Year_Built==y,.(type,maxSale>=MB_Year_Built)]))
+    print(table(d24[MB_Year_Built==y,.(type,spec)]))
 }
-print(table(d24[MB_Year_Built>2016 & MB_Year_Built<2023,.(type,maxSale>=MB_Year_Built,STREET_DIRECTION_SUFFIX)]))
-print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,maxSale>=MB_Year_Built,STREET_DIRECTION_SUFFIX)]))
-print(table(d24[thirty==0 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,maxSale>=MB_Year_Built,STREET_DIRECTION_SUFFIX)]))
-print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,maxSale>=MB_Year_Built,NEIGHBOURHOOD)]))
-print(table(d24[thirty==0 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,maxSale>=MB_Year_Built,NEIGHBOURHOOD)]))
+
+print(table(d24[MB_Year_Built>2016 & MB_Year_Built<2023,.(type,spec,STREET_DIRECTION_SUFFIX)]))
+print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,STREET_DIRECTION_SUFFIX)]))
+print(table(d24[thirty==0 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,STREET_DIRECTION_SUFFIX)]))
+print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,NEIGHBOURHOOD)]))
+print(table(d24[thirty==0 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,NEIGHBOURHOOD)]))
+
 # Main regression
 # Dummy for spec vs custom on property type dummies and share 
+shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric())
+for (y in seq(2016,2023)) {
+	for (n in unique(d24$NEIGHBOURHOOD)) {
+		#for (s in c(0,1)) {
+		for (s in c(1)) {
+			dsub <- d24[NEIGHBOURHOOD==n & MB_Year_Built==y & thirty==s  ]
+			for (t in c("single","duplex","laneway")) {
+			    shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)]))
+			}
+		    }
+        }
+}
+
+dnew <- d24[MB_Year_Built>2016 & MB_Year_Built<2023]
+print(dnew[,mean(spec),by=type])
+print(dnew[,mean(spec),by=MB_Year_Built])
+print(dnew[,quantile(improvementValue,na.rm=TRUE),by=.(spec)])
+print(dnew[,mean(improvementValue,na.rm=TRUE),by=.(spec)])
+print(summary(feols(improvementValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew)))
+
+print(summary(feols(typeSpec~shareType |year ^  type+nbhd+thirty,data=shares)))
+print(summary(feols(typeSpec~shareType |year +type,data=shares,cluster="nbhd")))
+
+ggplot(shares[type=="laneway",.(type,shareType,typeSpec,year),],aes(x=shareType,y=typeSpec,color=year)) +
+    geom_point() 
+ggsave("text/shareCustom.png")
