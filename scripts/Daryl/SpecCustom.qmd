@@ -1,0 +1,686 @@
+---
+title: "Laneway Spec/Custom"
+author: "Daryl Larsen"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+editor: visual
+---
+
+```{r setup}
+#| include: false
+
+library(dplyr)
+library(haven)
+library(gganimate)
+library(sf)
+library(here)
+library(fixest)
+library(modelsummary)
+
+options(contrasts = c("contr.treatment", "contr.poly"))
+
+city_boundary <- read_sf('/href/research3/w/data/shapefiles/city-boundary.shp')
+nhoods <- read_sf('/href/research3/w/data/shapefiles/local-area-boundary.shp')
+```
+
+Main takeaways:
+
+-   About 50% of laneways were built with the house
+
+-   Laneways built with a house are more likely to be spec (21-45%)
+
+-   Between 15-30% of laneways are spec builds
+
+-   East laneways are much more likely to be spec builds, with 18-33% vs 10-20% in the west (or 25-50% vs 12-36% with SF build)
+
+-   Custom builds are becoming more prevalent over time
+
+-   The relationship between spec share and laneway premium is negative when looking at neighbourhood-year, but becomes positive when years are pooled. I suspect there's a lot of noise in each neighbourhood-year estimate because each neighbourhood (especially in the West) has few laneways built each year.
+
+-   The relationship between spec share and premium is more positive for new builds
+
+    ::: {.callout–caution}
+    ## Identifying spec/custom builds in laneways
+
+    I identify spec laneways as those sold the year of completion. I also look at a secondary specification to include sales 1 year after the build is completed.
+
+    ```{r, collapse=TRUE}
+    #| code-fold: true
+
+    lw <- read_dta(here("data/vanroll_lw_sales.dta")) %>%
+      filter(!is.na(lw_year_built)) %>% 
+      mutate(year_built = ifelse(eff_year>year, year_built, eff_year),
+             lw_eff_year = ifelse(is.na(lw_eff_year), lw_year_built, lw_eff_year),
+             wbuild = abs(eff_year-lw_eff_year)<=2,
+             spec = year==lw_eff_year,
+             spec1 = (year-lw_eff_year) %in% c(0, 1),
+             neigh_name = factor(neigh_name, levels = c("Point Grey", "Dunbar", "Southlands", "Arbutus/Mackenzie Heights", "Kerrisdale", "Kitsilano", "South Granville", "Shaughnessy", "Cambie", "Oakridge", "Marpole", "Grandview", "Cedar Cottage", "Main/Fraser", "South Vancouver", "Knight", "Hastings East", "Renfrew", "Renfrew Heights", "Collingwood", "Killarney", "Fraserview")),
+             west = neigh_name %in% c("Point Grey", "Dunbar", "Southlands", "Arbutus/Mackenzie Heights", "Kerrisdale", "Kitsilano", "South Granville", "Shaughnessy", "Cambie", "Oakridge", "Marpole")) %>% 
+      group_by(roll_num) %>%
+      summarize(neigh=first(neigh_name), west=first(west), year=as.integer(first(lw_eff_year)), spec=max(spec), spec1=max(spec1), wbuild = max(wbuild), lat=first(lat), lon=first(lon), temp = max(year_built))
+
+    builds <- read_dta(here("data/vanroll_lw_sales.dta")) %>%
+      mutate(year_built = ifelse(eff_year>year, year_built, eff_year),
+             spec = year==year_built,
+             spec1 = (year-year_built) %in% c(0,1),
+             build_wlw = ifelse(is.na(lw_eff_year), 0, abs(year_built-lw_eff_year)<=2),
+             spec_wlw = spec*build_wlw,
+             spec1_wlw = spec1*build_wlw,
+             neigh_name = factor(neigh_name, levels = c("Point Grey", "Dunbar", "Southlands", "Arbutus/Mackenzie Heights", "Kerrisdale", "Kitsilano", "South Granville", "Shaughnessy", "Cambie", "Oakridge", "Marpole", "Grandview", "Cedar Cottage", "Main/Fraser", "South Vancouver", "Knight", "Hastings East", "Renfrew", "Renfrew Heights", "Collingwood", "Killarney", "Fraserview")),
+             west = neigh_name %in% c("Point Grey", "Dunbar", "Southlands", "Arbutus/Mackenzie Heights", "Kerrisdale", "Kitsilano", "South Granville", "Shaughnessy", "Cambie", "Oakridge", "Marpole")) %>% 
+      group_by(roll_num, year_built) %>%
+      summarize(neigh=first(neigh_name), west=first(west), year_built=as.integer(first(year_built)), eff_year = as.integer(first(eff_year)), lw_year_built=as.integer(first(lw_year_built)), lw_eff_year = as.integer(first(lw_eff_year)),spec=max(spec), spec1=max(spec1), spec_wlw=max(spec_wlw), spec1_wlw=max(spec1_wlw), build_wlw=max(build_wlw), lat=first(lat), lon=first(lon)) %>% 
+      group_by(roll_num)
+
+    sales <- read_dta(here("data/vanroll_lw_sales.dta")) %>%
+      filter(sale_status=="Qualified",
+             !is.na(lat)) %>%
+      mutate(yq = zoo::as.yearqtr(as.Date(paste(year, month, day, sep="-"))),
+             lw_eff_year = ifelse(is.na(lw_eff_year) & !is.na(lw_year_built), lw_year_built, lw_eff_year),
+             year_built = ifelse(eff_year>year, year_built, eff_year),
+             spec = year==year_built,
+             spec1 = (year-year_built) %in% c(0, 1),
+             build_wlw = ifelse(is.na(lw_eff_year), 0, abs(year_built-lw_eff_year)<=2),
+             spec_lw = year==lw_eff_year,
+             spec1_lw = (year-lw_eff_year) %in% c(0, 1),
+             neigh_name = factor(neigh_name, levels = c("Point Grey", "Dunbar", "Southlands", "Arbutus/Mackenzie Heights", "Kerrisdale", "Kitsilano", "South Granville", "Shaughnessy", "Cambie", "Oakridge", "Marpole", "Grandview", "Cedar Cottage", "Main/Fraser", "South Vancouver", "Knight", "Hastings East", "Renfrew", "Renfrew Heights", "Collingwood", "Killarney", "Fraserview")),
+             west = neigh_name %in% c("Point Grey", "Dunbar", "Southlands", "Arbutus/Mackenzie Heights", "Kerrisdale", "Kitsilano", "South Granville", "Shaughnessy", "Cambie", "Oakridge", "Marpole")) %>% 
+      select(roll_num, neigh_name, neigh_id, act_use, lotsize, year_built, eff_year, floorarea, bedrooms, lon, lat, starts_with("lw_"), price, sale_date, year, month, day, west, age, new, lprice, spec, spec1, landdepth, landwidth, storeys, basement_full, haslaneway, yq)
+    ```
+
+    ```{r}
+    #| echo: false
+
+    parcel <- read_sf(here("data/property-parcel-polygons.geojson")) %>%
+      st_transform(crs=32610)
+    lanes <- read_sf(here("data/lanes.geojson")) %>%
+      st_transform(crs=32610)
+
+    lanes_buff <- st_buffer(lanes, 4)
+
+    parcel$laneok1 <- ifelse(st_intersects(parcel, lanes_buff) %>% lengths>0, 1, 0)
+    parcel <- parcel %>%
+       select(laneok1)
+    sales <- st_as_sf(sales, coords = c('lon', 'lat'), crs=4326) %>%
+       st_transform(crs=32610) %>%
+       st_join(parcel, join = st_intersects) %>%
+       st_drop_geometry()
+
+    sales$laneok2 <- sales$landdepth>=110 & sales$landwidth>=25
+    sales$laneok3 <- sales$landdepth>=122 | sales$landwidth>=33
+    sales$vanspec <- sales$year_built>=1963 & sales$year_built<=1986 & sales$storeys==1 & sales$basement_full==1 & sales$floorarea>1500 & sales$lotsize<9000 & sales$floorarea/sales$lotsize>0.5
+    sales$laneReallyOK <- sales$laneok1==1 & sales$laneok2==1 & sales$laneok3==1 & sales$vanspec==0
+
+    ```
+    :::
+
+## Spec ratio by neighbourhood-year
+
+Roughly sorted West-East
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+lw_neighyear <- lw %>% 
+  group_by(neigh, year) %>% 
+  summarise(spec=100*mean(spec), spec1=100*mean(spec1), lon=median(lon), n=n())
+
+a <- ggplot(lw_neighyear, aes(as.factor(neigh), spec, size = n)) +
+  geom_point(show.legend = FALSE) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+anim <- a +
+  # Here comes the gganimate specific bits
+  labs(title = 'Year: {frame_time}', x = 'Neighbourhood', y = 'Spec Ratio') +
+  transition_time(year) +
+  ease_aes('linear')
+
+animate(anim, renderer = gifski_renderer())
+
+a + facet_wrap(~ year)
+```
+
+```{r}
+
+lw_neighyearw <- lw %>% 
+  group_by(neigh, year) %>% 
+  summarise(spec=100*mean(spec*wbuild), spec1=100*mean(spec1*wbuild), lon=median(lon), n=n())
+
+a <- ggplot(lw_neighyearw, aes(as.factor(neigh), spec, size = n)) +
+  geom_point(show.legend = FALSE) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+a + facet_wrap(~ year) %>% 
+```
+
+## Spec Ratio and Average Year of Build by Neighbourhood
+
+Eastern neighbourhoods have more laneways and are more likely to be spec builds.
+
+```{r}
+#| echo: false
+
+lw_neigh <- lw %>% 
+  group_by(neigh) %>% 
+  summarise('Spec Ratio'=100*mean(spec), 'Spec Ratio 1'=100*mean(spec1), 'Average Year Built'=mean(year), '# of Laneways'=n()) 
+
+lw_neigh %>% 
+  print(n=22)
+```
+
+```{r}
+#| echo: false
+
+library(ggplot2)
+
+lw_sf <- st_as_sf(lw %>% filter(!is.na(lat)), coords=c("lon", "lat"), crs=4326)
+
+ggplot(lw_sf) +
+  geom_sf(data=nhoods) +
+  geom_sf(aes(colour=as.factor(spec))) +
+  scale_color_manual(
+    values = c("0" = "grey50", "1" = "cyan"),  # Custom color mapping
+    labels = c("0" = "Custom", "1" = "Spec"),
+    name = "Spec"
+  ) +
+  theme_void() +
+  facet_wrap(~ year)
+
+ggplot(lw_sf) +
+  geom_sf(data=nhoods) +
+  geom_sf(aes(colour=as.factor(spec1))) +
+  scale_color_manual(
+    values = c("0" = "grey50", "1" = "cyan"),  # Custom color mapping
+    labels = c("0" = "Custom", "1" = "Spec"),
+    name = "Spec 1-year"
+  ) +
+  theme_void() +
+  facet_wrap(~ year)
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+
+ggplot(lw %>% group_by(west, year) %>% summarise(spec=mean(spec)), aes(x=year, y=spec, colour = west)) +
+  geom_line() +
+  theme_bw() +
+  ggtitle("Share of Spec Builds by East/West over Time")
+
+ggplot(lw, aes(x=year, fill=west)) +
+  geom_bar() +
+  theme_bw() + 
+  ggtitle("Number of laneways built in East/West over Time")
+
+```
+
+# Analysis
+
+I regress the probability of a custom build over time for west versus east neighbourhoods. This confirms that east neighbourhoods are much more likely to build spec laneways, though west specs are trending slightly upward relative to east.
+
+```{r}
+#| echo: false
+#| warning: false
+
+library(modelsummary)
+
+m1 <- lm(spec ~ year, data=lw)
+m2 <- lm(spec ~ year*west, data=lw)
+
+modelsummary(list(m1, m2))
+```
+
+## Laneway Premium
+
+I calculate the premium to having a laneway home in each neighbourhood
+
+```{r}
+#| echo: false
+#| message: false
+
+t2n11 <- feols(lprice ~ haslaneway:neigh_name + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + year, data = sales)
+t2n12 <- feols(lprice ~ haslaneway:neigh_name + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + year, data = sales %>% filter(new==1))
+t2n13 <- feols(lprice ~ haslaneway:neigh_name + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + year, data = sales %>% filter(new==0))
+
+t2n21 <- feols(lprice ~ haslaneway:neigh_name:as.factor(year) + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + year + month, data=sales)
+t2n22 <- feols(lprice ~ haslaneway:neigh_name:as.factor(year) + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + year + month, data=sales %>% filter(new==1))
+t2n23 <- feols(lprice ~ haslaneway:neigh_name:as.factor(year) + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + year + month, data=sales %>% filter(new==0))
+
+t2n31 <- feols(lprice ~ haslaneway:west:as.factor(year) + laneReallyOK + log(lotsize) + log(floorarea) + age + west | neigh_name + year, data=sales)
+t2n32 <- feols(lprice ~ haslaneway:west:as.factor(year) + laneReallyOK + log(lotsize) + log(floorarea) + age + west | neigh_name + year, data=sales %>% filter(new==1))
+```
+
+```{r}
+#| echo: false
+#| message: false
+
+t2s21 <- feols(lprice ~ haslaneway:neigh_name:as.factor(year) + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + yq, data=sales)
+t2s22 <- feols(lprice ~ haslaneway:neigh_name:as.factor(year) + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + yq, data=sales %>% filter(new==1))
+t2s23 <- feols(lprice ~ haslaneway:neigh_name:as.factor(year) + laneReallyOK + log(lotsize) + log(floorarea) + age | neigh_name + yq, data=sales %>% filter(new==0))
+```
+
+```{r}
+#| echo: false
+#| message: false
+
+modelsummary(list("Full Sample"=t2n11, "New House"=t2n12, "Old House"=t2n13),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+And plot it against the percentage of laneways that were spec-built
+
+```{r}
+#| echo: false
+#| message: false
+
+spec <- lw %>%
+  group_by(neigh) %>%
+  summarize(mean_spec = mean(spec),
+            mean_spec1 = mean(spec1),
+            count_spec = sum(spec),
+            count_lw = n())
+
+specs <- lw %>% 
+  group_by(neigh, west, year) %>% 
+  summarize(mean_spec = mean(spec),
+            mean_spec1 = mean(spec1),
+            count_spec = sum(spec),
+            count_lw = n())
+
+spec_builds <- builds %>% 
+  group_by(neigh, west, year_built) %>% 
+  summarize(mean_spec_sf = mean(spec),
+            mean_spec1_sf = mean(spec1),
+            count_spec_sf = sum(spec),
+            count_sf = n())
+
+specw <- lw %>% 
+  group_by(west, year) %>% 
+  summarize(mean_spec = mean(spec),
+            mean_spec1 = mean(spec1),
+            count_spec = sum(spec),
+            count_lw = n())
+
+coef_all <- coef(t2n11)
+coef_new <- coef(t2n12)
+# Filter coefficients for `haslaneway:neigh_name`
+coef_all <- coef_all[grepl("^haslaneway:neigh_name", names(coef_all))]
+coef_new <- coef_new[grepl("^haslaneway:neigh_name", names(coef_new))]
+
+coefs_all <- coef(t2n21)
+coefs_new <- coef(t2n22)
+
+coefs_all <- coefs_all[grepl("^haslaneway:neigh_name", names(coefs_all))]
+coefs_new <- coefs_new[grepl("^haslaneway:neigh_name", names(coefs_new))]
+
+coefw_all <- coef(t2n31)
+coefw_new <- coef(t2n32)
+
+coefw_all <- coefw_all[grepl("^haslaneway:west", names(coefw_all))]
+coefw_new <- coefw_new[grepl("^haslaneway:west", names(coefw_new))]
+
+# Create a dataframe with `neigh_name` and `coef`
+neigh <- data.frame(
+  neigh_name = sub("^haslaneway:neigh_name", "", names(coef_all)), # Remove prefix
+  coef_all = coef_all,
+  coef_new = coef_new,
+  row.names = NULL
+) %>% 
+  left_join(spec, by = c("neigh_name"="neigh"))
+
+neighs <- data.frame(
+  coeff_name = names(coefs_all),
+  coef = coefs_all
+) %>%
+  mutate(
+    neigh_name = sub("^haslaneway:neigh_name(.*):as\\.factor\\(year\\).*", "\\1", coeff_name),
+    year = sub("^.*:as\\.factor\\(year\\)(\\d+)", "\\1", coeff_name)
+  ) %>%
+  select(neigh_name, year, coef) %>%
+  mutate(year = as.numeric(year)) %>% 
+  left_join(specs, by = c("neigh_name"="neigh", "year"="year")) %>% 
+  mutate(share_spec_wlw = count_spec/count_spec_sf)
+
+neighs_new <- data.frame(
+  coeff_name = names(coefs_new),
+  coef = coefs_new
+) %>%
+  mutate(
+    neigh_name = sub("^haslaneway:neigh_name(.*):as\\.factor\\(year\\).*", "\\1", coeff_name),
+    year = sub("^.*:as\\.factor\\(year\\)(\\d+)", "\\1", coeff_name)
+  ) %>%
+  select(neigh_name, year, coef) %>%
+  mutate(year = as.numeric(year)) %>% 
+  left_join(specs, by = c("neigh_name"="neigh", "year"="year"))
+
+w_all <- data.frame(
+  coeff_name = names(coefw_all),
+  coef_all = coefw_all
+) %>%
+  mutate(
+    west = sub("^haslaneway:west(.*):as\\.factor\\(year\\).*", "\\1", coeff_name),
+    year = sub("^.*:as\\.factor\\(year\\)(\\d+)", "\\1", coeff_name)
+  ) %>%
+  select(west, year, coef_all) %>%
+  mutate(year = as.numeric(year),
+         west = as.logical(west)) %>% 
+  left_join(specw, by = c("west"="west", "year"="year"))
+
+w_new <- data.frame(
+  coeff_name = names(coefw_new),
+  coef_new = coefw_new
+) %>%
+  mutate(
+    west = sub("^haslaneway:west(.*):as\\.factor\\(year\\).*", "\\1", coeff_name),
+    year = sub("^.*:as\\.factor\\(year\\)(\\d+)", "\\1", coeff_name)
+  ) %>%
+  select(west, year, coef_new) %>%
+  mutate(year = as.numeric(year),
+         west = as.logical(west)) %>% 
+  left_join(specw, by = c("west"="west", "year"="year"))
+
+```
+
+Pooled years to show neighbourhoods (4 graphs). The relationship is positive and especially strong for new builds.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+ggplot(neigh, aes(x=coef_all, y=mean_spec, size=count_lw)) +
+  geom_text(aes(label=neigh_name)) +
+  geom_smooth(method = 'lm', aes(weight=count_lw), se=FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "All Homes, 2012-2024, Sale year of build")
+
+ggplot(neigh, aes(x=coef_all, y=mean_spec1, size=count_lw)) +
+  geom_text(aes(label=neigh_name)) +
+  geom_smooth(method = 'lm', aes(weight=count_lw), se=FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "All Homes, 2012-2024, Sale within 1 year of build")
+
+ggplot(neigh, aes(x=coef_new, y=mean_spec, size=count_lw)) +
+  geom_text(aes(label=neigh_name)) +
+  geom_smooth(method = 'lm', aes(weight=count_lw), se=FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2012-2024, Sale year of build")
+
+ggplot(neigh, aes(x=coef_new, y=mean_spec1, size=count_lw)) +
+  geom_text(aes(label=neigh_name)) +
+  geom_smooth(method = 'lm', aes(weight=count_lw), se=FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2012-2024, Sale within 1 year of build")
+
+```
+
+Neighbourhood-Year (4 graphs). Here, the relationship is negative and weak for new builds. I suspect there's too much noise here to get an accurate picture. Each neighbourhood has few laneways built each year
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+ggplot(neighs, aes(x=coef, y=share_spec_wlw, size=count_lw)) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'glm', method.args=list(family='binomial'), aes(weight=count_lw), se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "All Homes, 2012-2024, Sale year of build")
+
+ggplot(neighs, aes(x=coef, y=mean_spec1, size=count_lw)) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'glm', method.args=list(family='binomial'), aes(weight=count_lw), se=FALSE, show.legend = FALSE) +  
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "All Homes, 2012-2024, Sale within 1 year of build")
+
+ggplot(neighs_new, aes(x=coef, y=mean_spec, size=count_lw)) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'glm', method.args=list(family='binomial'), aes(weight=count_lw), se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2012-2024, Sale year of build")
+
+ggplot(neighs_new, aes(x=coef, y=mean_spec1, size=count_lw, color=as.factor(year))) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'glm', method.args=list(family='binomial'), aes(group=year, weight=count_lw), se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2012-2024, Sale within 1 year of build")
+
+```
+
+```{r}
+
+feols(mean_spec ~ coef | year + neigh_name, data=neighs_new)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+ggplot(neighs %>% filter(year>2014), aes(x=coef, y=mean_spec, size=count_lw)) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'lm', aes(weight=count_lw), se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "All Homes, 2015-2024, Sale year of build")
+
+ggplot(neighs %>% filter(year>2014), aes(x=coef, y=mean_spec1, size=count_lw)) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'lm', aes(weight=count_lw), se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "All Homes, 2015-2024, Sale within 1 year of build")
+
+ggplot(neighs_new %>% filter(year>2014), aes(x=coef, y=mean_spec, size=count_lw)) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'lm', aes(weight=count_lw), se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2015-2024, Sale year of build")
+
+ggplot(neighs_new %>% filter(year>2014), aes(x=coef, y=mean_spec1, size=count_lw, color=year)) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'glm', method.args=list(family='binomial'), aes(group=year, weight=count_lw), se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2015-2024, Sale within 1 year of build")
+
+```
+
+```{r}
+#| include: false
+#| echo: false
+#| message: false
+#| warning: false
+
+ggplot(w_all, aes(x=coef_all, y=mean_spec)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se=FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "All Homes, 2012-2024, Sale year of build")
+
+ggplot(w_all, aes(x=coef_all, y=mean_spec1)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se=FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "All Homes, 2012-2024, Sale within 1 year of build")
+
+ggplot(w_new, aes(x=coef_new, y=mean_spec)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se=FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2012-2024, Sale year of build")
+
+ggplot(w_new, aes(x=coef_new, y=mean_spec1)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se=FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2012-2024, Sale within 1 year of build")
+
+```
+
+### Plot against the share of specs that included a laneway
+
+```{r}
+#| echo: false
+#| message: false
+
+spec <- builds %>%
+  filter(year_built>2010,
+         spec1==1) %>%
+  group_by(neigh) %>%
+  summarize(mean_spec = mean(spec_wlw),
+            mean_spec1 = mean(spec1_wlw),
+            count_spec = sum(spec_wlw),
+            count_build = n())
+
+specs <- builds %>%
+  filter(year_built>2010,
+         spec1==1) %>%
+  group_by(neigh, west, year_built) %>% 
+  summarize(mean_spec = mean(spec_wlw),
+            mean_spec1 = mean(spec1_wlw),
+            count_spec = sum(spec_wlw),
+            count_build = n())
+
+spec_builds <- builds %>% 
+  group_by(neigh, west, year_built) %>% 
+  summarize(mean_spec_sf = mean(spec),
+            mean_spec1_sf = mean(spec1),
+            count_spec_sf = sum(spec),
+            count_sf = n())
+
+specw <- builds %>% 
+  filter(spec==1,
+         year_built>2010) %>%
+  group_by(west, year_built) %>% 
+  summarize(mean_spec = mean(spec_wlw),
+            mean_spec1 = mean(spec1_wlw),
+            count_spec = sum(spec_wlw),
+            count_lw = n())
+
+coef_all <- coef(t2n11)
+coef_new <- coef(t2n12)
+# Filter coefficients for `haslaneway:neigh_name`
+coef_all <- coef_all[grepl("^haslaneway:neigh_name", names(coef_all))]
+coef_new <- coef_new[grepl("^haslaneway:neigh_name", names(coef_new))]
+
+coefs_all <- coef(t2n21)
+coefs_new <- coef(t2n22)
+
+coefs_all <- coefs_all[grepl("^haslaneway:neigh_name", names(coefs_all))]
+coefs_new <- coefs_new[grepl("^haslaneway:neigh_name", names(coefs_new))]
+
+coefw_all <- coef(t2n31)
+coefw_new <- coef(t2n32)
+
+coefw_all <- coefw_all[grepl("^haslaneway:west", names(coefw_all))]
+coefw_new <- coefw_new[grepl("^haslaneway:west", names(coefw_new))]
+
+# Create a dataframe with `neigh_name` and `coef`
+neigh <- data.frame(
+  neigh_name = sub("^haslaneway:neigh_name", "", names(coef_all)), # Remove prefix
+  coef_all = coef_all,
+  coef_new = coef_new,
+  row.names = NULL
+) %>% 
+  left_join(spec, by = c("neigh_name"="neigh"))
+
+neighs <- data.frame(
+  coeff_name = names(coefs_all),
+  coef = coefs_all
+) %>%
+  mutate(
+    neigh_name = sub("^haslaneway:neigh_name(.*):as\\.factor\\(year\\).*", "\\1", coeff_name),
+    year = sub("^.*:as\\.factor\\(year\\)(\\d+)", "\\1", coeff_name)
+  ) %>%
+  select(neigh_name, year, coef) %>%
+  mutate(year = as.numeric(year)+1) %>% # lag 1 year 
+  left_join(specs, by = c("neigh_name"="neigh", "year"="year_built"))
+
+neighs_new <- data.frame(
+  coeff_name = names(coefs_new),
+  coef = coefs_new
+) %>%
+  mutate(
+    neigh_name = sub("^haslaneway:neigh_name(.*):as\\.factor\\(year\\).*", "\\1", coeff_name),
+    year = sub("^.*:as\\.factor\\(year\\)(\\d+)", "\\1", coeff_name)
+  ) %>%
+  select(neigh_name, year, coef) %>%
+  mutate(year = as.numeric(year)) %>% 
+  left_join(specs, by = c("neigh_name"="neigh", "year"="year_built"))
+
+w_all <- data.frame(
+  coeff_name = names(coefw_all),
+  coef_all = coefw_all
+) %>%
+  mutate(
+    west = sub("^haslaneway:west(.*):as\\.factor\\(year\\).*", "\\1", coeff_name),
+    year = sub("^.*:as\\.factor\\(year\\)(\\d+)", "\\1", coeff_name)
+  ) %>%
+  select(west, year, coef_all) %>%
+  mutate(year = as.numeric(year),
+         west = as.logical(west)) %>% 
+  left_join(specw, by = c("west"="west", "year"="year_built"))
+
+w_new <- data.frame(
+  coeff_name = names(coefw_new),
+  coef_new = coefw_new
+) %>%
+  mutate(
+    west = sub("^haslaneway:west(.*):as\\.factor\\(year\\).*", "\\1", coeff_name),
+    year = sub("^.*:as\\.factor\\(year\\)(\\d+)", "\\1", coeff_name)
+  ) %>%
+  select(west, year, coef_new) %>%
+  mutate(year = as.numeric(year),
+         west = as.logical(west)) %>% 
+  left_join(specw, by = c("west"="west", "year"="year_built"))
+
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+ggplot(neighs_new, aes(x=coef, y=mean_spec1, size=count_build)) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'glm', 
+              method.args=list(family='binomial'), 
+              aes(weight=count_build), 
+              se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2012-2024, Sale within 1 year of build")
+
+ggplot(neighs_new, aes(x=coef, y=mean_spec1, size=count_build, color=as.factor(year))) +
+  geom_point(shape=1) +
+  geom_smooth(method = 'glm', 
+              method.args=list(family='binomial'), 
+              aes(weight=count_build), 
+              se=FALSE, show.legend = FALSE) +
+  theme_bw() +
+  labs(y="Spec Share", x="Laneway Premium") +
+  ggtitle("Spec Share and Laneway Premium", subtitle = "New Homes, 2012-2024, Sale within 1 year of build")
+
+```

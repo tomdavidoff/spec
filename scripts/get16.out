@@ -1,5 +1,5 @@
 
-R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
@@ -36,7 +36,7 @@ Type 'q()' to quit R.
 > 
 > # open connection first
 > con <- dbConnect(RSQLite::SQLite(), "~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3")
-> dI <- dbGetQuery(con, "SELECT  roll_number, zoning, land_width, land_depth, MB_year_built FROM residentialInventory WHERE jurisdiction=='200' AND (zoning=='RS1' OR zoning=='RS2' OR zoning=='RS3' OR zoning=='RS3A' OR zoning=='RS4' OR zoning=='RS5' OR zoning=='RS6' OR zoning=='RS7' )")
+> dI <- dbGetQuery(con, "SELECT  roll_number, zoning, land_width, land_depth, MB_year_built, MB_effective_year FROM residentialInventory WHERE jurisdiction=='200' AND (zoning=='RS1' OR zoning=='RS2' OR zoning=='RS3' OR zoning=='RS3A' OR zoning=='RS4' OR zoning=='RS5' OR zoning=='RS6' OR zoning=='RS7' )")
 > dI <- data.table(dI)
 > print(summary(dI[,as.numeric(land_depth)]))
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
@@ -131,15 +131,15 @@ Duplex, Non-Strata Side by Side or Front / Back
 > print(names(dI))
  [1] "addressForLaneway"     "roll_number"           "zoning"               
  [4] "land_width"            "land_depth"            "MB_year_built"        
- [7] "thirty"                "fifty"                 "folioID"              
-[10] "streetNumber"          "streetDirectionPrefix" "streetName"           
-[13] "streetType"            "streetDirectionSuffix" "postalCode"           
-[16] "city"                  "actualUseDescription"  "improvementValue"     
-[19] "streetTypeForLaneway"  "laneok"                "madeupLaneok"         
-[22] "roundNumber"           "meanLaneok"           
+ [7] "MB_effective_year"     "thirty"                "fifty"                
+[10] "folioID"               "streetNumber"          "streetDirectionPrefix"
+[13] "streetName"            "streetType"            "streetDirectionSuffix"
+[16] "postalCode"            "city"                  "actualUseDescription" 
+[19] "improvementValue"      "streetTypeForLaneway"  "laneok"               
+[22] "madeupLaneok"          "roundNumber"           "meanLaneok"           
 > 
-> fwrite(dI[,.(folioID,roll_number,MB_year_built,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")
+> fwrite(dI[,.(folioID,roll_number,MB_year_built,MB_effective_year,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")
 > 
 > proc.time()
    user  system elapsed 
- 23.772   0.657  24.820 
+ 25.921   0.725  26.876 

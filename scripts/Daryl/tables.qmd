@@ -1,0 +1,639 @@
+---
+title: "Laneway"
+format: html
+editor: visual
+echo: false
+warning: false
+---
+
+```{r}
+#| include: false
+
+library(sf)
+library(dplyr)
+library(haven)
+library(gt)
+library(broom)
+library(vtable)
+library(fixest)
+library(modelsummary)
+
+roll <- read_dta("/href/research3/laneway/data/replicate_laneway.dta")
+orig <- read_dta("/href/research3/Filtering/data/andrey/workingAllR.dta")
+```
+
+## Table 1: Summary Statistics
+
+Original paper:
+
+![](images/table1_dps.png){#fig-table1}
+
+Replication with original data. To calculate number of units within 100m, I used a k-nearest neighbor search algorithm with euclidean distance in meters.
+
+The table here matches the original quite well, except there appear to be differences in how 'West' was defined.
+
+```{r}
+
+sumtable(orig %>% filter(year>=2012 & year<=2017),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+
+sumtable(orig %>% filter(year>=2012 & year<=2017, new==1),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+
+sumtable(orig %>% filter(year>=2012 & year<=2017, new==0),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+```
+
+Replication, Original data, adjusting for phantom laneways. Now there are half as many laneways.
+
+```{r}
+
+sumtable(orig %>% filter(year>=2012 & year<=2017) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+
+sumtable(orig %>% filter(year>=2012 & year<=2017, new==1) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+
+sumtable(orig %>% filter(year>=2012 & year<=2017, new==0) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+```
+
+Replication, Original data, adjusting for phantom laneways and rejected sales.
+
+This causes a large increase in average price, small increase in floor area, and decrease in age.
+
+```{r}
+
+sumtable(orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject') %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+
+sumtable(orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==1) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+
+sumtable(orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==0) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)),
+         vars = c('age', 'floorarea', 'haslaneway', 'lanes100', 'lotsize', 'price', 'resid100', 'single100', 'west'),
+         summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+         factor.numeric = TRUE,
+         digits = 3,
+         out = "kable")
+```
+
+Replication with sales data from BCA 2016-2024. The laneway numbers are more similar to the original table without adjusting for phantom laneways, which is a little confusing. My old homes have even fewer laneways though. My prices and lot sizes are higher as well.
+
+```{r}
+
+sumtable(roll %>% filter(year>=2012 & year<=2017), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+
+sumtable(roll %>% filter(year>=2012 & year<=2017, new==1), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+
+sumtable(roll %>% filter(year>=2012 & year<=2017, new==0), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+```
+
+Replication, Daryl's data, adjusted for rejected sales
+
+```{r}
+
+sumtable(roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject'), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+
+sumtable(roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==1), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+
+sumtable(roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==0), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+```
+
+Extension 2018-2023:
+
+```{r}
+
+sumtable(roll %>% filter(year>=2018), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+
+sumtable(roll %>% filter(year>=2018, new==1), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+
+sumtable(roll %>% filter(year>=2018, new==0), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+```
+
+Extension through 2023, adjusted for rejected sales
+
+```{r}
+
+sumtable(roll %>% filter(year>=2018, sale_status!='Reject'), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+
+sumtable(roll %>% filter(year>=2018, sale_status!='Reject', new==1), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+
+sumtable(roll %>% filter(year>=2018, sale_status!='Reject', new==0), 
+   vars = c('age', 'floor_area', 'haslaneway', 'lw100', 'lot_size', 'price', 'res100', 'sf100', 'west'),
+   summ = c('mean(x)', 'sd(x)', 'notNA(x)'),
+   factor.numeric = TRUE,
+   digits = 3,
+   out = 'kable')
+```
+
+## Table 2: Effect of own laneway home
+
+Identifying laneway-eligible properties
+
+```{r}
+#| echo: true
+
+# Download to a temporary file
+tmp_geojson1 <- tempfile(fileext = ".geojson")
+download.file(
+  "https://opendata.vancouver.ca/api/explore/v2.1/catalog/datasets/property-parcel-polygons/exports/geojson",
+  tmp_geojson1
+)
+tmp_geojson2 <- tempfile(fileext = ".geojson")
+download.file(
+  "https://opendata.vancouver.ca/api/explore/v2.1/catalog/datasets/lanes/exports/geojson",
+  tmp_geojson2
+)
+
+parcel <- read_sf(tmp_geojson1) %>%
+  st_transform(crs=32610)
+lanes <- read_sf(tmp_geojson2) %>%
+  st_transform(crs=32610)
+
+lanes_buff <- st_buffer(lanes, 4)
+
+parcel$laneok1 <- ifelse(st_intersects(parcel, lanes_buff) %>% lengths>0, 1, 0)
+parcel <- parcel %>%
+   select(laneok1)
+roll <- st_as_sf(roll, coords = c('lon', 'lat'), crs=4326) %>%
+   st_transform(crs=32610) %>%
+   st_join(parcel, join = st_intersects) %>%
+   st_drop_geometry()
+
+roll$laneok2 <- roll$landdepth>=110 & roll$landwidth>=25
+roll$laneok3 <- roll$landdepth>=122 | roll$landwidth>=33
+roll$vanspec <- roll$year_built>=1963 & roll$year_built<=1986 & roll$storeys==1 & roll$basement_full==1 & roll$floorarea>1500 & roll$lotsize<9000 & roll$floorarea/roll$lotsize>0.5
+roll$laneReallyOK <- roll$laneok1==1 & roll$laneok2==1 & roll$laneok3==1 & roll$vanspec==0
+
+```
+
+Original paper:
+
+![](images/table2_dps.png){#fig-table2 width="636"}
+
+Replication with original data. I couldn't discover what variables were used for structure characteristics, so I use lot size, floor area, and age. Regressions include fixed effects for neighborhood-year and year-month.
+
+```{r}
+#| include: false
+
+t2o11 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017))
+t2o12 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, new==1))
+t2o13 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, new==0))
+t2o14 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, new==1, west==0))
+t2o15 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, new==1, west==1))
+
+t2o21 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t2o22 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, new==1) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t2o23 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, new==0) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t2o24 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, new==1, west==0) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t2o25 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, new==1, west==1) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+
+t2o31 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject') %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t2o32 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==1) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t2o33 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==0) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t2o34 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==1, west==0) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t2o35 <- feols(lnP ~ haslaneway + laneReallyOK + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==1, west==1) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+```
+
+```{r}
+
+modelsummary(list("Full Sample"=t2o11, "New House"=t2o12, "Old House"=t2o13, "New: East"=t2o14, "New:West"=t2o15),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, original data, adjusted for phantom laneways
+
+```{r}
+
+modelsummary(list("Full Sample"=t2o21, "New House"=t2o22, "Old House"=t2o23, "New: East"=t2o24, "New:West"=t2o25),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, original data, adjusted for phantom laneways and rejected sales
+
+```{r}
+
+modelsummary(list("Full Sample"=t2o31, "New House"=t2o32, "Old House"=t2o33, "New: East"=t2o34, "New:West"=t2o35),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication using Daryl's data
+
+```{r}
+#| include: false
+
+t2n11 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017))
+t2n12 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, new==1))
+t2n13 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, new==0))
+t2n14 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, new==1, west==0))
+t2n15 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, new==1, west==1))
+
+t2n21 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+t2n22 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==1))
+t2n23 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==0))
+t2n24 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==1, west==0))
+t2n25 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject', new==1, west==1))
+```
+
+```{r}
+
+modelsummary(list("Full Sample"=t2n11, "New House"=t2n12, "Old House"=t2n13, "New: East"=t2n14, "New:West"=t2n15),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, Daryl's data, adjusted for rejected sales
+
+```{r}
+
+modelsummary(list("Full Sample"=t2n21, "New House"=t2n22, "Old House"=t2n23, "New: East"=t2n24, "New:West"=t2n25),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Extension through 2023
+
+```{r}
+#| include: false
+
+t2n31 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018))
+t2n32 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, new==1))
+t2n33 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, new==0))
+t2n34 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, new==1, west==0))
+t2n35 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, new==1, west==1))
+
+t2n41 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject'))
+t2n42 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject', new==1))
+t2n43 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject', new==0))
+t2n44 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject', new==1, west==0))
+t2n45 <- feols(lprice ~ haslaneway + laneReallyOK + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject', new==1, west==1))
+```
+
+```{r}
+
+modelsummary(list("Full Sample"=t2n31, "New House"=t2n32, "Old House"=t2n33, "New: East"=t2n34, "New:West"=t2n35),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Extension through 2023, adjusted for rejected sales
+
+```{r}
+
+modelsummary(list("Full Sample"=t2n41, "New House"=t2n42, "Old House"=t2n43, "New: East"=t2n44, "New:West"=t2n45),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+## Table 3: Effect of nearby laneway homes
+
+Original paper:
+
+![](images/table3_dps.png){#fig-table3 width="691"}
+
+Replication with original data:
+
+```{r}
+#| include: false
+
+t3o11 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017))
+t3o12 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, highPredictedPrice==1))
+t3o13 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, veryHighPredictedPrice==1))
+
+t3o21 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t3o22 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, highPredictedPrice==1) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t3o23 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, veryHighPredictedPrice==1) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+
+t3o31 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject') %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t3o32 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, highPredictedPrice==1, sale_status!='Reject') %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t3o33 <- feols(lnP ~ lanes100 + newsingle100 + haslaneway + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, veryHighPredictedPrice==1, sale_status!='Reject') %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+```
+
+```{r}
+
+modelsummary(list("Full Sample"=t3o11, "High pp"=t3o12, "Very high pp"=t3o13),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, original data, adjusted for phantom laneways
+
+```{r}
+
+modelsummary(list("Full Sample"=t3o21, "High pp"=t3o22, "Very high pp"=t3o23),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication original data, adjusted for rejected sales and phantom laneways
+
+```{r}
+
+modelsummary(list("Full Sample"=t3o31, "High pp"=t3o32, "Very high pp"=t3o33),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication with 2016-2024 roll data
+
+```{r}
+#| include: false
+
+t3n11 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017))
+t3n12 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, highPredictedPrice==1))
+t3n13 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, veryHighPredictedPrice==1))
+
+t3n21 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+t3n22 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, highPredictedPrice==1, sale_status!='Reject'))
+t3n23 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, veryHighPredictedPrice==1, sale_status!='Reject'))
+```
+
+```{r}
+
+modelsummary(list("Full Sample"=t3n11, "High pp"=t3n12, "Very high pp"=t3n13),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, Daryl's data, adjusted for rejected sales
+
+```{r}
+
+modelsummary(list("Full Sample"=t3n21, "High pp"=t3n22, "Very high pp"=t3n23),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Extension through 2023
+
+```{r}
+#| include: false
+
+t3n31 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018))
+t3n32 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, highPredictedPrice==1))
+t3n33 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, veryHighPredictedPrice==1))
+
+t3n41 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject'))
+t3n42 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, highPredictedPrice==1, sale_status!='Reject'))
+t3n43 <- feols(lprice ~ lw100 + sfnew100 + haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, veryHighPredictedPrice==1, sale_status!='Reject'))
+```
+
+```{r}
+
+modelsummary(list("Full Sample"=t3n31, "High pp"=t3n32, "Very high pp"=t3n33),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Extension through 2023, adjusted for rejected sales
+
+```{r}
+
+modelsummary(list("Full Sample"=t3n41, "High pp"=t3n42, "Very high pp"=t3n43),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+## Table 4: Effect of nearby laneway homes at different distances
+
+![](images/table4_dps.png){#fig-table4}
+
+Replication with original data
+
+```{r}
+#| include: false
+
+orig <- orig %>% 
+  mutate(lw50b100 = lanes100 - lanes50,
+         lw100b250 = lanes250 - lanes100)
+
+roll <- roll %>% 
+  mutate(lw50b100 = lw100 - lw50, # number of laneways between 50 and 100m
+         lw100b250 = lw250 - lw100)
+
+t4o11 <- feols(lnP ~ lanes50 + lw50b100 + lw100b250 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017))
+t4o12 <- feols(lnP ~ lanes50 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017))
+t4o13 <- feols(lnP ~ lanes100 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017))
+t4o14 <- feols(lnP ~ lanes250 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017))
+
+t4o21 <- feols(lnP ~ lanes50 + lw50b100 + lw100b250 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t4o22 <- feols(lnP ~ lanes50 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t4o23 <- feols(lnP ~ lanes100 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+t4o24 <- feols(lnP ~ lanes250 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017) %>% mutate(haslaneway = ifelse(year_built_lane<year | is.na(year_built_lane), 0, haslaneway)))
+
+t4o31 <- feols(lnP ~ lanes50 + lw50b100 + lw100b250 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+t4o32 <- feols(lnP ~ lanes50 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+t4o33 <- feols(lnP ~ lanes100 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+t4o34 <- feols(lnP ~ lanes250 + lotsize + floorarea + age | neigh_id^year + yearMonth, data = orig %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+
+t4n11 <- feols(lprice ~ lw50 + lw50b100 + lw100b250 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017))
+t4n12 <- feols(lprice ~ lw50 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017))
+t4n13 <- feols(lprice ~ lw100 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017))
+t4n14 <- feols(lprice ~ lw250 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017))
+
+t4n21 <- feols(lprice ~ lw50 + lw50b100 + lw100b250 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+t4n22 <- feols(lprice ~ lw50 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+t4n23 <- feols(lprice ~ lw100 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+t4n24 <- feols(lprice ~ lw250 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, sale_status!='Reject'))
+
+t4n31 <- feols(lprice ~ lw50 + lw50b100 + lw100b250 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018))
+t4n32 <- feols(lprice ~ lw50 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018))
+t4n33 <- feols(lprice ~ lw100 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018))
+t4n34 <- feols(lprice ~ lw250 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018))
+
+t4n41 <- feols(lprice ~ lw50 + lw50b100 + lw100b250 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject'))
+t4n42 <- feols(lprice ~ lw50 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject'))
+t4n43 <- feols(lprice ~ lw100 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject'))
+t4n44 <- feols(lprice ~ lw250 + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, sale_status!='Reject'))
+```
+
+```{r}
+
+modelsummary(list("Full Sample"=t4o11, "Full Sample"=t4o12, "Full Sample"=t4o13, "Full Sample"=t4o14),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, original data, adjusted for phantom laneways
+
+```{r}
+
+modelsummary(list("Full Sample"=t4o21, "Full Sample"=t4o22, "Full Sample"=t4o23, "Full Sample"=t4o24),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, original data, adjusted for phantom laneways and rejected sales
+
+```{r}
+
+modelsummary(list("Full Sample"=t4o31, "Full Sample"=t4o32, "Full Sample"=t4o33, "Full Sample"=t4o34),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, Daryl's data
+
+```{r}
+
+modelsummary(list("Full Sample"=t4n11, "Full Sample"=t4n12, "Full Sample"=t4n13, "Full Sample"=t4n14),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Replication, Daryl's data, adjusted for rejected sales
+
+```{r}
+
+modelsummary(list("Full Sample"=t4n21, "Full Sample"=t4n22, "Full Sample"=t4n23, "Full Sample"=t4n24),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Extension through 2023
+
+```{r}
+
+modelsummary(list("Full Sample"=t4n31, "Full Sample"=t4n32, "Full Sample"=t4n33, "Full Sample"=t4n34),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Extension through 2023, adjusted for rejected sales
+
+```{r}
+
+modelsummary(list("Full Sample"=t4n41, "Full Sample"=t4n42, "Full Sample"=t4n43, "Full Sample"=t4n44),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+## Table 5: Effect of immediate neighbour's laneway home (new neighbours only)
+
+![](images/table5_dps.png){width="636"}
+
+Replication, Daryl's data. Not sure why I have so many more observations.
+
+```{r}
+#| echo: true
+
+roll <- roll %>%
+  mutate(neigh1_isnew = year-neigh1_yb<5 & year-neigh2_yb>=0 & neigh1_issingle,
+         neigh2_isnew = year-neigh2_yb<5 & year-neigh2_yb>=0 & neigh2_issingle,
+         neigh_isnew = neigh1_isnew==1 | neigh2_isnew==1)
+
+t5n11 <- feols(lprice ~ neigh_haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, neigh_isnew==1))
+t5n12 <- feols(lprice ~ neigh_haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, neigh_isnew==1, highPredictedPrice==1))
+t5n13 <- feols(lprice ~ neigh_haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2012 & year<=2017, neigh_isnew==1, veryHighPredictedPrice==1))
+
+t5n21 <- feols(lprice ~ neigh_haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, neigh_isnew==1))
+t5n22 <- feols(lprice ~ neigh_haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, neigh_isnew==1, highPredictedPrice==1))
+t5n23 <- feols(lprice ~ neigh_haslaneway + lot_size + floorarea + age | neigh_id^year + yearMonth, data = roll %>% filter(year>=2018, neigh_isnew==1, veryHighPredictedPrice==1))
+```
+
+```{r}
+
+modelsummary(list("Full Sample"=t5n11, "High pp"=t5n12, "Very high pp"=t5n13),
+             stars = TRUE,
+             output = "kableExtra")
+```
+
+Extension through 2023:
+
+```{r}
+
+modelsummary(list("Full Sample"=t5n21, "High pp"=t5n22, "Very high pp"=t5n23),
+             stars = TRUE,
+             output = "kableExtra")
+```

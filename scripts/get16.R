@@ -17,7 +17,7 @@ library(RSQLite)
 
 # open connection first
 con <- dbConnect(RSQLite::SQLite(), "~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3")
-dI <- dbGetQuery(con, "SELECT  roll_number, zoning, land_width, land_depth, MB_year_built FROM residentialInventory WHERE jurisdiction=='200' AND (zoning=='RS1' OR zoning=='RS2' OR zoning=='RS3' OR zoning=='RS3A' OR zoning=='RS4' OR zoning=='RS5' OR zoning=='RS6' OR zoning=='RS7' )")
+dI <- dbGetQuery(con, "SELECT  roll_number, zoning, land_width, land_depth, MB_year_built, MB_effective_year FROM residentialInventory WHERE jurisdiction=='200' AND (zoning=='RS1' OR zoning=='RS2' OR zoning=='RS3' OR zoning=='RS3A' OR zoning=='RS4' OR zoning=='RS5' OR zoning=='RS6' OR zoning=='RS7' )")
 dI <- data.table(dI)
 print(summary(dI[,as.numeric(land_depth)]))
 dI[,thirty:=land_width<=33+WIDTH_TOLERANCE & land_width>=33-WIDTH_TOLERANCE & land_depth<=122+2*DEPTH_TOLERANCE & land_depth>=122-2*DEPTH_TOLERANCE]
@@ -68,4 +68,4 @@ print(table(dI[,actualUseDescription]))
 dI <- dI[actualUseDescription== "Single Family Dwelling" | actualUseDescription=="Residential Dwelling with Suite"]
 print(names(dI))
 
-fwrite(dI[,.(folioID,roll_number,MB_year_built,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")
+fwrite(dI[,.(folioID,roll_number,MB_year_built,MB_effective_year,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")
