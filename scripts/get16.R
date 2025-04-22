@@ -33,7 +33,7 @@ da <- merge(da,df,by="folioID")
 
 dfd <- dbGetQuery(con,"SELECT folioID, actualUseDescription from folioDescription")
 da <- merge(da,dfd,by="folioID")
-dv <- dbGetQuery(con, "SELECT folioID, improvementValue FROM valuation")
+dv <- dbGetQuery(con, "SELECT folioID, landValue, improvementValue FROM valuation")
 da <- merge(da,dv,by="folioID")
 
 
@@ -68,4 +68,4 @@ print(table(dI[,actualUseDescription]))
 dI <- dI[actualUseDescription== "Single Family Dwelling" | actualUseDescription=="Residential Dwelling with Suite"]
 print(names(dI))
 
-fwrite(dI[,.(folioID,roll_number,MB_year_built,MB_effective_year,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")
+fwrite(dI[,.(folioID,roll_number,MB_year_built,MB_effective_year,landValue,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")

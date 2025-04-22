@@ -156,7 +156,10 @@ City of Vancouver
                     Max.   :1  
 > 
 > fwrite(dMaxSale,"data/derived/maxSale.csv")
+> 
+> fwrite(dSales[,.(ROLL_NUMBER,FOLIO_ID,CONVEYANCE_DATE,CONVEYANCE_PRICE,CONVEYANCE_TYPE_DESCRIPTION)],"data/derived/sales.csv")
+> 
 > q("no")
 > proc.time()
    user  system elapsed 
-  4.498   0.171   4.708 
+  4.788   0.383  14.984 

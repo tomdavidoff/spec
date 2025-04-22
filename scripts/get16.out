@@ -1,5 +1,5 @@
 
-R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
 Copyright (C) 2024 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
@@ -58,7 +58,7 @@ thirty  FALSE  TRUE
 > 
 > dfd <- dbGetQuery(con,"SELECT folioID, actualUseDescription from folioDescription")
 > da <- merge(da,dfd,by="folioID")
-> dv <- dbGetQuery(con, "SELECT folioID, improvementValue FROM valuation")
+> dv <- dbGetQuery(con, "SELECT folioID, landValue, improvementValue FROM valuation")
 > da <- merge(da,dv,by="folioID")
 > 
 > 
@@ -135,11 +135,12 @@ Duplex, Non-Strata Side by Side or Front / Back
 [10] "folioID"               "streetNumber"          "streetDirectionPrefix"
 [13] "streetName"            "streetType"            "streetDirectionSuffix"
 [16] "postalCode"            "city"                  "actualUseDescription" 
-[19] "improvementValue"      "streetTypeForLaneway"  "laneok"               
-[22] "madeupLaneok"          "roundNumber"           "meanLaneok"           
+[19] "landValue"             "improvementValue"      "streetTypeForLaneway" 
+[22] "laneok"                "madeupLaneok"          "roundNumber"          
+[25] "meanLaneok"           
 > 
-> fwrite(dI[,.(folioID,roll_number,MB_year_built,MB_effective_year,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")
+> fwrite(dI[,.(folioID,roll_number,MB_year_built,MB_effective_year,landValue,improvementValue,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city,thirty,fifty,laneok)],"data/derived/baseline16.csv")
 > 
 > proc.time()
    user  system elapsed 
- 25.921   0.725  26.876 
+ 24.995   0.711  26.085 

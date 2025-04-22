@@ -24,6 +24,9 @@ print(summary(dMaxSale))
 print(summary(dMaxSale[,.N,by=ROLL_NUMBER]))
 
 fwrite(dMaxSale,"data/derived/maxSale.csv")
+
+fwrite(dSales[,.(ROLL_NUMBER,FOLIO_ID,CONVEYANCE_DATE,CONVEYANCE_PRICE,CONVEYANCE_TYPE_DESCRIPTION)],"data/derived/sales.csv")
+
 q("no")
 
 dDesc <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_descriptions_20240331_REVD24.csv",select=c("ROLL_NUMBER","FOLIO_ID","LAND_DEPTH","LAND_WIDTH","ACTUAL_USE_DESCRIPTION","MANUAL_CLASS_DESCRIPTION"))
