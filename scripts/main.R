@@ -61,7 +61,7 @@ print(table(d24[,type]))
 print(summary(d24[,MB_Year_Built]))
 d24[,spec:=0]
 d24[,sale2024:=0]
-FIRST_BUILT <- 2017 # results weirdly stronger with 2016 than prior years -- dearth of laneway early messing with fixed effect?
+FIRST_BUILT <- 2010 # Note can do early for the non-duplex stuff, and no duplex really pre-18
 for (y in seq(FIRST_BUILT,2023)) {
     #d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1 | get(paste0("sale",y+2))==1  ),spec:=1]
     d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1  ),spec:=1]
@@ -82,17 +82,22 @@ print(table(d24[thirty==0 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,
 # Dummy for spec vs custom on property type dummies and share 
 shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric(),priceLag=numeric())
 dsales <- fread("data/derived/sales.csv")
-dsales <- merge(dsales,d24[,.(ROLL_NUMBER24,MB_Year_Built,type,NEIGHBOURHOOD,thirty)],by.x="ROLL_NUMBER",by.y="ROLL_NUMBER24")
-dsales <- dsales[CONVEYANCE_DATE==MB_Year_Built | (CONVEYANCE_DATE==MB_Year_Built+1) ]
-KEEPLAG <- 2
+dsales <- merge(dsales,d24[,.(ROLL_NUMBER24,MB_Year_Built,type,NEIGHBOURHOOD,thirty,spec)],by.x="ROLL_NUMBER",by.y="ROLL_NUMBER24")
+sales <- dsales[CONVEYANCE_DATE==MB_Year_Built | (CONVEYANCE_DATE==MB_Year_Built+1) ]
+for  (n in unique(dsales[,NEIGHBOURHOOD])) {
+	print(n)
+	print(dsales[NEIGHBOURHOOD==n & type=="duplex" & CONVEYANCE_DATE>2019 & thirty==1,CONVEYANCE_PRICE])
+	print(quantile(dsales[NEIGHBOURHOOD==n & type=="duplex" & CONVEYANCE_DATE>2019 & thirty==1,CONVEYANCE_PRICE],na.rm=TRUE))
+}
+KEEPLAG <- 1
 for (y in seq(FIRST_BUILT,2023)) {
 	for (n in unique(d24$NEIGHBOURHOOD)) {
 		#for (s in c(0,1)) {
 		for (s in c(1)) {
 			dsub <- d24[NEIGHBOURHOOD==n & MB_Year_Built==y & thirty==s  ]
 			for (t in c("single","duplex","laneway","basement")) {
-				dss <- dsales[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction" & NEIGHBOURHOOD==n & CONVEYANCE_DATE<y & CONVEYANCE_DATE>=(y-KEEPLAG) | CONVEYANCE_DATE==(y-3)  & thirty==s & type==t]
-				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],priceLag=dss[,mean(log(CONVEYANCE_PRICE),na.rm=TRUE)]))
+				dss <- dsales[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction" & NEIGHBOURHOOD==n & CONVEYANCE_DATE<y & CONVEYANCE_DATE>=(y-KEEPLAG) & thirty==s & type==t]
+				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],priceLag=dss[,log(median(CONVEYANCE_PRICE,na.rm=TRUE))]))
 			}
 		    }
         }
@@ -109,15 +114,13 @@ print(summary(feols(improvementValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thir
 print(summary(feols(log(improvementValue)~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
 print(summary(feols(landValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
 print(summary(feols(log(landValue)~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
-dnew[,laneShare:=mean(type=="laneway"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
-dnew[,singleShare:=mean(type=="single"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
-dnew[,duplexShare:=mean(type=="duplex"),by=.(NEIGHBOURHOOD,MB_Year_Built,thirty)]
-dnew[,ownShare:=ifelse(type=="laneway",laneShare,ifelse(type=="single",singleShare,duplexShare))]
 
+# neighbourhood and type variation in spec?
+print(dnew[,mean(spec),by=type])
+print(dnew[,.(mean(spec),mean(type=="duplex")),by=.(NEIGHBOURHOOD)])
+print(dnew[MB_Year_Built<2019,.(mean(spec),mean(type=="duplex")),by=.(NEIGHBOURHOOD)])
 
 # note individual reg actually lower t-stat than group level
-print(summary(feols(spec ~ ownShare + log(improvementValue),data=dnew)))
-print(summary(feols(spec ~ ownShare + log(improvementValue)| MB_Year_Built^NEIGHBOURHOOD +type^MB_Year_Built,data=dnew)))
 print("fraction spec among new by rounded 2016 improvement value")
 STEP <- 10000
 ggplot(dnew[,.(n=.N,spec=mean(spec)),by=.(improvement=round(improvementValue/STEP)*STEP)],aes(x=improvement,y=spec,size=n)) + geom_point()
@@ -132,17 +135,16 @@ print(dnew[order(MB_year_built),.(.N,mean(spec)),by=.(MB_year_built)])
 print(dnew[order(MB_effective_year),.(.N,mean(spec)),by=.(MB_effective_year)])
 print(dnew[improvementValue>400000])
 
-print(summary(feols(typeSpec~shareType |year ^  type+nbhd,data=shares)))
-print(summary(feols(typeSpec~shareType |nbhd^type+year,data=shares,cluster="nbhd")))
-print(summary(feols(typeSpec~shareType |year^nbhd + type^year,data=shares,cluster="nbhd")))
+print(summary(feols(typeSpec~shareType |year^nbhd + type^year ,data=shares,cluster="nbhd")))
 shares[,nbhdType:=paste0(nbhd,"_",type)]
-print(summary(feols(typeSpec~shareType |year^type + nbhd^year ,data=shares,cluster="nbhdType")))
-print(summary(feols(typeSpec~shareType|year^type + nbhd^year + nbhd^type ,data=shares,cluster="nbhd")))
-print(summary(feols(specShare~ priceLag |year^type + nbhd^year ,data=shares,cluster="nbhd")))
+print(summary(feols(typeSpec~shareType |year^type + nbhd^year + nbhdType,data=shares,cluster="nbhdType")))
+print(summary(feols(typeSpec~shareType |year^type + nbhd^year + nbhdType,data=shares[year<2020 & type!="duplex"],cluster="nbhdType")))
+print(summary(feols(specShare~ priceLag |year^type + nbhd^year + nbhd^type,data=shares[type!="duplex"],cluster="nbhd")))
 print(summary(feols(specShare~ priceLag |year^type + nbhd^year ,data=shares[type!="duplex"],cluster="nbhd")))
+print(summary(feols(specShare~ priceLag |year^type+ nbhd^year + nbhd^type,data=shares[year<2020 & type!="duplex"],cluster="nbhd")))
 # Funny sales result
 print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,year)])
-print(shares[year==2019,mean(priceLag,na.rm=TRUE),by=.(type,nbhd)])
+print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,nbhd)])
 # is it desirable to have neighbourhood-type dummies?
 
 shares[,rr:=runif(nrow(shares))]

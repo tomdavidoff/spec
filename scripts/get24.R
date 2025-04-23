@@ -5,6 +5,7 @@
 # March 17, 2025
 
 # 2024/5 disappeared lots -- what is the current use?
+library(data.table)
 d24 <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_descriptions_20240331_REVD24.csv",select=c("FOLIO_ID","ROLL_NUMBER","ACTUAL_USE_DESCRIPTION","JURISDICTION_CODE","NEIGHBOURHOOD"),colClasses=c(ROLL_NUMBER="character"))
 d24 <- d24[JURISDICTION_CODE==200]
 d24[,nchar:=nchar(as.character(ROLL_NUMBER))]
@@ -19,8 +20,8 @@ d24 <- merge(d24,dI24,by.x="ROLL_NUMBER",by.y="Roll_Number")
 d24[,ROLL_NUMBER24:=ROLL_NUMBER]
 d24[,ROLL_NUMBER:=NULL]
 
-da <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_addresses_20240331_REVD24.csv",select=c("FOLIO_ID","STREET_NUMBER","STREET_DIRECTION_PREFIX","STREET_NAME","STREET_TYPE","STREET_DIRECTION_SUFFIX","POSTAL_CODE"),colClasses=c(FOLIO_ID="character"))
-da[,fullStreet24:=paste(STREET_NUMBER,STREET_DIRECTION_PREFIX,STREET_NAME,STREET_TYPE,STREET_DIRECTION_SUFFIX)]
+da <- fread("~/docs/data/bca/data_advice_REVD24_20240331/bca_folio_addresses_20240331_REVD24.csv",select=c("FOLIO_ID","UNIT_NUMBER","STREET_NUMBER","STREET_DIRECTION_PREFIX","STREET_NAME","STREET_TYPE","STREET_DIRECTION_SUFFIX","POSTAL_CODE"),colClasses=c(FOLIO_ID="character"))
+da[,fullStreet24:=paste(STREET_NUMBER,STREET_DIRECTION_PREFIX,STREET_NAME,STREET_TYPE,STREET_DIRECTION_SUFFIX,UNIT_NUMBER)]
 da[,streetNoNumber24:=paste(STREET_DIRECTION_PREFIX,STREET_NAME,STREET_TYPE,STREET_DIRECTION_SUFFIX)]
 da[,streetNumber24:=as.numeric(STREET_NUMBER)]
 

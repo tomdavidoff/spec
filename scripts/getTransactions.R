@@ -25,7 +25,12 @@ print(summary(dMaxSale[,.N,by=ROLL_NUMBER]))
 
 fwrite(dMaxSale,"data/derived/maxSale.csv")
 
-fwrite(dSales[,.(ROLL_NUMBER,FOLIO_ID,CONVEYANCE_DATE,CONVEYANCE_PRICE,CONVEYANCE_TYPE_DESCRIPTION)],"data/derived/sales.csv")
+# get date of most recent, second most recent, and third most recent sale
+dSales[,mostRecentSale:=max(CONVEYANCE_DATE),by="ROLL_NUMBER"]
+dSales[,secondMostRecentSale:=max(CONVEYANCE_DATE[CONVEYANCE_DATE<mostRecentSale]),by="ROLL_NUMBER"]
+dSales[,thirdMostRecentSale:=max(CONVEYANCE_DATE[CONVEYANCE_DATE<secondMostRecentSale]),by="ROLL_NUMBER"]
+
+fwrite(dSales[,.(ROLL_NUMBER,FOLIO_ID,CONVEYANCE_DATE,CONVEYANCE_PRICE,CONVEYANCE_TYPE_DESCRIPTION,mostRecentSale,secondMostRecentSale,thirdMostRecentSale)],"data/derived/sales.csv")
 
 q("no")
 

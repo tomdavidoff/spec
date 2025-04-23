@@ -1,5 +1,5 @@
 
-R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
@@ -157,9 +157,16 @@ City of Vancouver
 > 
 > fwrite(dMaxSale,"data/derived/maxSale.csv")
 > 
-> fwrite(dSales[,.(ROLL_NUMBER,FOLIO_ID,CONVEYANCE_DATE,CONVEYANCE_PRICE,CONVEYANCE_TYPE_DESCRIPTION)],"data/derived/sales.csv")
+> # get date of most recent, second most recent, and third most recent sale
+> dSales[,mostRecentSale:=max(CONVEYANCE_DATE),by="ROLL_NUMBER"]
+> dSales[,secondMostRecentSale:=max(CONVEYANCE_DATE[CONVEYANCE_DATE<mostRecentSale]),by="ROLL_NUMBER"]
+There were 50 or more warnings (use warnings() to see the first 50)
+> dSales[,thirdMostRecentSale:=max(CONVEYANCE_DATE[CONVEYANCE_DATE<secondMostRecentSale]),by="ROLL_NUMBER"]
+There were 50 or more warnings (use warnings() to see the first 50)
+> 
+> fwrite(dSales[,.(ROLL_NUMBER,FOLIO_ID,CONVEYANCE_DATE,CONVEYANCE_PRICE,CONVEYANCE_TYPE_DESCRIPTION,mostRecentSale,secondMostRecentSale,thirdMostRecentSale)],"data/derived/sales.csv")
 > 
 > q("no")
 > proc.time()
    user  system elapsed 
-  4.788   0.383  14.984 
+  7.165   0.347   8.609 
