@@ -36,7 +36,7 @@ print(summary(d24))
 dLaneway <- openxlsx::read.xlsx("data/raw/20250401_UBC_CustomLanewayReport.xlsx")
 #dLaneway <- read.dta13("data/raw/Laneway list 2015-23.dta")
 print(names(dLaneway))
-dLaneway <- data.table(dLaneway)[,.(Roll,Jur)]
+dLaneway <- data.table(dLaneway)[,.(Roll,Jur,YearBuilt)]
 print(table(dLaneway[,Jur]))
 dLaneway[,Jur==NULL]
 dLaneway[,Roll:=as.character(as.numeric(Roll))]
@@ -45,6 +45,9 @@ d24[,Roll:=as.character(roll_number)]
 
 d24 <- merge(d24,dLaneway,by="Roll",all.x=TRUE,all.y=TRUE)
 print(table(d24[,.(is.na(hasLaneway),is.na(rollEnd24))])) # about 50% of laneways -- not bad as all 30 50
+print(summary(d24[hasLaneway==1]))
+print(summary(d24[,YearBuilt==MB_Year_Built]))
+print(d24[hasLaneway==1 & YearBuilt!=MB_Year_Built])
 d24[,hasLaneway:=ifelse(is.na(hasLaneway),0,hasLaneway)]
 
 # get max transaction date by roll rumber
@@ -88,8 +91,8 @@ for (y in seq(FIRST_BUILT,2023)) {
 		for (s in c(1)) {
 			dsub <- d24[NEIGHBOURHOOD==n & MB_Year_Built==y & thirty==s  ]
 			for (t in c("single","duplex","laneway","basement")) {
-				dss <- dsales[NEIGHBOURHOOD==n & CONVEYANCE_DATE<y & CONVEYANCE_DATE>=(y-KEEPLAG) | CONVEYANCE_DATE==(y-3)  & thirty==s & type==t]
-				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],priceLag=dss[,median((CONVEYANCE_PRICE),na.rm=TRUE)]))
+				dss <- dsales[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction" & NEIGHBOURHOOD==n & CONVEYANCE_DATE<y & CONVEYANCE_DATE>=(y-KEEPLAG) | CONVEYANCE_DATE==(y-3)  & thirty==s & type==t]
+				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],priceLag=dss[,mean(log(CONVEYANCE_PRICE),na.rm=TRUE)]))
 			}
 		    }
         }
@@ -136,9 +139,10 @@ shares[,nbhdType:=paste0(nbhd,"_",type)]
 print(summary(feols(typeSpec~shareType |year^type + nbhd^year ,data=shares,cluster="nbhdType")))
 print(summary(feols(typeSpec~shareType|year^type + nbhd^year + nbhd^type ,data=shares,cluster="nbhd")))
 print(summary(feols(specShare~ priceLag |year^type + nbhd^year ,data=shares,cluster="nbhd")))
+print(summary(feols(specShare~ priceLag |year^type + nbhd^year ,data=shares[type!="duplex"],cluster="nbhd")))
 # Funny sales result
 print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,year)])
-print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,nbhd)])
+print(shares[year==2019,mean(priceLag,na.rm=TRUE),by=.(type,nbhd)])
 # is it desirable to have neighbourhood-type dummies?
 
 shares[,rr:=runif(nrow(shares))]
