@@ -1,5 +1,5 @@
 
-R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
 Copyright (C) 2024 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
@@ -480,12 +480,13 @@ basement   duplex  laneway    other   single
 > d24[,spec:=0]
 > d24[,sale2024:=0]
 > FIRST_BUILT <- 2010 # Note can do early for the non-duplex stuff, and no duplex really pre-18
-> for (y in seq(FIRST_BUILT,2023)) {
+> LAST_BUILT <- 2023 # pre-duplex era?
+> for (y in seq(FIRST_BUILT,LAST_BUILT)) {
 +     #d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1 | get(paste0("sale",y+2))==1  ),spec:=1]
 +     d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1  ),spec:=1]
 +     #d24[MB_Year_Built==y & ( get(paste0("sale",y+1))==1  ),spec:=1]
 + }
-> for (y in seq(FIRST_BUILT,2023)) {
+> for (y in seq(FIRST_BUILT,LAST_BUILT)) {
 +     print(y)
 +     print(table(d24[MB_Year_Built==y,.(type,spec)]))
 + }
@@ -1091,40 +1092,26 @@ type        0  1
 > shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric(),priceLag=numeric())
 > dsales <- fread("data/derived/sales.csv")
 > dsales <- merge(dsales,d24[,.(ROLL_NUMBER24,MB_Year_Built,type,NEIGHBOURHOOD,thirty,spec)],by.x="ROLL_NUMBER",by.y="ROLL_NUMBER24")
-> dsales[,priorYear:=max((CONVEYANCE_DATE*(CONVEYANCE_DATE<MB_Year_Built)),na.rm=TRUE),by=.(ROLL_NUMBER)]
-There were 50 or more warnings (use warnings() to see the first 50)
-> dsales[,holdPeriod:=MB_Year_Built-priorYear]
-> dsales[,nPrior:=sum(CONVEYANCE_DATE<MB_Year_Built),by=.(ROLL_NUMBER)]
-> dsales[nPrior>0 & MB_Year_Built>FIRST_BUILT,median(holdPeriod),by=spec]
-    spec    V1
-   <num> <num>
-1:     0     2
-2:     1     2
-> summary(dsales[spec==0 & nPrior>0 & MB_Year_Built>FIRST_BUILT & MB_Year_Built<2023,holdPeriod])
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  1.000   1.000   2.000   5.066   7.000  46.000 
-> summary(dsales[spec==1 & nPrior>0 & MB_Year_Built>FIRST_BUILT & MB_Year_Built<2023,holdPeriod])
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  1.000   1.000   2.000   6.721   8.000  43.000 
-> dsales <- dsales[CONVEYANCE_DATE==MB_Year_Built | (CONVEYANCE_DATE==MB_Year_Built+1) ]
+> sales <- dsales[CONVEYANCE_DATE==MB_Year_Built | (CONVEYANCE_DATE==MB_Year_Built+1) ]
 > for  (n in unique(dsales[,NEIGHBOURHOOD])) {
 + 	print(n)
 + 	print(dsales[NEIGHBOURHOOD==n & type=="duplex" & CONVEYANCE_DATE>2019 & thirty==1,CONVEYANCE_PRICE])
 + 	print(quantile(dsales[NEIGHBOURHOOD==n & type=="duplex" & CONVEYANCE_DATE>2019 & thirty==1,CONVEYANCE_PRICE],na.rm=TRUE))
 + }
 [1] "Point Grey"
-[1] 2300000
+[1] 2184000   20710 2300000 2639375 1300000 1200000
      0%     25%     50%     75%    100% 
-2300000 2300000 2300000 2300000 2300000 
+  20710 1225000 1742000 2271000 2639375 
 [1] "Kitsilano"
- [1] 2250000 2360000 2540952 2585000 2476480      NA 2615000      NA 2030000
-[10] 2080000 2498000
+ [1] 3188000 3188000 3188000 3188000 3188000 3188000 2250000 2360000 2540952
+[10] 2585000 2476480      NA 2615000      NA 2050000 2050000 2030000 2080000
+[19] 2498000
      0%     25%     50%     75%    100% 
-2030000 2250000 2476480 2540952 2615000 
+2030000 2250000 2540952 3188000 3188000 
 [1] "Dunbar"
-[1] 2558000
+[1] 2558000 2380000 2418000
      0%     25%     50%     75%    100% 
-2558000 2558000 2558000 2558000 2558000 
+2380000 2399000 2418000 2488000 2558000 
 [1] "Arbutus Ridge - Mackenzie Heights"
 integer(0)
   0%  25%  50%  75% 100% 
@@ -1142,9 +1129,10 @@ integer(0)
   0%  25%  50%  75% 100% 
   NA   NA   NA   NA   NA 
 [1] "Cambie"
-integer(0)
-  0%  25%  50%  75% 100% 
-  NA   NA   NA   NA   NA 
+ [1] 2200000 2200000 2200000 1563500 1563500 1563500 1563500 1020550 1020550
+[10] 2188000 2188000 2188000 2188000 2024200 2024200 2024200 2024200
+     0%     25%     50%     75%    100% 
+1020550 1563500 2024200 2188000 2200000 
 [1] "South Granville"
 integer(0)
   0%  25%  50%  75% 100% 
@@ -1154,80 +1142,111 @@ integer(0)
   0%  25%  50%  75% 100% 
   NA   NA   NA   NA   NA 
 [1] "Marpole"
- [1] 2068000 2068000 2068000 2000000 2000000 2000000   40000   40000  980000
-[10]  980000
+ [1] 1971000 1971000 1971000 1715700 1715700 1715700 1971000 1971000 1971000
+[10] 1724900 1724900 1724900 1860000 1860000 1860000 2000000 2000000 2000000
+[19] 2280000 2280000 2068000 2068000 2068000 2000000 2000000 2000000   40000
+[28]   40000  980000  980000
      0%     25%     50%     75%    100% 
-  40000  980000 2000000 2051000 2068000 
+  40000 1724900 1971000 2000000 2280000 
 [1] "Grandview"
  [1] 1700000 1700000 1268300 1580000 1580000 1325000 1591750 1490000 1490476
-[10] 1525000 1750000 1865000
+[10] 1525000 1750000 1865000 1839800 1849000
      0%     25%     50%     75%    100% 
-1268300 1490357 1580000 1700000 1865000 
+1268300 1499107 1585875 1737500 1865000 
 [1] "Cedar Cottage"
-[1] 1588000 1688000 2145000 2215000 1988000 1998000 1800000 1925000
+[1] 1588000 1688000 2145000 2215000 1988000 1998000 1800000 1925000 1700000
      0%     25%     50%     75%    100% 
-1588000 1772000 1956500 2034750 2215000 
+1588000 1700000 1925000 1998000 2215000 
 [1] "Main & Fraser"
- [1] 1670000 1638000  821000  821000 1565000 1900000 1642857 1875000 1830000
-[10] 1850000 1935000 1458000 1517000 1598000 1514000 1480000 1885000 1897000
-[19] 1325000
+ [1] 1702000 1865000 1800000 1800000 1800000 1684600 1684600 1684600 1570000
+[10] 1570000 1570000 1570000 1570000 1670000 1638000  821000  821000 1540000
+[19] 1385000 1565000 1900000 1700000 1610000   33100   33100   33100 1655000
+[28] 1655000 1655000 1348100 1348100 1348100 1642857 1875000 1830000 1850000
+[37] 1680000 1680000 1680000  909200  909200  909200 1818400 1818400 1818400
+[46] 2125000 2125000 1750000 1750000 1935000 1458000 1508000 1508000 1517000
+[55] 1598000 1600000 1600000 1514000 1480000 1575000 1575000 1885000 1897000
+[64] 1750000 1750000 1810000 1810000 1700000 1700000 1460000 1325000
      0%     25%     50%     75%    100% 
- 821000 1497000 1638000 1862500 1935000 
+  33100 1511000 1655000 1775000 2125000 
 [1] "South Vancouver"
- [1] 1125714 1125714 1125714 1440000 1440000 1440000 1550000 1550000 1523000
-[10] 1550476 1569523 1350000 1350000 1388000 1388000 1494285 1590000 1500000
-[19] 1450000 1900000 1281000 1281000 1609523 1609523 1720000 1800000 1713333
-[28] 1276190 1300000 1388000 1388000 1400000 1400000 1450000
+ [1] 1125714 1125714 1125714 1440000 1440000 1440000 1231500 1231500 1550000
+[10] 1550000 1360000 1523000 1550476 1569523 1350000 1350000 1388000 1388000
+[19] 1494285 1590000 1500000 1450000 1412000 1900000 1650000 1700000 1700000
+[28] 1680000 1680000 1148571 1148571 1281000 1281000 1609523 1609523 1720000
+[37] 1800000 1713333 1276190 1300000 1070000 1070000 1070000 1388000 1388000
+[46] 1400000 1400000 1450000
      0%     25%     50%     75%    100% 
-1125714 1359500 1440000 1550357 1900000 
+1070000 1281000 1426000 1574642 1900000 
 [1] "Knight"
- [1] 1550000 1555000 1309523 1331428 1525000 1525000    1976    1976    1976
-[10]    1976 1615000 1615000 1615000 1680000 1286000 1428571 1704001 1704001
-[19] 1704001 1265000 1269000 1590000 1500000
+ [1] 1550000 1555000 1420000 1420000 1050000 1050000 1224000 1309523 1331428
+[10] 1525000 1525000 1245000 1245000 1219400 1219400    1976    1976    1976
+[19]    1976 1615000 1615000 1615000 1505000 1650000 1680000 1630000 1630000
+[28] 1630000  775000 1286000 1428571 1704001 1704001 1704001 1265000 1269000
+[37] 1888000 1888000 1888000 1590000 1500000
      0%     25%     50%     75%    100% 
-   1976 1277500 1525000 1615000 1704001 
+   1976 1245000 1500000 1630000 1888000 
 [1] "Hastings East"
- [1] 1951000 1951000 1498000 1501900 1500000 1500000 1549900 1571428 1670000
-[10] 1357142 1699000 1749000 2035000 2035000 1510000 1620000 1760000 1830000
-[19] 1410000 1650000 1550000 1550000 1495238 1525000 1630000 1630000 1825000
-[28] 1725000 1310000 1639000 1639000 1538095 1679000 1699000 1450000 1450000
+ [1] 1951000 1951000 1488000 1488000 1498000 1501900 1465000 1139500 1585000
+[10] 1500000 1500000 1549900 1480000 1480000 1480000 1571428 1670000 1300000
+[19] 1300000 1300000 1300000 1300000 1260000 1260000 1260000 1260000 1260000
+[28] 1510000 1365000 1339000 1339000 1113900 1113900 1357142 1699000 1749000
+[37] 2035000 2035000 1555000 1555000 1510000 1620000 1760000 1830000 1630000
+[46] 1630000      NA      NA 1410000 1650000 1475000 1475000 1475000 1475000
+[55] 1550000 1550000 1495238 1525000 1630000 1630000 1505000 1505000 1505000
+[64] 1291500 1291500 1291500 1825000 1725000 1700000 1700000 1700000 1300400
+[73] 1300400 1300400 1571428 1571428 1571428 1310000 1639000 1639000 1538095
+[82] 1679000 1699000 1450000 1435000 1450000 1375000 1350000 1280000 1280000
+[91] 1280000 1280000 1280000 1800000 1800000 1800000 1720000 1720000 1720000
      0%     25%     50%     75%    100% 
-1310000 1501425 1625000 1705500 2035000 
+1113900 1310000 1500000 1639000 2035000 
 [1] "Renfrew"
- [1] 1370000 1640000 1640000 1388000 1298000 2165000 2165000 1679000 1699900
-[10] 1610000 1610000 1599000 1599000 1460000 1610000 1620000 1474000 1461000
-[19] 1599000 1649000 1899000 1630000 1595000 1220000 1200000 1660000 1675000
-[28] 1706000 1799000 1650000 1650000 1380000 1430000 1413000 1408000 1430000
-[37] 1550000 1252380 1580000 1265000 1250000
+ [1] 1400000 1400000 1400000 1400000 1400000 1370000 1640000 1640000 1388000
+[10] 1298000 2165000 2165000 1679000 1699900 1701888 1701888 1610000 1610000
+[19] 1599000 1599000 1460000 1610000 1620000 1474000 1461000 1620000 1620000
+[28] 1599000 1649000 1630000 1899000 1630000 1595000 1220000 1885000 1885000
+[37] 1885000 1328200 1328200 1328200 1435000 1499000 1385000 1385000 1385000
+[46] 1200000 1635000 1635000 1685000 1685000 1250000 1250000 1198000 1240000
+[55] 1660000 1675000 1450000 1450000 1450000 1706000 1799000 1768000 1768000
+[64] 1768000 1545000 1545000 1545000 1650000 1650000 1350000 1350000 1725000
+[73] 1725000 1725000 1305800 1305800 1305800 1380000 1430000 1413000 1408000
+[82] 1295500 1295500 1430000 1550000 1487500 1487500 1252380 1580000 1265000
+[91] 1250000
      0%     25%     50%     75%    100% 
-1200000 1413000 1599000 1650000 2165000 
+1198000 1385000 1545000 1650000 2165000 
 [1] "Renfrew Heights"
  [1] 1620000 1665000 1439000 1439000 1439000 1434000 1434000 1434000 1982000
-[10] 1982000 1982000 1548000 1548000 1300000 1300000 1535000 1529000
+[10] 1982000 1982000 1265000 1265000 1265000 1301000 1301000 1301000 1301000
+[19] 1301000 1100000 1100000 1100000 1100000 1100000 1548000 1548000 1300000
+[28] 1300000 1535000 1529000 1400000 1400000 1400000 1050000 1137700
      0%     25%     50%     75%    100% 
-1300000 1434000 1529000 1620000 1982000 
+1050000 1265000 1400000 1484000 1982000 
 [1] "Collingwood"
- [1] 1500000 1580000 1352380 1595238 1595238 1428571 1428571 1600000 1600000
-[10] 1330000 1330000 1188000
+ [1] 1500000 1580000 1352380 1410000 1175700 1595238 1595238 1410000 1410000
+[10] 1175700 1175700 1438000 1438000 1208600 1208600 1220000 1220000 1428571
+[19] 1428571 1600000 1600000 1790000 1790000 1790000 3300000 3300000 1330000
+[28] 1330000 1188000
      0%     25%     50%     75%    100% 
-1188000 1346785 1464286 1595238 1600000 
+1175700 1220000 1428571 1595238 3300000 
 [1] "Killarney"
- [1] 1549000 1230500 1333333 1333333 1322857 1322857 1495238 1420000 1210000
-[10] 1485714 1485714 1460000 1590000 1540000 1675000 1675000 1675000 1095238
-[19] 1333333 1333333 1400000 1657142 1657142 1237142 1237142 1238095 1238095
+ [1] 1350000 1350000 1350000 1350000 1350000 1549000 1230500 1500000 1500000
+[10] 1333333 1333333 1418000 1418000 1322857 1322857 1495238 1420000 1210000
+[19] 1485714 1485714 1460000 1590000 1540000  789000  789000  789000  789000
+[28]  789000  789000 1675000 1675000 1675000 1095238 1333333 1333333 1400000
+[37] 1657142 1657142 1237142 1237142 1238095 1238095
      0%     25%     50%     75%    100% 
-1095238 1280476 1400000 1544500 1675000 
+ 789000 1237380 1350000 1492857 1675000 
 [1] "Fraserview"
 integer(0)
   0%  25%  50%  75% 100% 
   NA   NA   NA   NA   NA 
 > KEEPLAG <- 1
-> for (y in seq(FIRST_BUILT,2023)) {
+> for (y in seq(FIRST_BUILT,LAST_BUILT)) {
 + 	for (n in unique(d24$NEIGHBOURHOOD)) {
-+ 		#for (s in c(0,1)) {
-+ 		for (s in c(1)) {
++ 		for (s in c(0,1)) { #consider 50', too
++ 		#for (s in c(1)) {
 + 			dsub <- d24[NEIGHBOURHOOD==n & MB_Year_Built==y & thirty==s  ]
 + 			for (t in c("single","duplex","laneway","basement")) {
++ 			#for (t in c("single","laneway","basement")) {
 + 				dss <- dsales[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction" & NEIGHBOURHOOD==n & CONVEYANCE_DATE<y & CONVEYANCE_DATE>=(y-KEEPLAG) & thirty==s & type==t]
 + 				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],priceLag=dss[,log(median(CONVEYANCE_PRICE,na.rm=TRUE))]))
 + 			}
@@ -1235,22 +1254,22 @@ integer(0)
 +         }
 + }
 > print(summary(shares))
-     nbhd                year          thirty      type          
- Length:1288        Min.   :2010   Min.   :1   Length:1288       
- Class :character   1st Qu.:2013   1st Qu.:1   Class :character  
- Mode  :character   Median :2016   Median :1   Mode  :character  
-                    Mean   :2016   Mean   :1                     
-                    3rd Qu.:2020   3rd Qu.:1                     
-                    Max.   :2023   Max.   :1                     
-                                                                 
-   shareType          typeSpec        specShare         priceLag    
- Min.   :0.00000   Min.   :0.0000   Min.   :0.0000   Min.   :13.14  
- 1st Qu.:0.00000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:13.93  
- Median :0.09766   Median :0.1818   Median :0.0000   Median :14.31  
- Mean   :0.24996   Mean   :0.2849   Mean   :0.2499   Mean   :14.29  
- 3rd Qu.:0.46282   3rd Qu.:0.5000   3rd Qu.:0.4638   3rd Qu.:14.65  
- Max.   :1.00000   Max.   :1.0000   Max.   :1.0000   Max.   :15.27  
- NA's   :284       NA's   :718      NA's   :512      NA's   :972    
+     nbhd                year          thirty        type          
+ Length:2576        Min.   :2010   Min.   :0.0   Length:2576       
+ Class :character   1st Qu.:2013   1st Qu.:0.0   Class :character  
+ Mode  :character   Median :2016   Median :0.5   Mode  :character  
+                    Mean   :2016   Mean   :0.5                     
+                    3rd Qu.:2020   3rd Qu.:1.0                     
+                    Max.   :2023   Max.   :1.0                     
+                                                                   
+   shareType         typeSpec        specShare         priceLag    
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :12.97  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:14.04  
+ Median :0.0136   Median :0.0000   Median :0.0000   Median :14.37  
+ Mean   :0.2494   Mean   :0.2607   Mean   :0.2499   Mean   :14.37  
+ 3rd Qu.:0.4552   3rd Qu.:0.5000   3rd Qu.:0.4743   3rd Qu.:14.77  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :15.64  
+ NA's   :716      NA's   :1643     NA's   :1424     NA's   :1106   
 > 
 > 
 > dnew <- d24[MB_Year_Built>FIRST_BUILT & MB_Year_Built<2023]
@@ -1729,139 +1748,139 @@ Key: <ROLL_NUMBER24>
 4137:        0        0        0  FALSE     TRUE  FALSE  laneway     0        0
 4138:        0        0        0  FALSE     TRUE  FALSE  laneway     0        0
 > 
-> print(summary(feols(typeSpec~shareType |year^nbhd + type^year ,data=shares,cluster="nbhd")))
-NOTE: 718 observations removed because of NA values (LHS: 718, RHS: 284, Fixed-effects: 56, vcov: 56).
+> print(summary(feols(typeSpec~shareType |year^nbhd^thirty + type^year ,data=shares,cluster="nbhd")))
+NOTE: 1,643 observations removed because of NA values (LHS: 1,643, RHS: 716, Fixed-effects: 112, vcov: 112).
 OLS estimation, Dep. Var.: typeSpec
-Observations: 570
-Fixed-effects: year^nbhd: 251,  type^year: 48
+Observations: 933
+Fixed-effects: year^nbhd^thirty: 465,  type^year: 49
 Standard-errors: Clustered (nbhd) 
           Estimate Std. Error t value  Pr(>|t|)    
-shareType 0.227208   0.070031 3.24441 0.0040623 ** 
+shareType 0.147103   0.044878 3.27781 0.0035911 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.198178     Adj. R2: 0.212875
-                 Within R2: 0.032477
+RMSE: 0.199853     Adj. R2: 0.235263
+                 Within R2: 0.013226
 > shares[,nbhdType:=paste0(nbhd,"_",type)]
-> print(summary(feols(typeSpec~shareType |year^type + nbhd^year + nbhdType,data=shares,cluster="nbhdType")))
-NOTE: 718 observations removed because of NA values (LHS: 718, RHS: 284, Fixed-effects: 56).
+> print(summary(feols(typeSpec~shareType |year^type + nbhd^year^thirty + nbhdType^thirty,data=shares,cluster="nbhdType")))
+NOTE: 1,643 observations removed because of NA values (LHS: 1,643, RHS: 716, Fixed-effects: 112).
 OLS estimation, Dep. Var.: typeSpec
-Observations: 570
-Fixed-effects: year^type: 48,  nbhd^year: 251,  nbhdType: 75
-Standard-errors: Clustered (nbhdType) 
-          Estimate Std. Error  t value Pr(>|t|) 
-shareType 0.054405   0.076309 0.712966  0.47811 
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.166341     Adj. R2: 0.237161
-                 Within R2: 0.001803
-> print(summary(feols(typeSpec~shareType |year^type + nbhd^year + nbhdType,data=shares[year<2020 & type!="duplex"],cluster="nbhdType")))
-NOTE: 296 observations removed because of NA values (LHS: 296, RHS: 147, Fixed-effects: 30).
-OLS estimation, Dep. Var.: typeSpec
-Observations: 394
-Fixed-effects: year^type: 30,  nbhd^year: 181,  nbhdType: 55
+Observations: 933
+Fixed-effects: year^type: 49,  nbhd^year^thirty: 465,  nbhdType^thirty: 145
 Standard-errors: Clustered (nbhdType) 
           Estimate Std. Error t value Pr(>|t|) 
-shareType 0.145415   0.123465 1.17779  0.24405 
+shareType  0.07303   0.067877 1.07592  0.28512 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.162867     Adj. R2: 0.177209
-                 Within R2: 0.012289
-> print(summary(feols(specShare~ priceLag |year^type + nbhd^year + nbhd^type,data=shares[type!="duplex"],cluster="nbhd")))
-NOTE: 722 observations removed because of NA values (LHS: 384, RHS: 677, Fixed-effects: 42, vcov: 42).
+RMSE: 0.166591     Adj. R2: 0.190392
+                 Within R2: 0.003062
+> print(summary(feols(typeSpec~shareType |year^type + nbhd^year^thirty + nbhdType^thirty,data=shares[year<2020 & type!="duplex"],cluster="nbhdType")))
+NOTE: 718 observations removed because of NA values (LHS: 718, RHS: 363, Fixed-effects: 60).
+OLS estimation, Dep. Var.: typeSpec
+Observations: 662
+Fixed-effects: year^type: 30,  nbhd^year^thirty: 338,  nbhdType^thirty: 106
+Standard-errors: Clustered (nbhdType) 
+          Estimate Std. Error t value Pr(>|t|) 
+shareType  0.14064   0.087753 1.60268  0.11426 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.170122     Adj. R2: 0.118125
+                 Within R2: 0.010192
+> print(summary(feols(specShare~ priceLag |year^type + nbhd^year^thirty + nbhd^type^thirty,data=shares[type!="duplex"],cluster="nbhd")))
+NOTE: 1,146 observations removed because of NA values (LHS: 1,068, RHS: 545, Fixed-effects: 84, vcov: 84).
 OLS estimation, Dep. Var.: specShare
-Observations: 244
-Fixed-effects: year^type: 39,  nbhd^year: 156,  nbhd^type: 42
+Observations: 786
+Fixed-effects: year^type: 42,  nbhd^year^thirty: 286,  nbhd^type^thirty: 113
 Standard-errors: Clustered (nbhd) 
-         Estimate Std. Error  t value Pr(>|t|) 
-priceLag 0.019397   0.262314 0.073947  0.94187 
+          Estimate Std. Error  t value Pr(>|t|)    
+priceLag -0.408803   0.133424 -3.06394 0.005892 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.158802     Adj. R2: -4.29232
-                 Within R2: 1.305e-4
-> print(summary(feols(specShare~ priceLag |year^type + nbhd^year ,data=shares[type!="duplex"],cluster="nbhd")))
-NOTE: 722 observations removed because of NA values (LHS: 384, RHS: 677, Fixed-effects: 42, vcov: 42).
+RMSE: 0.247223     Adj. R2: 0.071521
+                 Within R2: 0.031391
+> print(summary(feols(specShare~ priceLag |year^type + nbhd^year^thirty ,data=shares[type!="duplex"],cluster="nbhd")))
+NOTE: 1,146 observations removed because of NA values (LHS: 1,068, RHS: 545, Fixed-effects: 84, vcov: 84).
 OLS estimation, Dep. Var.: specShare
-Observations: 244
-Fixed-effects: year^type: 39,  nbhd^year: 156
+Observations: 786
+Fixed-effects: year^type: 42,  nbhd^year^thirty: 286
 Standard-errors: Clustered (nbhd) 
-          Estimate Std. Error   t value Pr(>|t|) 
-priceLag -0.174317     0.2786 -0.625689  0.53937 
+          Estimate Std. Error  t value Pr(>|t|) 
+priceLag -0.148443   0.146627 -1.01238  0.32288 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.212922     Adj. R2: -0.553343
-                 Within R2:  0.008049
-> print(summary(feols(specShare~ priceLag |year^type+ nbhd^year + nbhd^type,data=shares[year<2020 & type!="duplex"],cluster="nbhd")))
-NOTE: 475 observations removed because of NA values (LHS: 252, RHS: 441, Fixed-effects: 30, vcov: 30).
+RMSE: 0.320591     Adj. R2: -0.179525
+                 Within R2:  0.003251
+> print(summary(feols(specShare~ priceLag |year^type+ nbhd^year^thirty + nbhd^type^thirty,data=shares[year<2020 & type!="duplex"],cluster="nbhd")))
+NOTE: 759 observations removed because of NA values (LHS: 705, RHS: 365, Fixed-effects: 60, vcov: 60).
 OLS estimation, Dep. Var.: specShare
-Observations: 215
-Fixed-effects: year^type: 30,  nbhd^year: 131,  nbhd^type: 41
+Observations: 621
+Fixed-effects: year^type: 30,  nbhd^year^thirty: 224,  nbhd^type^thirty: 111
 Standard-errors: Clustered (nbhd) 
-         Estimate Std. Error  t value Pr(>|t|) 
-priceLag 0.019397   0.259198 0.074836  0.94117 
+          Estimate Std. Error  t value Pr(>|t|)    
+priceLag -0.379019   0.149434 -2.53637 0.019643 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.169174     Adj. R2: -1.98072
-                 Within R2: 1.305e-4
+RMSE: 0.254511     Adj. R2: 0.027718
+                 Within R2: 0.024149
 > # Funny sales result
 > print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,year)])
         type  year       V1
       <char> <num>    <num>
- 1:   single  2010 14.29694
- 2:   duplex  2010      NaN
- 3:  laneway  2010 13.37201
- 4: basement  2010 13.65091
- 5:   single  2011 14.36100
- 6:   duplex  2011      NaN
- 7:  laneway  2011 13.79170
- 8: basement  2011 13.72362
- 9:   single  2012 14.22193
-10:   duplex  2012      NaN
-11:  laneway  2012 13.81483
-12: basement  2012 13.98066
-13:   single  2013 14.30194
-14:   duplex  2013      NaN
-15:  laneway  2013 13.64196
-16: basement  2013 13.99429
-17:   single  2014 14.47832
-18:   duplex  2014      NaN
-19:  laneway  2014 13.88424
-20: basement  2014 14.04457
-21:   single  2015 14.47619
-22:   duplex  2015      NaN
-23:  laneway  2015 13.99923
-24: basement  2015 14.31235
-25:   single  2016 14.76043
-26:   duplex  2016      NaN
-27:  laneway  2016 14.24306
-28: basement  2016 14.58513
-29:   single  2017 15.09201
-30:   duplex  2017      NaN
-31:  laneway  2017 14.62875
-32: basement  2017 14.80163
-33:   single  2018 14.93763
-34:   duplex  2018      NaN
-35:  laneway  2018 14.58484
-36: basement  2018 15.03403
-37:   single  2019 14.92272
-38:   duplex  2019      NaN
-39:  laneway  2019 14.54037
-40: basement  2019 14.82499
-41:   single  2020 14.97866
-42:   duplex  2020      NaN
-43:  laneway  2020 14.50935
-44: basement  2020 14.99782
-45:   single  2021 14.50866
-46:   duplex  2021 14.15644
-47:  laneway  2021 14.51938
-48: basement  2021 14.70975
-49:   single  2022 14.55745
-50:   duplex  2022 14.22884
-51:  laneway  2022 14.58216
-52: basement  2022 14.85877
-53:   single  2023 14.78905
-54:   duplex  2023 14.35085
-55:  laneway  2023 14.99915
-56: basement  2023 14.97430
+ 1:   single  2010 13.90410
+ 2:   duplex  2010 13.12528
+ 3:  laneway  2010 13.64382
+ 4: basement  2010 13.81422
+ 5:   single  2011 13.96621
+ 6:   duplex  2011 13.52345
+ 7:  laneway  2011 13.78047
+ 8: basement  2011 13.91504
+ 9:   single  2012 14.16372
+10:   duplex  2012 13.50061
+11:  laneway  2012 13.96643
+12: basement  2012 14.07325
+13:   single  2013 14.19745
+14:   duplex  2013 13.46595
+15:  laneway  2013 13.93102
+16: basement  2013 14.14325
+17:   single  2014 14.22347
+18:   duplex  2014 13.51176
+19:  laneway  2014 14.06765
+20: basement  2014 14.10597
+21:   single  2015 14.27639
+22:   duplex  2015 13.56062
+23:  laneway  2015 14.14283
+24: basement  2015 14.22343
+25:   single  2016 14.51123
+26:   duplex  2016 14.10547
+27:  laneway  2016 14.38768
+28: basement  2016 14.42492
+29:   single  2017 14.67559
+30:   duplex  2017 14.40794
+31:  laneway  2017 14.65227
+32: basement  2017 14.66024
+33:   single  2018 14.72403
+34:   duplex  2018 14.19120
+35:  laneway  2018 14.67944
+36: basement  2018 14.68135
+37:   single  2019 14.64576
+38:   duplex  2019 14.39701
+39:  laneway  2019 14.66494
+40: basement  2019 14.64879
+41:   single  2020 14.56685
+42:   duplex  2020 13.86905
+43:  laneway  2020 14.67243
+44: basement  2020 14.51643
+45:   single  2021 14.68580
+46:   duplex  2021 14.21309
+47:  laneway  2021 14.72981
+48: basement  2021 14.63282
+49:   single  2022 14.70824
+50:   duplex  2022 14.39208
+51:  laneway  2022 14.82641
+52: basement  2022 14.74360
+53:   single  2023 14.73514
+54:   duplex  2023 14.44768
+55:  laneway  2023 15.03271
+56: basement  2023 14.75564
         type  year       V1
 > print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,nbhd)])
         type                              nbhd       V1
@@ -1870,139 +1889,154 @@ RMSE: 0.169174     Adj. R2: -1.98072
  2:   duplex                              <NA>      NaN
  3:  laneway                              <NA>      NaN
  4: basement                              <NA>      NaN
- 5:   single                        Point Grey 14.68425
- 6:   duplex                        Point Grey 14.64842
- 7:  laneway                        Point Grey 14.69146
- 8: basement                        Point Grey 14.68053
- 9:   single                         Kitsilano 14.51669
-10:   duplex                         Kitsilano 14.53579
-11:  laneway                         Kitsilano 14.70538
-12: basement                         Kitsilano 14.62331
-13:   single                            Dunbar 14.72686
+ 5:   single                        Point Grey 14.82674
+ 6:   duplex                        Point Grey 14.74754
+ 7:  laneway                        Point Grey 14.72999
+ 8: basement                        Point Grey 14.81604
+ 9:   single                         Kitsilano 14.70663
+10:   duplex                         Kitsilano 14.71381
+11:  laneway                         Kitsilano 14.59512
+12: basement                         Kitsilano 14.63108
+13:   single                            Dunbar 14.75880
 14:   duplex                            Dunbar      NaN
-15:  laneway                            Dunbar 14.58782
-16: basement                            Dunbar 14.66036
-17:   single Arbutus Ridge - Mackenzie Heights 14.63495
-18:   duplex Arbutus Ridge - Mackenzie Heights      NaN
-19:  laneway Arbutus Ridge - Mackenzie Heights      NaN
-20: basement Arbutus Ridge - Mackenzie Heights 14.51074
-21:   single                        Kerrisdale 14.54859
-22:   duplex                        Kerrisdale 14.58701
-23:  laneway                        Kerrisdale 14.94691
-24: basement                        Kerrisdale 14.64924
-25:   single                        Southlands 14.37105
-26:   duplex                        Southlands      NaN
-27:  laneway                        Southlands      NaN
-28: basement                        Southlands 14.31629
-29:   single                       Shaughnessy      NaN
+15:  laneway                            Dunbar 14.71232
+16: basement                            Dunbar 14.77642
+17:   single Arbutus Ridge - Mackenzie Heights 14.79949
+18:   duplex Arbutus Ridge - Mackenzie Heights 14.76227
+19:  laneway Arbutus Ridge - Mackenzie Heights 14.68332
+20: basement Arbutus Ridge - Mackenzie Heights 14.73651
+21:   single                        Kerrisdale 14.75852
+22:   duplex                        Kerrisdale 14.68380
+23:  laneway                        Kerrisdale 14.77983
+24: basement                        Kerrisdale 14.67396
+25:   single                        Southlands 14.57897
+26:   duplex                        Southlands 14.79007
+27:  laneway                        Southlands 14.46841
+28: basement                        Southlands 14.46030
+29:   single                       Shaughnessy 14.93132
 30:   duplex                       Shaughnessy      NaN
-31:  laneway                       Shaughnessy      NaN
-32: basement                       Shaughnessy      NaN
-33:   single                            Cambie 14.22848
-34:   duplex                            Cambie      NaN
-35:  laneway                            Cambie 14.33158
-36: basement                            Cambie 14.61391
-37:   single                   South Granville 14.50770
+31:  laneway                       Shaughnessy 14.79283
+32: basement                       Shaughnessy 14.91275
+33:   single                            Cambie 14.60925
+34:   duplex                            Cambie 14.59850
+35:  laneway                            Cambie 14.45535
+36: basement                            Cambie 14.56924
+37:   single                   South Granville 14.78176
 38:   duplex                   South Granville      NaN
-39:  laneway                   South Granville      NaN
-40: basement                   South Granville      NaN
-41:   single                          Oakridge      NaN
+39:  laneway                   South Granville 14.66614
+40: basement                   South Granville 14.72124
+41:   single                          Oakridge 14.55525
 42:   duplex                          Oakridge      NaN
-43:  laneway                          Oakridge 15.00943
-44: basement                          Oakridge 14.17982
-45:   single                           Marpole 14.37579
-46:   duplex                           Marpole 14.52551
-47:  laneway                           Marpole 14.57729
-48: basement                           Marpole 14.18142
-49:   single                         Grandview      NaN
-50:   duplex                         Grandview 14.29182
-51:  laneway                         Grandview      NaN
-52: basement                         Grandview      NaN
-53:   single                     Cedar Cottage      NaN
-54:   duplex                     Cedar Cottage 14.37169
-55:  laneway                     Cedar Cottage 14.62199
-56: basement                     Cedar Cottage 14.16314
-57:   single                     Main & Fraser 14.25740
-58:   duplex                     Main & Fraser 14.30300
-59:  laneway                     Main & Fraser 14.10257
-60: basement                     Main & Fraser 14.01634
-61:   single                   South Vancouver      NaN
-62:   duplex                   South Vancouver 14.12292
-63:  laneway                   South Vancouver 13.84240
-64: basement                   South Vancouver 13.84755
-65:   single                            Knight      NaN
-66:   duplex                            Knight 14.13422
-67:  laneway                            Knight 13.85689
-68: basement                            Knight 13.79611
-69:   single                     Hastings East      NaN
-70:   duplex                     Hastings East 14.26861
-71:  laneway                     Hastings East 14.18138
-72: basement                     Hastings East 13.64621
-73:   single                           Renfrew      NaN
-74:   duplex                           Renfrew 14.22983
-75:  laneway                           Renfrew 14.20821
-76: basement                           Renfrew 13.82242
-77:   single                   Renfrew Heights      NaN
-78:   duplex                   Renfrew Heights 14.20903
-79:  laneway                   Renfrew Heights 14.07279
-80: basement                   Renfrew Heights 13.76949
-81:   single                       Collingwood      NaN
-82:   duplex                       Collingwood 14.22256
-83:  laneway                       Collingwood 13.90739
-84: basement                       Collingwood 13.62480
-85:   single                         Killarney      NaN
-86:   duplex                         Killarney 14.16276
-87:  laneway                         Killarney 14.08235
-88: basement                         Killarney 13.66810
-89:   single                        Fraserview      NaN
-90:   duplex                        Fraserview      NaN
-91:  laneway                        Fraserview 13.69334
-92: basement                        Fraserview 13.98085
+43:  laneway                          Oakridge 14.50543
+44: basement                          Oakridge 14.49198
+45:   single                           Marpole 14.45517
+46:   duplex                           Marpole 14.46762
+47:  laneway                           Marpole 14.47113
+48: basement                           Marpole 14.47145
+49:   single                         Grandview 14.01436
+50:   duplex                         Grandview 14.23591
+51:  laneway                         Grandview 14.12284
+52: basement                         Grandview 13.98294
+53:   single                     Cedar Cottage 14.21027
+54:   duplex                     Cedar Cottage 14.32472
+55:  laneway                     Cedar Cottage 14.18685
+56: basement                     Cedar Cottage 14.21476
+57:   single                     Main & Fraser 13.98372
+58:   duplex                     Main & Fraser 14.40397
+59:  laneway                     Main & Fraser 14.16457
+60: basement                     Main & Fraser 14.13191
+61:   single                   South Vancouver 13.95087
+62:   duplex                   South Vancouver 14.05704
+63:  laneway                   South Vancouver 14.12665
+64: basement                   South Vancouver 14.08560
+65:   single                            Knight 13.99523
+66:   duplex                            Knight 13.93490
+67:  laneway                            Knight 13.94878
+68: basement                            Knight 14.04303
+69:   single                     Hastings East 13.90494
+70:   duplex                     Hastings East 14.04563
+71:  laneway                     Hastings East 13.89853
+72: basement                     Hastings East 14.01560
+73:   single                           Renfrew 13.92103
+74:   duplex                           Renfrew 14.10750
+75:  laneway                           Renfrew 13.97197
+76: basement                           Renfrew 14.07051
+77:   single                   Renfrew Heights 13.96770
+78:   duplex                   Renfrew Heights 14.05342
+79:  laneway                   Renfrew Heights 14.02169
+80: basement                   Renfrew Heights 14.07548
+81:   single                       Collingwood 13.95843
+82:   duplex                       Collingwood 13.91509
+83:  laneway                       Collingwood 14.14062
+84: basement                       Collingwood 13.95582
+85:   single                         Killarney 14.05254
+86:   duplex                         Killarney 14.03818
+87:  laneway                         Killarney 14.14500
+88: basement                         Killarney 14.16333
+89:   single                        Fraserview 14.05455
+90:   duplex                        Fraserview 14.17473
+91:  laneway                        Fraserview 14.17078
+92: basement                        Fraserview 14.17422
         type                              nbhd       V1
+> # convergance?
+> print(shares[year==2017,mean(priceLag,na.rm=TRUE),by=.(type,thirty,nbhd)])
+         type thirty       nbhd       V1
+       <char>  <num>     <char>    <num>
+  1:   single      0       <NA>      NaN
+  2:   duplex      0       <NA>      NaN
+  3:  laneway      0       <NA>      NaN
+  4: basement      0       <NA>      NaN
+  5:   single      1       <NA>      NaN
+ ---                                    
+180: basement      0 Fraserview 14.66993
+181:   single      1 Fraserview      NaN
+182:   duplex      1 Fraserview      NaN
+183:  laneway      1 Fraserview      NaN
+184: basement      1 Fraserview 14.03062
 > # is it desirable to have neighbourhood-type dummies?
 > 
 > shares[,rr:=runif(nrow(shares))]
 > x <- feols(shareType ~ rr|type+year+nbhd,data=shares)
-NOTE: 284 observations removed because of NA values (LHS: 284, Fixed-effects: 56).
+NOTE: 716 observations removed because of NA values (LHS: 716, Fixed-effects: 112).
 > print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
-[1] 0.06626446 0.09773143
+[1] 0.08534059 0.11237014
 > x <- feols(shareType ~ rr|type^year + nbhd^year,data=shares)
-NOTE: 284 observations removed because of NA values (LHS: 284, Fixed-effects: 56).
+NOTE: 716 observations removed because of NA values (LHS: 716, Fixed-effects: 112).
 > print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
-[1] 0.05109234 0.09773143
+[1] 0.0714963 0.1123701
 > x <- feols(shareType ~ rr|type^year+type^nbhd+nbhd^year,data=shares)
-NOTE: 284 observations removed because of NA values (LHS: 284, Fixed-effects: 56).
+NOTE: 716 observations removed because of NA values (LHS: 716, Fixed-effects: 112).
 > print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
-[1] 0.03510656 0.09773143
+[1] 0.05475012 0.11237014
 > x <- feols(shareType ~ rr|nbhd^type,data=shares)
-NOTE: 284 observations removed because of NA values (LHS: 284, Fixed-effects: 56).
+NOTE: 716 observations removed because of NA values (LHS: 716, Fixed-effects: 112).
 > print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
-[1] 0.05018954 0.09773143
+[1] 0.06809965 0.11237014
 > 
 > 
 > ggplot(shares[type=="laneway",.(type,shareType,typeSpec,year),],aes(x=shareType,y=typeSpec,color=year)) +
 +     geom_point() 
 Warning message:
-Removed 108 rows containing missing values or values outside the scale range
+Removed 286 rows containing missing values or values outside the scale range
 (`geom_point()`). 
 > ggsave("text/shareCustom.png")
 Saving 7 x 7 in image
 Warning message:
-Removed 108 rows containing missing values or values outside the scale range
+Removed 286 rows containing missing values or values outside the scale range
 (`geom_point()`). 
 > 
 > ggplot(shares[,.(shareType,typeSpec,nbhd)],aes(x=shareType,y=typeSpec,color=nbhd)) + geom_point() 
 Warning message:
-Removed 718 rows containing missing values or values outside the scale range
+Removed 1643 rows containing missing values or values outside the scale range
 (`geom_point()`). 
 > ggsave("text/shareSpecType.png")
 Saving 7 x 7 in image
 Warning message:
-Removed 718 rows containing missing values or values outside the scale range
+Removed 1643 rows containing missing values or values outside the scale range
 (`geom_point()`). 
 > 
 > 
 > 
 > proc.time()
    user  system elapsed 
-  4.622   0.284   4.912 
+ 10.377   0.541  13.643 

@@ -62,12 +62,13 @@ print(summary(d24[,MB_Year_Built]))
 d24[,spec:=0]
 d24[,sale2024:=0]
 FIRST_BUILT <- 2010 # Note can do early for the non-duplex stuff, and no duplex really pre-18
-for (y in seq(FIRST_BUILT,2023)) {
+LAST_BUILT <- 2023 # pre-duplex era?
+for (y in seq(FIRST_BUILT,LAST_BUILT)) {
     #d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1 | get(paste0("sale",y+2))==1  ),spec:=1]
     d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1  ),spec:=1]
     #d24[MB_Year_Built==y & ( get(paste0("sale",y+1))==1  ),spec:=1]
 }
-for (y in seq(FIRST_BUILT,2023)) {
+for (y in seq(FIRST_BUILT,LAST_BUILT)) {
     print(y)
     print(table(d24[MB_Year_Built==y,.(type,spec)]))
 }
@@ -90,12 +91,13 @@ for  (n in unique(dsales[,NEIGHBOURHOOD])) {
 	print(quantile(dsales[NEIGHBOURHOOD==n & type=="duplex" & CONVEYANCE_DATE>2019 & thirty==1,CONVEYANCE_PRICE],na.rm=TRUE))
 }
 KEEPLAG <- 1
-for (y in seq(FIRST_BUILT,2023)) {
+for (y in seq(FIRST_BUILT,LAST_BUILT)) {
 	for (n in unique(d24$NEIGHBOURHOOD)) {
-		#for (s in c(0,1)) {
-		for (s in c(1)) {
+		for (s in c(0,1)) { #consider 50', too
+		#for (s in c(1)) {
 			dsub <- d24[NEIGHBOURHOOD==n & MB_Year_Built==y & thirty==s  ]
 			for (t in c("single","duplex","laneway","basement")) {
+			#for (t in c("single","laneway","basement")) {
 				dss <- dsales[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction" & NEIGHBOURHOOD==n & CONVEYANCE_DATE<y & CONVEYANCE_DATE>=(y-KEEPLAG) & thirty==s & type==t]
 				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],priceLag=dss[,log(median(CONVEYANCE_PRICE,na.rm=TRUE))]))
 			}
@@ -135,16 +137,18 @@ print(dnew[order(MB_year_built),.(.N,mean(spec)),by=.(MB_year_built)])
 print(dnew[order(MB_effective_year),.(.N,mean(spec)),by=.(MB_effective_year)])
 print(dnew[improvementValue>400000])
 
-print(summary(feols(typeSpec~shareType |year^nbhd + type^year ,data=shares,cluster="nbhd")))
+print(summary(feols(typeSpec~shareType |year^nbhd^thirty + type^year ,data=shares,cluster="nbhd")))
 shares[,nbhdType:=paste0(nbhd,"_",type)]
-print(summary(feols(typeSpec~shareType |year^type + nbhd^year + nbhdType,data=shares,cluster="nbhdType")))
-print(summary(feols(typeSpec~shareType |year^type + nbhd^year + nbhdType,data=shares[year<2020 & type!="duplex"],cluster="nbhdType")))
-print(summary(feols(specShare~ priceLag |year^type + nbhd^year + nbhd^type,data=shares[type!="duplex"],cluster="nbhd")))
-print(summary(feols(specShare~ priceLag |year^type + nbhd^year ,data=shares[type!="duplex"],cluster="nbhd")))
-print(summary(feols(specShare~ priceLag |year^type+ nbhd^year + nbhd^type,data=shares[year<2020 & type!="duplex"],cluster="nbhd")))
+print(summary(feols(typeSpec~shareType |year^type + nbhd^year^thirty + nbhdType^thirty,data=shares,cluster="nbhdType")))
+print(summary(feols(typeSpec~shareType |year^type + nbhd^year^thirty + nbhdType^thirty,data=shares[year<2020 & type!="duplex"],cluster="nbhdType")))
+print(summary(feols(specShare~ priceLag |year^type + nbhd^year^thirty + nbhd^type^thirty,data=shares[type!="duplex"],cluster="nbhd")))
+print(summary(feols(specShare~ priceLag |year^type + nbhd^year^thirty ,data=shares[type!="duplex"],cluster="nbhd")))
+print(summary(feols(specShare~ priceLag |year^type+ nbhd^year^thirty + nbhd^type^thirty,data=shares[year<2020 & type!="duplex"],cluster="nbhd")))
 # Funny sales result
 print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,year)])
 print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,nbhd)])
+# convergance?
+print(shares[year==2017,mean(priceLag,na.rm=TRUE),by=.(type,thirty,nbhd)])
 # is it desirable to have neighbourhood-type dummies?
 
 shares[,rr:=runif(nrow(shares))]
