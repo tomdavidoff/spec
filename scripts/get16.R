@@ -55,8 +55,6 @@ dLaneOk[,streetNumber:=NULL]
 dLaneOk[,streetName:=NULL]
 dI <- merge(dI,dLaneOk,by="addressForLaneway",all.x=TRUE,all.y=TRUE)
 # deal with NA laneok approximation
-print("IS IT A DATATABLE?")
-print(is.data.table(dI))
 dI[,madeupLaneok:=is.na(laneok)]
 dI[,roundNumber:=floor(as.numeric(streetNumber)/100)]
 dI[,meanLaneok:=mean(laneok,na.rm=TRUE),by=roundNumber]

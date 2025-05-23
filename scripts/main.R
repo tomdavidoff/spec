@@ -105,7 +105,11 @@ for (y in seq(FIRST_BUILT,LAST_BUILT)) {
         }
 }
 print(summary(shares))
-
+print(quantile(shares[,specShare],seq(.1,.9,.1),na.rm=TRUE))
+print(quantile(shares[,shareType],seq(.1,.9,.1),na.rm=TRUE))
+print("pre duplex")
+print(quantile(shares[year<2019,specShare],seq(.1,.9,.1),na.rm=TRUE))
+print(quantile(shares[year<2019,shareType],seq(.1,.9,.1),na.rm=TRUE))
 
 dnew <- d24[MB_Year_Built>FIRST_BUILT & MB_Year_Built<2023]
 print(dnew[MB_Year_Built>2016,mean(spec),by=type])
@@ -161,10 +165,11 @@ print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
 x <- feols(shareType ~ rr|nbhd^type,data=shares)
 print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
 
-
-ggplot(shares[type=="laneway",.(type,shareType,typeSpec,year),],aes(x=shareType,y=typeSpec,color=year)) +
-    geom_point() 
-ggsave("text/shareCustom.png")
+for (y in 2010:2018) {
+	ggplot(shares[year==y & type=="laneway",.(type,shareType,typeSpec,year),],aes(x=shareType,y=typeSpec,color=year)) +
+	    geom_point() 
+	ggsave(paste0("text/shareSpec",y,".png"))
+}
 
 ggplot(shares[,.(shareType,typeSpec,nbhd)],aes(x=shareType,y=typeSpec,color=nbhd)) + geom_point() 
 ggsave("text/shareSpecType.png")
