@@ -1,6 +1,6 @@
 
-R version 4.4.0 (2024-04-24) -- "Puppy Cup"
-Copyright (C) 2024 The R Foundation for Statistical Computing
+R version 4.5.0 (2025-04-11) -- "How About a Twenty-Six"
+Copyright (C) 2025 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -33,23 +33,23 @@ Type 'q()' to quit R.
 > d16 <- fread("data/derived/baseline16.csv")
 > print(summary(d16))
    folioID           roll_number             MB_year_built  MB_effective_year
- Length:25640       Min.   : 1023636540000   Min.   :1900   Min.   :1909     
- Class :character   1st Qu.: 5731056220000   1st Qu.:1942   1st Qu.:1970     
- Mode  :character   Median :16741216240000   Median :1978   Median :1986     
-                    Mean   :14145787111320   Mean   :1971   Mean   :1985     
-                    3rd Qu.:20586300230000   3rd Qu.:1997   3rd Qu.:2000     
-                    Max.   :25830270550000   Max.   :2020   Max.   :2020     
-                                             NA's   :24     NA's   :24       
-   landValue       improvementValue   streetNumber  streetDirectionPrefix
- Min.   : 199000   Min.   :      0   Min.   :   3   Mode:logical         
- 1st Qu.:1020000   1st Qu.:  53500   1st Qu.:1742   NA's:25640           
- Median :1213000   Median : 155000   Median :2879                        
- Mean   :1470442   Mean   : 238800   Mean   :3046                        
- 3rd Qu.:1870000   3rd Qu.: 293000   3rd Qu.:4032                        
- Max.   :8880000   Max.   :3801000   Max.   :8571                        
-                                     NA's   :2                           
+ Length:69497       Min.   : 1019632060000   Min.   :1900   Min.   :1908     
+ Class :character   1st Qu.: 6830087800000   1st Qu.:1946   1st Qu.:1968     
+ Mode  :character   Median :16748195310000   Median :1977   Median :1986     
+                    Mean   :14860433825956   Mean   :1972   Mean   :1985     
+                    3rd Qu.:21631300230000   3rd Qu.:1998   3rd Qu.:2001     
+                    Max.   :25830270850000   Max.   :2020   Max.   :2020     
+                                             NA's   :62     NA's   :62       
+   landValue        improvementValue    streetNumber  streetDirectionPrefix
+ Min.   :   91700   Min.   :       0   Min.   :   2   Length:69497         
+ 1st Qu.: 1022000   1st Qu.:   53900   1st Qu.:1810   Class :character     
+ Median : 1258000   Median :  162000   Median :3057   Mode  :character     
+ Mean   : 1654947   Mean   :  287304   Mean   :3224                        
+ 3rd Qu.: 2021000   3rd Qu.:  350000   3rd Qu.:4450                        
+ Max.   :41052000   Max.   :23273000   Max.   :8630                        
+                                       NA's   :2                           
   streetName         streetType        streetDirectionSuffix  postalCode       
- Length:25640       Length:25640       Length:25640          Length:25640      
+ Length:69497       Length:69497       Length:69497          Length:69497      
  Class :character   Class :character   Class :character      Class :character  
  Mode  :character   Mode  :character   Mode  :character      Mode  :character  
                                                                                
@@ -57,10 +57,10 @@ Type 'q()' to quit R.
                                                                                
                                                                                
      city             thirty          fifty           laneok       
- Length:25640       Mode :logical   Mode :logical   Mode :logical  
- Class :character   FALSE:4991      FALSE:20649     FALSE:503      
- Mode  :character   TRUE :20649     TRUE :4991      TRUE :23474    
-                                                    NA's :1663     
+ Length:69497       Mode :logical   Mode :logical   Mode :logical  
+ Class :character   FALSE:48848     FALSE:64506     FALSE:5372     
+ Mode  :character   TRUE :20649     TRUE :4991      TRUE :58431    
+                                                    NA's :5694     
                                                                    
                                                                    
                                                                    
@@ -79,14 +79,14 @@ Type 'q()' to quit R.
                                            3rd Qu.:200                         
                                            Max.   :200                         
                                                                                
-     nchar      splitspot    rollStart            rollEnd24       
- Min.   :15   Min.   :11   Min.   : 101963206   Min.   :   0.000  
- 1st Qu.:15   1st Qu.:11   1st Qu.: 813073905   1st Qu.:   0.000  
- Median :15   Median :11   Median :1721681936   Median :   0.000  
- Mean   :15   Mean   :11   Mean   :1507320016   Mean   :   0.694  
- 3rd Qu.:15   3rd Qu.:11   3rd Qu.:2163827160   3rd Qu.:   0.000  
- Max.   :15   Max.   :11   Max.   :2583027085   Max.   :4001.000  
-                                                                  
+     nchar      splitspot    rollStart            rollEnd24        
+ Min.   :15   Min.   :11   Min.   : 101963206   Min.   :   0.0000  
+ 1st Qu.:15   1st Qu.:11   1st Qu.: 813073905   1st Qu.:   0.0000  
+ Median :15   Median :11   Median :1721681936   Median :   0.0000  
+ Mean   :15   Mean   :11   Mean   :1507320016   Mean   :   0.6937  
+ 3rd Qu.:15   3rd Qu.:11   3rd Qu.:2163827160   3rd Qu.:   0.0000  
+ Max.   :15   Max.   :11   Max.   :2583027085   Max.   :4001.0000  
+                                                                   
   Jurisdiction MB_Year_Built     Zoning          ROLL_NUMBER24           
  Min.   :200   Min.   :1900   Length:77530       Min.   : 1019632060000  
  1st Qu.:200   1st Qu.:1950   Class :character   1st Qu.: 8130739050000  
@@ -132,39 +132,39 @@ Type 'q()' to quit R.
 > d24 <- merge(d24,d16,by.x=c("rollStart"),by.y=c("rollStart")) 
 > print(summary(d24))
    rollStart           FOLIO_ID         ACTUAL_USE_DESCRIPTION
- Min.   :1.024e+08   Length:31936       Length:31936          
- 1st Qu.:5.737e+08   Class :character   Class :character      
- Median :1.676e+09   Mode  :character   Mode  :character      
- Mean   :1.436e+09                                            
- 3rd Qu.:2.059e+09                                            
+ Min.   :1.020e+08   Length:87300       Length:87300          
+ 1st Qu.:8.737e+08   Class :character   Class :character      
+ Median :1.723e+09   Mode  :character   Mode  :character      
+ Mean   :1.523e+09                                            
+ 3rd Qu.:2.164e+09                                            
  Max.   :2.583e+09                                            
                                                               
  JURISDICTION_CODE NEIGHBOURHOOD          nchar      splitspot 
- Min.   :200       Length:31936       Min.   :15   Min.   :11  
+ Min.   :200       Length:87300       Min.   :15   Min.   :11  
  1st Qu.:200       Class :character   1st Qu.:15   1st Qu.:11  
  Median :200       Mode  :character   Median :15   Median :11  
  Mean   :200                          Mean   :15   Mean   :11  
  3rd Qu.:200                          3rd Qu.:15   3rd Qu.:11  
  Max.   :200                          Max.   :15   Max.   :11  
                                                                
-   rollEnd24        Jurisdiction MB_Year_Built     Zoning         
- Min.   :0.00000   Min.   :200   Min.   :1900   Length:31936      
- 1st Qu.:0.00000   1st Qu.:200   1st Qu.:1949   Class :character  
- Median :0.00000   Median :200   Median :1989   Mode  :character  
- Mean   :0.01976   Mean   :200   Mean   :1979                     
- 3rd Qu.:0.00000   3rd Qu.:200   3rd Qu.:2011                     
- Max.   :3.00000   Max.   :200   Max.   :2023                     
-                                 NA's   :137                      
+   rollEnd24          Jurisdiction MB_Year_Built     Zoning         
+ Min.   :   0.0000   Min.   :200   Min.   :1900   Length:87300      
+ 1st Qu.:   0.0000   1st Qu.:200   1st Qu.:1952   Class :character  
+ Median :   0.0000   Median :200   Median :1989   Mode  :character  
+ Mean   :   0.6129   Mean   :200   Mean   :1980                     
+ 3rd Qu.:   0.0000   3rd Qu.:200   3rd Qu.:2011                     
+ Max.   :4001.0000   Max.   :200   Max.   :2023                     
+                                   NA's   :379                      
  ROLL_NUMBER24            UNIT_NUMBER        STREET_NUMBER  
- Min.   : 1023636540000   Length:31936       Min.   :    2  
- 1st Qu.: 5737097260000   Class :character   1st Qu.: 1551  
- Median :16758201410000   Mode  :character   Median : 2887  
- Mean   :14362021408364                      Mean   : 3041  
- 3rd Qu.:20587300480001                      3rd Qu.: 4048  
- Max.   :25830270550000                      Max.   :74088  
-                                             NA's   :4      
+ Min.   : 1019632060000   Length:87300       Min.   :    1  
+ 1st Qu.: 8737125550000   Class :character   1st Qu.: 1709  
+ Median :17231793740000   Mode  :character   Median : 3057  
+ Mean   :15234738723017                      Mean   : 3211  
+ 3rd Qu.:21641275380000                      3rd Qu.: 4453  
+ Max.   :25830270850000                      Max.   :74088  
+                                             NA's   :8      
  STREET_DIRECTION_PREFIX STREET_NAME        STREET_TYPE       
- Length:31936            Length:31936       Length:31936      
+ Length:87300            Length:87300       Length:87300      
  Class :character        Class :character   Class :character  
  Mode  :character        Mode  :character   Mode  :character  
                                                               
@@ -172,7 +172,7 @@ Type 'q()' to quit R.
                                                               
                                                               
  STREET_DIRECTION_SUFFIX POSTAL_CODE        fullStreet24      
- Length:31936            Length:31936       Length:31936      
+ Length:87300            Length:87300       Length:87300      
  Class :character        Class :character   Class :character  
  Mode  :character        Mode  :character   Mode  :character  
                                                               
@@ -180,32 +180,32 @@ Type 'q()' to quit R.
                                                               
                                                               
  streetNoNumber24   streetNumber24    folioID           roll_number            
- Length:31936       Min.   :    2   Length:31936       Min.   : 1023636540000  
- Class :character   1st Qu.: 1551   Class :character   1st Qu.: 5737097260000  
- Mode  :character   Median : 2887   Mode  :character   Median :16758201410000  
-                    Mean   : 3041                      Mean   :14362021408364  
-                    3rd Qu.: 4048                      3rd Qu.:20587300480000  
-                    Max.   :74088                      Max.   :25830270550000  
-                    NA's   :4                                                  
- MB_year_built  MB_effective_year   landValue       improvementValue 
- Min.   :1900   Min.   :1909      Min.   : 199000   Min.   :      0  
- 1st Qu.:1946   1st Qu.:1970      1st Qu.:1020000   1st Qu.:  52900  
- Median :1984   Median :1990      Median :1219000   Median : 169000  
- Mean   :1975   Mean   :1988      Mean   :1458804   Mean   : 265909  
- 3rd Qu.:2009   3rd Qu.:2010      3rd Qu.:1840000   3rd Qu.: 348000  
- Max.   :2020   Max.   :2020      Max.   :8880000   Max.   :3801000  
- NA's   :50     NA's   :50                                           
+ Length:87300       Min.   :    1   Length:87300       Min.   : 1019632060000  
+ Class :character   1st Qu.: 1709   Class :character   1st Qu.: 8737125550000  
+ Mode  :character   Median : 3057   Mode  :character   Median :17231793740000  
+                    Mean   : 3211                      Mean   :15234738723016  
+                    3rd Qu.: 4453                      3rd Qu.:21641275380000  
+                    Max.   :74088                      Max.   :25830270850000  
+                    NA's   :8                                                  
+ MB_year_built  MB_effective_year   landValue        improvementValue  
+ Min.   :1900   Min.   :1908      Min.   :   91700   Min.   :       0  
+ 1st Qu.:1948   1st Qu.:1970      1st Qu.: 1028000   1st Qu.:   53800  
+ Median :1985   Median :1990      Median : 1250000   Median :  182000  
+ Mean   :1976   Mean   :1988      Mean   : 1617363   Mean   :  313596  
+ 3rd Qu.:2009   3rd Qu.:2010      3rd Qu.: 1975000   3rd Qu.:  419000  
+ Max.   :2020   Max.   :2020      Max.   :41052000   Max.   :23273000  
+ NA's   :119    NA's   :119                                            
   streetNumber  streetDirectionPrefix  streetName         streetType       
- Min.   :   3   Mode:logical          Length:31936       Length:31936      
- 1st Qu.:1542   NA's:31936            Class :character   Class :character  
- Median :2886                         Mode  :character   Mode  :character  
- Mean   :3035                                                              
- 3rd Qu.:4043                                                              
- Max.   :8571                                                              
+ Min.   :   2   Length:87300          Length:87300       Length:87300      
+ 1st Qu.:1703   Class :character      Class :character   Class :character  
+ Median :3054   Mode  :character      Mode  :character   Mode  :character  
+ Mean   :3205                                                              
+ 3rd Qu.:4448                                                              
+ Max.   :8630                                                              
  NA's   :4                                                                 
  streetDirectionSuffix  postalCode            city             thirty       
- Length:31936          Length:31936       Length:31936       Mode :logical  
- Class :character      Class :character   Class :character   FALSE:6223     
+ Length:87300          Length:87300       Length:87300       Mode :logical  
+ Class :character      Class :character   Class :character   FALSE:61587    
  Mode  :character      Mode  :character   Mode  :character   TRUE :25713    
                                                                             
                                                                             
@@ -213,11 +213,11 @@ Type 'q()' to quit R.
                                                                             
    fifty           laneok          rollEnd16
  Mode :logical   Mode :logical   Min.   :0  
- FALSE:25713     FALSE:567       1st Qu.:0  
- TRUE :6223      TRUE :27733     Median :0  
-                 NA's :3636      Mean   :0  
+ FALSE:81077     FALSE:5764      1st Qu.:0  
+ TRUE :6223      TRUE :69017     Median :0  
+                 NA's :12519     Mean   :0  
                                  3rd Qu.:0  
-                                 Max.   :0  
+                                 Max.   :2  
                                             
 > 
 > dLaneway <- openxlsx::read.xlsx("data/raw/20250401_UBC_CustomLanewayReport.xlsx")
@@ -240,43 +240,43 @@ logical(0)
 > print(table(d24[,.(is.na(hasLaneway),is.na(rollEnd24))])) # about 50% of laneways -- not bad as all 30 50
        V2
 V1      FALSE  TRUE
-  FALSE  7441  3957
-  TRUE  24495     0
+  FALSE 20561   453
+  TRUE  66739     0
 > print(summary(d24[hasLaneway==1]))
      Roll             rollStart           FOLIO_ID        
- Length:11398       Min.   :1.634e+08   Length:11398      
- Class :character   1st Qu.:9.714e+08   Class :character  
- Mode  :character   Median :1.780e+09   Mode  :character  
-                    Mean   :1.561e+09                     
-                    3rd Qu.:2.161e+09                     
+ Length:21014       Min.   :1.024e+08   Length:21014      
+ Class :character   1st Qu.:1.214e+09   Class :character  
+ Mode  :character   Median :1.782e+09   Mode  :character  
+                    Mean   :1.686e+09                     
+                    3rd Qu.:2.269e+09                     
                     Max.   :2.583e+09                     
-                    NA's   :3957                          
- ACTUAL_USE_DESCRIPTION JURISDICTION_CODE NEIGHBOURHOOD          nchar     
- Length:11398           Min.   :200       Length:11398       Min.   :15    
- Class :character       1st Qu.:200       Class :character   1st Qu.:15    
- Mode  :character       Median :200       Mode  :character   Median :15    
-                        Mean   :200                          Mean   :15    
-                        3rd Qu.:200                          3rd Qu.:15    
-                        Max.   :200                          Max.   :15    
-                        NA's   :3957                         NA's   :3957  
-   splitspot      rollEnd24     Jurisdiction  MB_Year_Built     Zoning         
- Min.   :11     Min.   :0      Min.   :200    Min.   :1905   Length:11398      
- 1st Qu.:11     1st Qu.:0      1st Qu.:200    1st Qu.:2007   Class :character  
- Median :11     Median :0      Median :200    Median :2013   Mode  :character  
- Mean   :11     Mean   :0      Mean   :200    Mean   :2002                     
- 3rd Qu.:11     3rd Qu.:0      3rd Qu.:200    3rd Qu.:2017                     
- Max.   :11     Max.   :0      Max.   :200    Max.   :2023                     
- NA's   :3957   NA's   :3957   NA's   :3957   NA's   :3997                     
+                    NA's   :453                           
+ ACTUAL_USE_DESCRIPTION JURISDICTION_CODE NEIGHBOURHOOD          nchar    
+ Length:21014           Min.   :200       Length:21014       Min.   :15   
+ Class :character       1st Qu.:200       Class :character   1st Qu.:15   
+ Mode  :character       Median :200       Mode  :character   Median :15   
+                        Mean   :200                          Mean   :15   
+                        3rd Qu.:200                          3rd Qu.:15   
+                        Max.   :200                          Max.   :15   
+                        NA's   :453                          NA's   :453  
+   splitspot     rollEnd24    Jurisdiction MB_Year_Built     Zoning         
+ Min.   :11    Min.   :0     Min.   :200   Min.   :1905   Length:21014      
+ 1st Qu.:11    1st Qu.:0     1st Qu.:200   1st Qu.:2006   Class :character  
+ Median :11    Median :0     Median :200   Median :2013   Mode  :character  
+ Mean   :11    Mean   :0     Mean   :200   Mean   :2003                     
+ 3rd Qu.:11    3rd Qu.:0     3rd Qu.:200   3rd Qu.:2016                     
+ Max.   :11    Max.   :0     Max.   :200   Max.   :2023                     
+ NA's   :453   NA's   :453   NA's   :453   NA's   :555                      
  ROLL_NUMBER24            UNIT_NUMBER        STREET_NUMBER  
- Min.   : 1634037190000   Length:11398       Min.   :    2  
- 1st Qu.: 9714153140000   Class :character   1st Qu.: 1079  
- Median :17803197640000   Mode  :character   Median : 2807  
- Mean   :15611953793535                      Mean   : 2979  
- 3rd Qu.:21607280300000                      3rd Qu.: 4043  
- Max.   :25828251390000                      Max.   :74088  
- NA's   :          3957                      NA's   :3957   
+ Min.   : 1023637870000   Length:21014       Min.   :    2  
+ 1st Qu.:12137823040000   Class :character   1st Qu.: 1424  
+ Median :17821216250000   Mode  :character   Median : 2938  
+ Mean   :16858593470541                      Mean   : 3123  
+ 3rd Qu.:22692274260000                      3rd Qu.: 4410  
+ Max.   :25828269350000                      Max.   :74088  
+ NA's   :           453                      NA's   :456    
  STREET_DIRECTION_PREFIX STREET_NAME        STREET_TYPE       
- Length:11398            Length:11398       Length:11398      
+ Length:21014            Length:21014       Length:21014      
  Class :character        Class :character   Class :character  
  Mode  :character        Mode  :character   Mode  :character  
                                                               
@@ -284,7 +284,7 @@ V1      FALSE  TRUE
                                                               
                                                               
  STREET_DIRECTION_SUFFIX POSTAL_CODE        fullStreet24      
- Length:11398            Length:11398       Length:11398      
+ Length:21014            Length:21014       Length:21014      
  Class :character        Class :character   Class :character  
  Mode  :character        Mode  :character   Mode  :character  
                                                               
@@ -292,47 +292,47 @@ V1      FALSE  TRUE
                                                               
                                                               
  streetNoNumber24   streetNumber24    folioID           roll_number            
- Length:11398       Min.   :    2   Length:11398       Min.   : 1634037190000  
- Class :character   1st Qu.: 1079   Class :character   1st Qu.: 9714153140000  
- Mode  :character   Median : 2807   Mode  :character   Median :17803197640000  
-                    Mean   : 2979                      Mean   :15611953793535  
-                    3rd Qu.: 4043                      3rd Qu.:21607280300000  
-                    Max.   :74088                      Max.   :25828251390000  
-                    NA's   :3957                       NA's   :          3957  
- MB_year_built  MB_effective_year   landValue       improvementValue 
- Min.   :1905   Min.   :1928      Min.   : 684000   Min.   :      0  
- 1st Qu.:1989   1st Qu.:1996      1st Qu.:1020000   1st Qu.:  48500  
- Median :2012   Median :2012      Median :1125000   Median : 286000  
- Mean   :1995   Mean   :2003      Mean   :1367980   Mean   : 379251  
- 3rd Qu.:2015   3rd Qu.:2015      3rd Qu.:1650000   3rd Qu.: 581000  
- Max.   :2020   Max.   :2020      Max.   :3574000   Max.   :1836000  
- NA's   :3986   NA's   :3986      NA's   :3957      NA's   :3957     
+ Length:21014       Min.   :    2   Length:21014       Min.   : 1023637870000  
+ Class :character   1st Qu.: 1424   Class :character   1st Qu.:12137823040000  
+ Mode  :character   Median : 2938   Mode  :character   Median :17821216250000  
+                    Mean   : 3123                      Mean   :16858593470541  
+                    3rd Qu.: 4410                      3rd Qu.:22692274260000  
+                    Max.   :74088                      Max.   :25828269350000  
+                    NA's   :456                        NA's   :           453  
+ MB_year_built  MB_effective_year   landValue        improvementValue 
+ Min.   :1905   Min.   :1923      Min.   :  177000   Min.   :      0  
+ 1st Qu.:1989   1st Qu.:1995      1st Qu.: 1039000   1st Qu.:  54900  
+ Median :2012   Median :2012      Median : 1215000   Median : 339000  
+ Mean   :1996   Mean   :2002      Mean   : 1445412   Mean   : 429727  
+ 3rd Qu.:2015   3rd Qu.:2015      3rd Qu.: 1600000   3rd Qu.: 637000  
+ Max.   :2020   Max.   :2020      Max.   :13538000   Max.   :7811000  
+ NA's   :509    NA's   :509       NA's   :453        NA's   :453      
   streetNumber  streetDirectionPrefix  streetName         streetType       
- Min.   :   8   Mode:logical          Length:11398       Length:11398      
- 1st Qu.:1060   NA's:11398            Class :character   Class :character  
- Median :2805                         Mode  :character   Mode  :character  
- Mean   :2956                                                              
- 3rd Qu.:4039                                                              
- Max.   :8273                                                              
- NA's   :3957                                                              
+ Min.   :   3   Length:21014          Length:21014       Length:21014      
+ 1st Qu.:1381   Class :character      Class :character   Class :character  
+ Median :2932   Mode  :character      Mode  :character   Mode  :character  
+ Mean   :3099                                                              
+ 3rd Qu.:4347                                                              
+ Max.   :8515                                                              
+ NA's   :453                                                               
  streetDirectionSuffix  postalCode            city             thirty       
- Length:11398          Length:11398       Length:11398       Mode :logical  
- Class :character      Class :character   Class :character   FALSE:1471     
+ Length:21014          Length:21014       Length:21014       Mode :logical  
+ Class :character      Class :character   Class :character   FALSE:14591    
  Mode  :character      Mode  :character   Mode  :character   TRUE :5970     
-                                                             NA's :3957     
+                                                             NA's :453      
                                                                             
                                                                             
                                                                             
-   fifty           laneok          rollEnd16        Jur           
- Mode :logical   Mode :logical   Min.   :   0   Length:11398      
- FALSE:5970      FALSE:32        1st Qu.:   0   Class :character  
- TRUE :1471      TRUE :5110      Median :   0   Mode  :character  
- NA's :3957      NA's :6256      Mean   :   0                     
-                                 3rd Qu.:   0                     
-                                 Max.   :   0                     
-                                 NA's   :3957                     
+   fifty           laneok          rollEnd16       Jur           
+ Mode :logical   Mode :logical   Min.   :  0   Length:21014      
+ FALSE:19090     FALSE:236       1st Qu.:  0   Class :character  
+ TRUE :1471      TRUE :12374     Median :  0   Mode  :character  
+ NA's :453       NA's :8404      Mean   :  0                     
+                                 3rd Qu.:  0                     
+                                 Max.   :  0                     
+                                 NA's   :453                     
   YearBuilt           hasLaneway
- Length:11398       Min.   :1   
+ Length:21014       Min.   :1   
  Class :character   1st Qu.:1   
  Mode  :character   Median :1   
                     Mean   :1   
@@ -341,22 +341,22 @@ V1      FALSE  TRUE
                                 
 > print(summary(d24[,YearBuilt==MB_Year_Built]))
    Mode   FALSE    TRUE    NA's 
-logical    3058    4343   28492 
+logical    8809   11650   67294 
 > print(d24[hasLaneway==1 & YearBuilt!=MB_Year_Built])
 Key: <Roll>
                 Roll  rollStart   FOLIO_ID          ACTUAL_USE_DESCRIPTION
               <char>      <num>     <char>                          <char>
-   1: 10813124770000 1081312477 A000001CV1 Residential Dwelling with Suite
-   2: 10813124770000 1081312477 A000001CV1 Residential Dwelling with Suite
-   3: 10813124770000 1081312477 A000001CV1 Residential Dwelling with Suite
-   4: 10813124770000 1081312477 A000001CV1 Residential Dwelling with Suite
-   5: 10813124770000 1081312477 A000001CV1 Residential Dwelling with Suite
+   1: 10093790400000 1009379040 A000001ARN Residential Dwelling with Suite
+   2: 10093790400000 1009379040 A000001ARN Residential Dwelling with Suite
+   3: 10093792740000 1009379274 A000001ASD          Single Family Dwelling
+   4: 10093792740000 1009379274 A000001ASD          Single Family Dwelling
+   5: 10093792740000 1009379274 A000001ASD          Single Family Dwelling
   ---                                                                     
-3054:  9747179640000  974717964 A000001ALB Residential Dwelling with Suite
-3055:  9747179640000  974717964 A000001ALB Residential Dwelling with Suite
-3056:  9747179640000  974717964 A000001ALB Residential Dwelling with Suite
-3057:  9747179640000  974717964 A000001ALB Residential Dwelling with Suite
-3058:  9747179640000  974717964 A000001ALB Residential Dwelling with Suite
+8805:  9750182710000  975018271 A000001APV Residential Dwelling with Suite
+8806:  9750182710000  975018271 A000001APV Residential Dwelling with Suite
+8807:  9750182710000  975018271 A000001APV Residential Dwelling with Suite
+8808:  9750182710000  975018271 A000001APV Residential Dwelling with Suite
+8809:  9750182710000  975018271 A000001APV Residential Dwelling with Suite
       JURISDICTION_CODE   NEIGHBOURHOOD nchar splitspot rollEnd24 Jurisdiction
                   <int>          <char> <int>     <int>     <num>        <int>
    1:               200 South Granville    15        11         0          200
@@ -365,102 +365,102 @@ Key: <Roll>
    4:               200 South Granville    15        11         0          200
    5:               200 South Granville    15        11         0          200
   ---                                                                         
-3054:               200          Cambie    15        11         0          200
-3055:               200          Cambie    15        11         0          200
-3056:               200          Cambie    15        11         0          200
-3057:               200          Cambie    15        11         0          200
-3058:               200          Cambie    15        11         0          200
+8805:               200          Cambie    15        11         0          200
+8806:               200          Cambie    15        11         0          200
+8807:               200          Cambie    15        11         0          200
+8808:               200          Cambie    15        11         0          200
+8809:               200          Cambie    15        11         0          200
       MB_Year_Built Zoning  ROLL_NUMBER24 UNIT_NUMBER STREET_NUMBER
               <int> <char>          <i64>      <char>         <int>
-   1:          1988    RS1 10813124770000                      1523
-   2:          1988    RS1 10813124770000                      1523
-   3:          1988    RS1 10813124770000                      1523
-   4:          1988    RS1 10813124770000                      1525
-   5:          1988    RS1 10813124770000                      1525
+   1:          1923    RS6 10093790400000                      6548
+   2:          1923    RS6 10093790400000                      6552
+   3:          2021    RS6 10093792740000                      6726
+   4:          2021    RS6 10093792740000                      6726
+   5:          2021    RS6 10093792740000                      6718
   ---                                                              
-3054:          1940    RS1  9747179640000                       136
-3055:          1940    RS1  9747179640000                       136
-3056:          1940    RS1  9747179640000                       138
-3057:          1940    RS1  9747179640000                       138
-3058:          1940    RS1  9747179640000                       138
+8805:          2014    RS1  9750182710000                        33
+8806:          2014    RS1  9750182710000                        33
+8807:          2014    RS1  9750182710000                        31
+8808:          2014    RS1  9750182710000                        31
+8809:          2014    RS1  9750182710000                        31
       STREET_DIRECTION_PREFIX STREET_NAME STREET_TYPE STREET_DIRECTION_SUFFIX
                        <char>      <char>      <char>                  <char>
-   1:                                59TH         AVE                       W
-   2:                                59TH         AVE                       W
-   3:                                59TH         AVE                       W
-   4:                                59TH         AVE                       W
-   5:                                59TH         AVE                       W
+   1:                            LABURNUM          ST                        
+   2:                            LABURNUM          ST                        
+   3:                            LABURNUM          ST                        
+   4:                            LABURNUM          ST                        
+   5:                            LABURNUM          ST                        
   ---                                                                        
-3054:                                40TH         AVE                       W
-3055:                                40TH         AVE                       W
-3056:                                40TH         AVE                       W
-3057:                                40TH         AVE                       W
-3058:                                40TH         AVE                       W
-      POSTAL_CODE     fullStreet24 streetNoNumber24 streetNumber24    folioID
-           <char>           <char>           <char>          <int>     <char>
-   1:     V6P 1Z1 1523  59TH AVE W       59TH AVE W           1523 A000001CV1
-   2:     V6P 1Z1 1523  59TH AVE W       59TH AVE W           1523 A000001CV1
-   3:     V6P 1Z1 1523  59TH AVE W       59TH AVE W           1523 A000001CV1
-   4:     V6P 1Z1 1525  59TH AVE W       59TH AVE W           1525 A000001CV1
-   5:     V6P 1Z1 1525  59TH AVE W       59TH AVE W           1525 A000001CV1
-  ---                                                                        
-3054:     V5Y 2R2  136  40TH AVE W       40TH AVE W            136 A000001ALB
-3055:     V5Y 2R2  136  40TH AVE W       40TH AVE W            136 A000001ALB
-3056:     V5Y 2R2  138  40TH AVE W       40TH AVE W            138 A000001ALB
-3057:     V5Y 2R2  138  40TH AVE W       40TH AVE W            138 A000001ALB
-3058:     V5Y 2R2  138  40TH AVE W       40TH AVE W            138 A000001ALB
+8805:                                41ST         AVE                       W
+8806:                                41ST         AVE                       W
+8807:                                41ST         AVE                       W
+8808:                                41ST         AVE                       W
+8809:                                41ST         AVE                       W
+      POSTAL_CODE      fullStreet24 streetNoNumber24 streetNumber24    folioID
+           <char>            <char>           <char>          <int>     <char>
+   1:     V6P 5M5 6548  LABURNUM ST      LABURNUM ST           6548 A000001ARN
+   2:     V6P 5M5 6552  LABURNUM ST      LABURNUM ST           6552 A000001ARN
+   3:     V6P 5M7 6726  LABURNUM ST      LABURNUM ST           6726 A000001ASD
+   4:     V6P 5M7 6726  LABURNUM ST      LABURNUM ST           6726 A000001ASD
+   5:     V6P 5M7 6718  LABURNUM ST      LABURNUM ST           6718 A000001ASD
+  ---                                                                         
+8805:     V5Y 2R8    33  41ST AVE W       41ST AVE W             33 A000001APV
+8806:     V5Y 2R8    33  41ST AVE W       41ST AVE W             33 A000001APV
+8807:     V5Y 2R8    31  41ST AVE W       41ST AVE W             31 A000001APV
+8808:     V5Y 2R8    31  41ST AVE W       41ST AVE W             31 A000001APV
+8809:     V5Y 2R8    31  41ST AVE W       41ST AVE W             31 A000001APV
          roll_number MB_year_built MB_effective_year landValue improvementValue
                <i64>         <int>             <int>     <int>            <int>
-   1: 10813124770000          1988              1991   2143000           380000
-   2: 10813124770000          1988              1991   2143000           380000
-   3: 10813124770000          1988              1991   2143000           380000
-   4: 10813124770000          1988              1991   2143000           380000
-   5: 10813124770000          1988              1991   2143000           380000
+   1: 10093790400000          1923              1980   2357000            71200
+   2: 10093790400000          1923              1980   2357000            71200
+   3: 10093792740000          2019              2019   4085000            10000
+   4: 10093792740000          2019              2019   4085000            10000
+   5: 10093792740000          2019              2019   4085000            10000
   ---                                                                          
-3054:  9747179640000          1940              1995   2082000           753000
-3055:  9747179640000          1940              1995   2082000           753000
-3056:  9747179640000          1940              1995   2082000           753000
-3057:  9747179640000          1940              1995   2082000           753000
-3058:  9747179640000          1940              1995   2082000           753000
+8805:  9750182710000          2014              2014   1203000           663000
+8806:  9750182710000          2014              2014   1203000           663000
+8807:  9750182710000          2014              2014   1203000           663000
+8808:  9750182710000          2014              2014   1203000           663000
+8809:  9750182710000          2014              2014   1203000           663000
       streetNumber streetDirectionPrefix streetName streetType
-             <int>                <lgcl>     <char>     <char>
-   1:         1523                    NA       59TH        AVE
-   2:         1525                    NA       59TH        AVE
-   3:         1527                    NA       59TH        AVE
-   4:         1523                    NA       59TH        AVE
-   5:         1525                    NA       59TH        AVE
+             <int>                <char>     <char>     <char>
+   1:         6548                         LABURNUM         ST
+   2:         6548                         LABURNUM         ST
+   3:         6726                         LABURNUM         ST
+   4:         6726                         LABURNUM         ST
+   5:         6726                         LABURNUM         ST
   ---                                                         
-3054:          138                    NA       40TH        AVE
-3055:          140                    NA       40TH        AVE
-3056:          136                    NA       40TH        AVE
-3057:          138                    NA       40TH        AVE
-3058:          140                    NA       40TH        AVE
+8805:           31                             41ST        AVE
+8806:           33                             41ST        AVE
+8807:           29                             41ST        AVE
+8808:           31                             41ST        AVE
+8809:           33                             41ST        AVE
       streetDirectionSuffix postalCode      city thirty  fifty laneok rollEnd16
                      <char>     <char>    <char> <lgcl> <lgcl> <lgcl>     <i64>
-   1:                     W    V6P 1Z1 VANCOUVER  FALSE   TRUE   TRUE         0
-   2:                     W    V6P 1Z1 VANCOUVER  FALSE   TRUE   TRUE         0
-   3:                     W    V6P 1Z1 VANCOUVER  FALSE   TRUE   TRUE         0
-   4:                     W    V6P 1Z1 VANCOUVER  FALSE   TRUE   TRUE         0
-   5:                     W    V6P 1Z1 VANCOUVER  FALSE   TRUE   TRUE         0
+   1:                          V6P 5M5 VANCOUVER  FALSE  FALSE   TRUE         0
+   2:                          V6P 5M5 VANCOUVER  FALSE  FALSE   TRUE         0
+   3:                          V6P 5M7 VANCOUVER  FALSE  FALSE   TRUE         0
+   4:                          V6P 5M7 VANCOUVER  FALSE  FALSE   TRUE         0
+   5:                          V6P 5M7 VANCOUVER  FALSE  FALSE   TRUE         0
   ---                                                                          
-3054:                     W            VANCOUVER  FALSE   TRUE     NA         0
-3055:                     W    V5Y 2R2 VANCOUVER  FALSE   TRUE   TRUE         0
-3056:                     W    V5Y 2R2 VANCOUVER  FALSE   TRUE     NA         0
-3057:                     W            VANCOUVER  FALSE   TRUE     NA         0
-3058:                     W    V5Y 2R2 VANCOUVER  FALSE   TRUE   TRUE         0
+8805:                     W    V5Y 2R8 VANCOUVER  FALSE  FALSE     NA         0
+8806:                     W    V5Y 2R8 VANCOUVER  FALSE  FALSE     NA         0
+8807:                     W    V5Y 2R8 VANCOUVER  FALSE  FALSE  FALSE         0
+8808:                     W    V5Y 2R8 VANCOUVER  FALSE  FALSE     NA         0
+8809:                     W    V5Y 2R8 VANCOUVER  FALSE  FALSE     NA         0
          Jur YearBuilt hasLaneway
       <char>    <char>      <num>
-   1:    200      2016          1
-   2:    200      2016          1
-   3:    200      2016          1
-   4:    200      2016          1
-   5:    200      2016          1
+   1:    200      2017          1
+   2:    200      2017          1
+   3:    200      2022          1
+   4:    200      2022          1
+   5:    200      2022          1
   ---                            
-3054:    200      2011          1
-3055:    200      2011          1
-3056:    200      2011          1
-3057:    200      2011          1
-3058:    200      2011          1
+8805:    200      2013          1
+8806:    200      2013          1
+8807:    200      2013          1
+8808:    200      2013          1
+8809:    200      2013          1
 > d24[,hasLaneway:=ifelse(is.na(hasLaneway),0,hasLaneway)]
 > 
 > # get max transaction date by roll rumber
@@ -473,10 +473,10 @@ Key: <Roll>
 > print(table(d24[,type]))
 
 basement   duplex  laneway    other   single 
-   12763      740    11386      143    10861 
+   32157     1911    20981      653    32051 
 > print(summary(d24[,MB_Year_Built]))
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-   1900    1949    1989    1979    2011    2023    4094 
+   1900    1952    1989    1980    2011    2023     832 
 > d24[,spec:=0]
 > d24[,sale2024:=0]
 > FIRST_BUILT <- 2010 # Note can do early for the non-duplex stuff, and no duplex really pre-18
@@ -493,144 +493,163 @@ basement   duplex  laneway    other   single
 [1] 2010
           spec
 type         0   1
-  basement 158 124
-  laneway  150  54
-  other      4   0
-  single    25  24
+  basement 428 353
+  duplex     0   9
+  laneway  499 249
+  other      8   2
+  single    94  82
 [1] 2011
           spec
 type         0   1
-  basement 230 198
-  laneway  306 206
-  other      4   0
-  single    48  42
+  basement 723 560
+  laneway  813 472
+  other      5   0
+  single   156 110
 [1] 2012
           spec
 type         0   1
-  basement 216 207
-  laneway  320 213
-  other      0   1
-  single    49  50
+  basement 600 482
+  laneway  955 588
+  other      1   1
+  single   195  99
 [1] 2013
           spec
 type         0   1
-  basement 158 150
-  laneway  350 188
-  single    44  30
+  basement 467 301
+  duplex     9   4
+  laneway  953 620
+  single   153  85
 [1] 2014
           spec
-type         0   1
-  basement 124 126
-  laneway  396 202
-  single    35  30
+type          0    1
+  basement  358  265
+  laneway  1108  701
+  other       4    0
+  single    136   90
 [1] 2015
           spec
-type         0   1
-  basement 140  62
-  duplex     9   0
-  laneway  539 267
-  single    48  17
+type          0    1
+  basement  348  151
+  duplex      9    0
+  laneway  1389  533
+  single    154   61
 [1] 2016
           spec
 type         0   1
-  basement  58  20
-  laneway  302 100
-  single    24  10
+  basement 177  40
+  laneway  823 207
+  single   104  19
 [1] 2017
           spec
 type         0   1
-  basement  51  12
+  basement 191  27
   duplex     1   0
-  laneway  295  52
-  single    45   6
+  laneway  864 137
+  other      2   0
+  single   169  19
 [1] 2018
           spec
 type         0   1
-  basement  88   8
-  laneway  339  78
-  single    49   3
+  basement 189  17
+  laneway  854 139
+  single   131  10
 [1] 2019
           spec
 type         0   1
-  basement  47   8
-  duplex    19   1
-  laneway  265  54
-  single    32   1
+  basement 127  23
+  duplex    54   5
+  laneway  712 107
+  single    96   7
 [1] 2020
           spec
 type         0   1
-  basement  39   8
-  duplex    38  79
-  laneway  189  25
-  single    14   1
+  basement  86  12
+  duplex    86 146
+  laneway  458  82
+  single    60   4
 [1] 2021
           spec
 type         0   1
-  basement  30  10
-  duplex    79 101
-  laneway  123  40
-  single    18   5
+  basement 121  17
+  duplex   228 236
+  laneway  382  77
+  single    67  10
 [1] 2022
           spec
 type         0   1
-  basement  34  10
-  duplex   138 107
-  laneway  242  29
-  single    31   7
+  basement 155  30
+  duplex   377 269
+  laneway  742  67
+  single    69  10
 [1] 2023
           spec
 type         0   1
-  basement  31   0
-  duplex    87  11
-  laneway  119   4
-  other      4   0
-  single    26   0
+  basement 105   3
+  duplex   290  35
+  laneway  288  16
+  other      9   0
+  single    79   9
 > 
 > print(table(d24[MB_Year_Built>2016 & MB_Year_Built<2023,.(type,spec,STREET_DIRECTION_SUFFIX)]))
 , , STREET_DIRECTION_SUFFIX = 
 
           spec
-type         0   1
-  basement  67   9
-  duplex   139 131
-  laneway  505 119
-  single    35   2
+type          0    1
+  basement  334   45
+  duplex    399  300
+  laneway  1626  274
+  other       0    0
+  single    198   22
 
 , , STREET_DIRECTION_SUFFIX = E
 
           spec
-type         0   1
-  basement  70  14
-  duplex    85 133
-  laneway  544 120
-  single    23   3
+type          0    1
+  basement  234   36
+  duplex    237  295
+  laneway  1517  269
+  other       0    0
+  single     46    5
 
 , , STREET_DIRECTION_SUFFIX = N
 
           spec
-type         0   1
-  basement   0   0
-  duplex     0   1
-  laneway    4   2
-  single     0   0
+type          0    1
+  basement    2    0
+  duplex      0    2
+  laneway     4    2
+  other       0    0
+  single      0    0
 
 , , STREET_DIRECTION_SUFFIX = SE
 
           spec
-type         0   1
-  basement   0   0
-  duplex     0   0
-  laneway    3   0
-  single     0   0
+type          0    1
+  basement    0    0
+  duplex      0    0
+  laneway     6    0
+  other       0    0
+  single      0    0
+
+, , STREET_DIRECTION_SUFFIX = SW
+
+          spec
+type          0    1
+  basement    2    0
+  duplex      0    0
+  laneway     2    0
+  other       0    0
+  single      2    0
 
 , , STREET_DIRECTION_SUFFIX = W
 
           spec
-type         0   1
-  basement 152  33
-  duplex    51  23
-  laneway  397  37
-  single   131  18
+type          0    1
+  basement  297   45
+  duplex    110   59
+  laneway   857   64
+  other       2    0
+  single    346   33
 
 > print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,STREET_DIRECTION_SUFFIX)]))
 , , STREET_DIRECTION_SUFFIX = 
@@ -673,38 +692,62 @@ type         0   1
 , , STREET_DIRECTION_SUFFIX = 
 
           spec
-type         0   1
-  basement   5   0
-  duplex    22  16
-  laneway   76   7
-  single     9   1
+type          0    1
+  basement  219   26
+  duplex    156  104
+  laneway  1006  142
+  other       0    0
+  single    155   19
 
 , , STREET_DIRECTION_SUFFIX = E
 
           spec
-type         0   1
-  basement   2   2
-  duplex    15  20
-  laneway   55  16
-  single     1   0
+type          0    1
+  basement  136   17
+  duplex     74  125
+  laneway   847  147
+  other       0    0
+  single     21    1
+
+, , STREET_DIRECTION_SUFFIX = N
+
+          spec
+type          0    1
+  basement    2    0
+  duplex      0    0
+  laneway     0    0
+  other       0    0
+  single      0    0
 
 , , STREET_DIRECTION_SUFFIX = SE
 
           spec
-type         0   1
-  basement   0   0
-  duplex     0   0
-  laneway    3   0
-  single     0   0
+type          0    1
+  basement    0    0
+  duplex      0    0
+  laneway     3    0
+  other       0    0
+  single      0    0
+
+, , STREET_DIRECTION_SUFFIX = SW
+
+          spec
+type          0    1
+  basement    2    0
+  duplex      0    0
+  laneway     0    0
+  other       0    0
+  single      2    0
 
 , , STREET_DIRECTION_SUFFIX = W
 
           spec
-type         0   1
-  basement  45   1
-  duplex     7   4
-  laneway  126   2
-  single    47   3
+type          0    1
+  basement  152   10
+  duplex     46   17
+  laneway   463   29
+  other       2    0
+  single    244   18
 
 > print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,NEIGHBOURHOOD)]))
 , , NEIGHBOURHOOD = Arbutus Ridge - Mackenzie Heights
@@ -900,196 +943,227 @@ type         0   1
 , , NEIGHBOURHOOD = Arbutus Ridge - Mackenzie Heights
 
           spec
-type        0  1
-  basement 10  0
-  duplex    4  2
-  laneway  31  0
-  single   15  3
+type         0   1
+  basement  32   1
+  duplex    12   9
+  laneway   86   3
+  other      0   0
+  single    59   7
 
 , , NEIGHBOURHOOD = Cambie
 
           spec
-type        0  1
-  basement  0  0
-  duplex    7  0
-  laneway   6  0
-  single    1  0
+type         0   1
+  basement  11   0
+  duplex     7   2
+  laneway   63  12
+  other      0   0
+  single    14   1
 
 , , NEIGHBOURHOOD = Cedar Cottage
 
           spec
-type        0  1
-  basement  0  2
-  duplex   12  1
-  laneway  13  0
-  single    1  0
+type         0   1
+  basement  11   2
+  duplex    12   3
+  laneway   34   2
+  other      0   0
+  single     7   1
 
 , , NEIGHBOURHOOD = Collingwood
 
           spec
-type        0  1
-  basement  0  0
-  duplex    0  0
-  laneway  12  3
-  single    0  0
+type         0   1
+  basement  13   0
+  duplex    14   8
+  laneway  128  21
+  other      0   0
+  single     2   0
 
 , , NEIGHBOURHOOD = Dunbar
 
           spec
-type        0  1
-  basement  8  1
-  duplex    0  0
-  laneway  45  0
-  single   11  1
+type         0   1
+  basement  37   3
+  duplex     8   0
+  laneway  124   2
+  other      0   0
+  single    75   6
 
 , , NEIGHBOURHOOD = Fraserview
 
           spec
-type        0  1
-  basement  2  0
-  duplex    2  2
-  laneway  16  0
-  single    0  0
+type         0   1
+  basement  15   0
+  duplex    25  16
+  laneway  143  10
+  other      0   0
+  single     4   0
 
 , , NEIGHBOURHOOD = Grandview
 
           spec
-type        0  1
-  basement  0  0
-  duplex    0  8
-  laneway   0  0
-  single    0  0
+type         0   1
+  basement   4   3
+  duplex     4   8
+  laneway   14   0
+  other      0   0
+  single     3   0
 
 , , NEIGHBOURHOOD = Hastings East
 
           spec
-type        0  1
-  basement  0  0
-  duplex   10  4
-  laneway   7  2
-  single    0  0
+type         0   1
+  basement  27   2
+  duplex    31  28
+  laneway  125  32
+  other      0   0
+  single     0   1
 
 , , NEIGHBOURHOOD = Kerrisdale
 
           spec
-type        0  1
-  basement  7  0
-  duplex    4  0
-  laneway  13  4
-  single   14  0
+type         0   1
+  basement  21   2
+  duplex    13   0
+  laneway   43   6
+  other      0   0
+  single    44   4
 
 , , NEIGHBOURHOOD = Killarney
 
           spec
-type        0  1
-  basement  0  0
-  duplex    0  4
-  laneway   6 13
-  single    0  0
+type         0   1
+  basement  37   0
+  duplex    47  47
+  laneway  254  63
+  other      0   0
+  single     2   1
 
 , , NEIGHBOURHOOD = Kitsilano
 
           spec
-type        0  1
-  basement 11  0
-  duplex    0  0
-  laneway  22  0
-  single    3  0
+type         0   1
+  basement  22   1
+  duplex     4   2
+  laneway   44   0
+  other      0   0
+  single    12   1
+
+, , NEIGHBOURHOOD = Knight
+
+          spec
+type         0   1
+  basement  48   8
+  duplex     3  15
+  laneway  134  12
+  other      0   0
+  single     4   0
 
 , , NEIGHBOURHOOD = Main & Fraser
 
           spec
-type        0  1
-  basement  0  0
-  duplex    0  0
-  laneway  13  0
-  single    0  0
+type         0   1
+  basement  67  15
+  duplex    13  22
+  laneway  166  26
+  other      0   0
+  single    17   3
 
 , , NEIGHBOURHOOD = Marpole
 
           spec
-type        0  1
-  basement  0  0
-  duplex    0  8
-  laneway   0  0
-  single    1  0
+type         0   1
+  basement   8   0
+  duplex    15  20
+  laneway   37   4
+  other      0   0
+  single     8   0
 
 , , NEIGHBOURHOOD = Oakridge
 
           spec
-type        0  1
-  basement  0  0
-  duplex    0  0
-  laneway   3  0
-  single    0  0
+type         0   1
+  basement  12   0
+  duplex     4   4
+  laneway   53   3
+  other      2   0
+  single     9   0
 
 , , NEIGHBOURHOOD = Point Grey
 
           spec
-type        0  1
-  basement  7  0
-  duplex    0  0
-  laneway  22  0
-  single    8  0
+type         0   1
+  basement  19   2
+  duplex     4   0
+  laneway   99   4
+  other      0   0
+  single    42   3
 
 , , NEIGHBOURHOOD = Renfrew
 
           spec
-type        0  1
-  basement  0  0
-  duplex    1 11
-  laneway   9  0
-  single    0  0
+type         0   1
+  basement   4   0
+  duplex    13  29
+  laneway   62   6
+  other      0   0
+  single     0   0
 
 , , NEIGHBOURHOOD = Renfrew Heights
 
           spec
-type        0  1
-  basement  0  0
-  duplex    0  0
-  laneway   3  0
-  single    0  0
+type         0   1
+  basement  29   4
+  duplex    11  23
+  laneway  236  56
+  other      0   0
+  single     1   1
 
 , , NEIGHBOURHOOD = Shaughnessy
 
           spec
-type        0  1
-  basement  2  0
-  duplex    0  0
-  laneway   2  0
-  single    0  0
+type         0   1
+  basement  12   3
+  duplex     0   0
+  laneway   25   4
+  other      0   0
+  single    33   2
 
 , , NEIGHBOURHOOD = South Granville
 
           spec
-type        0  1
-  basement  5  0
-  duplex    0  0
-  laneway   9  0
-  single    2  0
+type         0   1
+  basement  24   0
+  duplex     8   0
+  laneway   87   5
+  other      0   0
+  single    56   5
 
 , , NEIGHBOURHOOD = South Vancouver
 
           spec
-type        0  1
-  basement  0  0
-  duplex    4  0
-  laneway  23  3
-  single    0  0
+type         0   1
+  basement  36   7
+  duplex    23  10
+  laneway  342  42
+  other      0   0
+  single     1   0
 
 , , NEIGHBOURHOOD = Southlands
 
           spec
-type        0  1
-  basement  0  0
-  duplex    0  0
-  laneway   5  0
-  single    1  0
+type         0   1
+  basement  22   0
+  duplex     5   0
+  laneway   20   5
+  other      0   0
+  single    29   2
 
 > 
 > # Main regression
 > # Dummy for spec vs custom on property type dummies and share 
-> shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric(),priceLag=numeric())
+> shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric(),customShare=numeric(),priceLag=numeric())
 > dsales <- fread("data/derived/sales.csv")
 > dsales <- merge(dsales,d24[,.(ROLL_NUMBER24,MB_Year_Built,type,NEIGHBOURHOOD,thirty,spec)],by.x="ROLL_NUMBER",by.y="ROLL_NUMBER24")
 > sales <- dsales[CONVEYANCE_DATE==MB_Year_Built | (CONVEYANCE_DATE==MB_Year_Built+1) ]
@@ -1177,6 +1251,10 @@ integer(0)
 [46] 1400000 1400000 1450000
      0%     25%     50%     75%    100% 
 1070000 1281000 1426000 1574642 1900000 
+[1] "Marine Drive"
+integer(0)
+  0%  25%  50%  75% 100% 
+  NA   NA   NA   NA   NA 
 [1] "Knight"
  [1] 1550000 1555000 1420000 1420000 1050000 1050000 1224000 1309523 1331428
 [10] 1525000 1525000 1245000 1245000 1219400 1219400    1976    1976    1976
@@ -1248,224 +1326,272 @@ integer(0)
 + 			for (t in c("single","duplex","laneway","basement")) {
 + 			#for (t in c("single","laneway","basement")) {
 + 				dss <- dsales[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction" & NEIGHBOURHOOD==n & CONVEYANCE_DATE<y & CONVEYANCE_DATE>=(y-KEEPLAG) & thirty==s & type==t]
-+ 				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],priceLag=dss[,log(median(CONVEYANCE_PRICE,na.rm=TRUE))]))
++ 				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],customShare=dsub[spec==0,mean(type==t)],priceLag=dss[,log(median(CONVEYANCE_PRICE,na.rm=TRUE))]))
 + 			}
 + 		    }
 +         }
 + }
 > print(summary(shares))
      nbhd                year          thirty        type          
- Length:2576        Min.   :2010   Min.   :0.0   Length:2576       
+ Length:2688        Min.   :2010   Min.   :0.0   Length:2688       
  Class :character   1st Qu.:2013   1st Qu.:0.0   Class :character  
  Mode  :character   Median :2016   Median :0.5   Mode  :character  
                     Mean   :2016   Mean   :0.5                     
                     3rd Qu.:2020   3rd Qu.:1.0                     
                     Max.   :2023   Max.   :1.0                     
                                                                    
-   shareType         typeSpec        specShare         priceLag    
- Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :12.97  
- 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:14.04  
- Median :0.0136   Median :0.0000   Median :0.0000   Median :14.37  
- Mean   :0.2494   Mean   :0.2607   Mean   :0.2499   Mean   :14.37  
- 3rd Qu.:0.4552   3rd Qu.:0.5000   3rd Qu.:0.4743   3rd Qu.:14.77  
- Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :15.64  
- NA's   :716      NA's   :1643     NA's   :1424     NA's   :1106   
-> print(quantile(shares[,specShare],seq(.1,.9,.1),na.rm=TRUE))
-      10%       20%       30%       40%       50%       60%       70%       80% 
-0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.3333333 0.6666667 
-      90% 
-1.0000000 
-> print(quantile(shares[,shareType],seq(.1,.9,.1),na.rm=TRUE))
-       10%        20%        30%        40%        50%        60%        70% 
-0.00000000 0.00000000 0.00000000 0.00000000 0.01356025 0.18181818 0.34701449 
-       80%        90% 
-0.54717742 0.86138938 
+   shareType         typeSpec        specShare       customShare    
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000  
+ Median :0.1372   Median :0.1519   Median :0.0000   Median :0.1304  
+ Mean   :0.2495   Mean   :0.2511   Mean   :0.2499   Mean   :0.2494  
+ 3rd Qu.:0.4414   3rd Qu.:0.4286   3rd Qu.:0.4643   3rd Qu.:0.4359  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+ NA's   :456      NA's   :1274     NA's   :876      NA's   :504     
+    priceLag    
+ Min.   :12.97  
+ 1st Qu.:13.98  
+ Median :14.33  
+ Mean   :14.33  
+ 3rd Qu.:14.73  
+ Max.   :15.81  
+ NA's   :833    
+> 
+> print("Herf")
+[1] "Herf"
+> print(summary(shares[,sum(shareType^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty          V1        
+ Min.   :2010   Length:672         Min.   :0.0   Min.   :0.2092  
+ 1st Qu.:2013   Class :character   1st Qu.:0.0   1st Qu.:0.4295  
+ Median :2016   Mode  :character   Median :0.5   Median :0.5147  
+ Mean   :2016                      Mean   :0.5   Mean   :0.5815  
+ 3rd Qu.:2020                      3rd Qu.:1.0   3rd Qu.:0.7017  
+ Max.   :2023                      Max.   :1.0   Max.   :1.0000  
+                                                 NA's   :114     
+> print(summary(shares[,sum(customShare^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty          V1        
+ Min.   :2010   Length:672         Min.   :0.0   Min.   :0.2092  
+ 1st Qu.:2013   Class :character   1st Qu.:0.0   1st Qu.:0.4380  
+ Median :2016   Mode  :character   Median :0.5   Median :0.5320  
+ Mean   :2016                      Mean   :0.5   Mean   :0.6021  
+ 3rd Qu.:2020                      3rd Qu.:1.0   3rd Qu.:0.7348  
+ Max.   :2023                      Max.   :1.0   Max.   :1.0000  
+                                                 NA's   :126     
+> print(summary(shares[,sum(specShare^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty          V1        
+ Min.   :2010   Length:672         Min.   :0.0   Min.   :0.3333  
+ 1st Qu.:2013   Class :character   1st Qu.:0.0   1st Qu.:0.5200  
+ Median :2016   Mode  :character   Median :0.5   Median :0.7025  
+ Mean   :2016                      Mean   :0.5   Mean   :0.7381  
+ 3rd Qu.:2020                      3rd Qu.:1.0   3rd Qu.:1.0000  
+ Max.   :2023                      Max.   :1.0   Max.   :1.0000  
+                                                 NA's   :219     
 > print("pre duplex")
 [1] "pre duplex"
-> print(quantile(shares[year<2019,specShare],seq(.1,.9,.1),na.rm=TRUE))
-      10%       20%       30%       40%       50%       60%       70%       80% 
-0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.3126566 0.6666667 
-      90% 
-1.0000000 
-> print(quantile(shares[year<2019,shareType],seq(.1,.9,.1),na.rm=TRUE))
-      10%       20%       30%       40%       50%       60%       70%       80% 
-0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.1785714 0.3571429 0.5471774 
-      90% 
-0.9000000 
+> print(summary(shares[year<2019,sum(shareType^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty          V1        
+ Min.   :2010   Length:432         Min.   :0.0   Min.   :0.2988  
+ 1st Qu.:2012   Class :character   1st Qu.:0.0   1st Qu.:0.4515  
+ Median :2014   Mode  :character   Median :0.5   Median :0.5269  
+ Mean   :2014                      Mean   :0.5   Mean   :0.6038  
+ 3rd Qu.:2016                      3rd Qu.:1.0   3rd Qu.:0.7521  
+ Max.   :2018                      Max.   :1.0   Max.   :1.0000  
+                                                 NA's   :71      
+> print(summary(shares[year<2019,sum(customShare^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty          V1        
+ Min.   :2010   Length:432         Min.   :0.0   Min.   :0.2222  
+ 1st Qu.:2012   Class :character   1st Qu.:0.0   1st Qu.:0.4609  
+ Median :2014   Mode  :character   Median :0.5   Median :0.5671  
+ Mean   :2014                      Mean   :0.5   Mean   :0.6262  
+ 3rd Qu.:2016                      3rd Qu.:1.0   3rd Qu.:0.7870  
+ Max.   :2018                      Max.   :1.0   Max.   :1.0000  
+                                                 NA's   :79      
+> print(summary(shares[year<2019,sum(specShare^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty          V1        
+ Min.   :2010   Length:432         Min.   :0.0   Min.   :0.3333  
+ 1st Qu.:2012   Class :character   1st Qu.:0.0   1st Qu.:0.5130  
+ Median :2014   Mode  :character   Median :0.5   Median :0.6526  
+ Mean   :2014                      Mean   :0.5   Mean   :0.7165  
+ 3rd Qu.:2016                      3rd Qu.:1.0   3rd Qu.:1.0000  
+ Max.   :2018                      Max.   :1.0   Max.   :1.0000  
+                                                 NA's   :114     
+> print(summary(shares[thirty==1 &year<2019,sum(shareType^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty        V1        
+ Min.   :2010   Length:216         Min.   :1   Min.   :0.3394  
+ 1st Qu.:2012   Class :character   1st Qu.:1   1st Qu.:0.5000  
+ Median :2014   Mode  :character   Median :1   Median :0.6167  
+ Mean   :2014                      Mean   :1   Mean   :0.6602  
+ 3rd Qu.:2016                      3rd Qu.:1   3rd Qu.:0.8321  
+ Max.   :2018                      Max.   :1   Max.   :1.0000  
+                                               NA's   :52      
+> print(summary(shares[thirty==1 &year<2019,sum(customShare^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty        V1        
+ Min.   :2010   Length:216         Min.   :1   Min.   :0.3344  
+ 1st Qu.:2012   Class :character   1st Qu.:1   1st Qu.:0.5118  
+ Median :2014   Mode  :character   Median :1   Median :0.6608  
+ Mean   :2014                      Mean   :1   Mean   :0.6951  
+ 3rd Qu.:2016                      3rd Qu.:1   3rd Qu.:0.8953  
+ Max.   :2018                      Max.   :1   Max.   :1.0000  
+                                               NA's   :58      
+> print(summary(shares[thirty==1 &year<2019,sum(specShare^2),by=.(year,nbhd,thirty)]))
+      year          nbhd               thirty        V1        
+ Min.   :2010   Length:216         Min.   :1   Min.   :0.3333  
+ 1st Qu.:2012   Class :character   1st Qu.:1   1st Qu.:0.5556  
+ Median :2014   Mode  :character   Median :1   Median :0.7863  
+ Mean   :2014                      Mean   :1   Mean   :0.7685  
+ 3rd Qu.:2016                      3rd Qu.:1   3rd Qu.:1.0000  
+ Max.   :2018                      Max.   :1   Max.   :1.0000  
+                                               NA's   :79      
 > 
-> for (y in seq(2010:2018)) {
-+ 	print(y) 
-+ 	print((shares[type=="laneway" & year==y,mean(specShare,na.rm=TRUE)]))
-+ 	print((shares[type=="laneway" & year==y,mean(shareType,na.rm=TRUE)]))
-+ }
-[1] 1
-[1] NaN
-[1] NaN
-[1] 2
-[1] NaN
-[1] NaN
-[1] 3
-[1] NaN
-[1] NaN
-[1] 4
-[1] NaN
-[1] NaN
-[1] 5
-[1] NaN
-[1] NaN
-[1] 6
-[1] NaN
-[1] NaN
-[1] 7
-[1] NaN
-[1] NaN
-[1] 8
-[1] NaN
-[1] NaN
-[1] 9
-[1] NaN
-[1] NaN
 > 
 > dnew <- d24[MB_Year_Built>FIRST_BUILT & MB_Year_Built<2023]
+> print(dnew[MB_Year_Built>2016,mean(spec),by=.(thirty,fifty)])
+   thirty  fifty        V1
+   <lgcl> <lgcl>     <num>
+1:  FALSE  FALSE 0.1671852
+2:   TRUE  FALSE 0.2483341
+3:  FALSE   TRUE 0.1433333
 > print(dnew[MB_Year_Built>2016,mean(spec),by=type])
-       type        V1
-     <char>     <num>
-1:   single 0.1084906
-2:   duplex 0.5115453
-3:  laneway 0.1606008
-4: basement 0.1623188
+       type         V1
+     <char>      <num>
+1:   single 0.09202454
+2:  laneway 0.13178966
+3: basement 0.12663317
+4:   duplex 0.46790300
+5:    other 0.00000000
 > print(dnew[MB_Year_Built>2016,mean(spec),by=MB_Year_Built])
    MB_Year_Built        V1
            <int>     <num>
-1:          2019 0.1498829
-2:          2020 0.2875318
-3:          2018 0.1575221
-4:          2021 0.3842365
-5:          2022 0.2558528
-6:          2017 0.1515152
+1:          2018 0.1238806
+2:          2022 0.2187318
+3:          2021 0.2987698
+4:          2019 0.1255526
+5:          2017 0.1297872
+6:          2020 0.2612420
 > print(dnew[MB_Year_Built>2016,quantile(improvementValue,na.rm=TRUE),by=.(spec)])
-     spec     V1
-    <num>  <num>
- 1:     0   6800
- 2:     0  24800
- 3:     0  34500
- 4:     0  68600
- 5:     0 591000
- 6:     1   9200
- 7:     1  22400
- 8:     1  29300
- 9:     1  46400
-10:     1 411000
+     spec      V1
+    <num>   <num>
+ 1:     1    9200
+ 2:     1   23200
+ 3:     1   30200
+ 4:     1   47800
+ 5:     1  724000
+ 6:     0       0
+ 7:     0   26400
+ 8:     0   38500
+ 9:     0   75500
+10:     0 2781000
 > print(dnew[MB_Year_Built>2016,mean(improvementValue,na.rm=TRUE),by=.(spec)])
     spec       V1
    <num>    <num>
-1:     0 59575.61
-2:     1 44648.06
+1:     1 47409.79
+2:     0 71529.08
 > print(summary(feols(improvementValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
 OLS estimation, Dep. Var.: improvementValue
-Observations: 2,851
-Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 196
+Observations: 7,672
+Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 238
 Standard-errors: Clustered (MB_Year_Built^NEIGHBOURHOOD^thirty) 
-     Estimate Std. Error  t value  Pr(>|t|)    
-spec -9497.31    3591.09 -2.64468 0.0088429 ** 
+     Estimate Std. Error  t value   Pr(>|t|)    
+spec   -11044    2763.71 -3.99607 8.6017e-05 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 49,937.0     Adj. R2: 0.325019
-                 Within R2: 0.004768
+RMSE: 84,838.1     Adj. R2: 0.187771
+                 Within R2: 0.002227
 > print(summary(feols(log(improvementValue)~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
+NOTE: 4 observations removed because of infinite values (LHS: 4).
 OLS estimation, Dep. Var.: log(improvementValue)
-Observations: 2,851
-Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 196
+Observations: 7,668
+Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 238
 Standard-errors: Clustered (MB_Year_Built^NEIGHBOURHOOD^thirty) 
-      Estimate Std. Error  t value Pr(>|t|)    
-spec -0.161608   0.055616 -2.90578 0.004087 ** 
+      Estimate Std. Error  t value   Pr(>|t|)    
+spec -0.164187   0.035534 -4.62052 6.2865e-06 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.618011     Adj. R2: 0.290685
-                 Within R2: 0.008976
+RMSE: 0.708926     Adj. R2: 0.237234
+                 Within R2: 0.007018
 > print(summary(feols(landValue~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
 OLS estimation, Dep. Var.: landValue
-Observations: 2,851
-Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 196
+Observations: 7,672
+Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 238
 Standard-errors: Clustered (MB_Year_Built^NEIGHBOURHOOD^thirty) 
-     Estimate Std. Error  t value Pr(>|t|) 
-spec   4674.6    7734.85 0.604355  0.54631 
+     Estimate Std. Error t value Pr(>|t|) 
+spec -20985.9    17681.3 -1.1869  0.23646 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 126,330.7     Adj. R2: 0.942851
-                  Within R2: 1.813e-4
+RMSE: 617,838.4     Adj. R2: 0.600807
+                  Within R2: 1.519e-4
 > print(summary(feols(log(landValue)~spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=dnew[MB_Year_Built>2016])))
 OLS estimation, Dep. Var.: log(landValue)
-Observations: 2,851
-Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 196
+Observations: 7,672
+Fixed-effects: MB_Year_Built^NEIGHBOURHOOD^thirty: 238
 Standard-errors: Clustered (MB_Year_Built^NEIGHBOURHOOD^thirty) 
-     Estimate Std. Error  t value Pr(>|t|) 
-spec 0.000486   0.005814 0.083571  0.93348 
+      Estimate Std. Error  t value Pr(>|t|)    
+spec -0.014238   0.007124 -1.99873  0.04678 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.077483     Adj. R2: 0.943955
-                 Within R2: 5.209e-6
+RMSE: 0.162215     Adj. R2: 0.843202
+                 Within R2: 0.001014
 > 
 > # neighbourhood and type variation in spec?
 > print(dnew[,mean(spec),by=type])
-       type        V1
-     <char>     <num>
-1:   single 0.3161189
-2:   duplex 0.5034965
-3: basement 0.4026549
-4:  laneway 0.2839844
-5:    other 0.2000000
+       type         V1
+     <char>      <num>
+1:   single 0.26017875
+2: basement 0.35211268
+3:  laneway 0.27062323
+4:   duplex 0.46348315
+5:    other 0.07692308
 > print(dnew[,.(mean(spec),mean(type=="duplex")),by=.(NEIGHBOURHOOD)])
                         NEIGHBOURHOOD        V1         V2
                                <char>     <num>      <num>
- 1:                        Point Grey 0.3214286 0.01428571
- 2:                         Kitsilano 0.2761506 0.05648536
- 3:                            Dunbar 0.3366337 0.00990099
- 4: Arbutus Ridge - Mackenzie Heights 0.3055556 0.02083333
- 5:                        Kerrisdale 0.2460317 0.04761905
- 6:                        Southlands 0.4634146 0.12195122
- 7:                       Shaughnessy 0.2631579 0.00000000
- 8:                            Cambie 0.2472648 0.06126915
- 9:                   South Granville 0.3508772 0.00000000
-10:                          Oakridge 0.2894737 0.00000000
-11:                           Marpole 0.3746224 0.09969789
-12:                         Grandview 0.3921569 0.43137255
-13:                     Cedar Cottage 0.3068783 0.13227513
-14:                     Main & Fraser 0.3443073 0.05624143
-15:                   South Vancouver 0.2547170 0.05660377
-16:                            Knight 0.3241252 0.06077348
-17:                     Hastings East 0.4307932 0.14930016
-18:                           Renfrew 0.4155556 0.08666667
-19:                   Renfrew Heights 0.3344371 0.11589404
-20:                       Collingwood 0.3730570 0.10362694
-21:                         Killarney 0.3453815 0.07831325
-22:                        Fraserview 0.2397260 0.02739726
+ 1:                        Point Grey 0.2598985 0.01421320
+ 2:                         Kitsilano 0.2790698 0.05426357
+ 3:                            Dunbar 0.2741935 0.02052786
+ 4: Arbutus Ridge - Mackenzie Heights 0.3027167 0.03492885
+ 5:                        Kerrisdale 0.2744526 0.03357664
+ 6:                        Southlands 0.2857143 0.06233766
+ 7:                       Shaughnessy 0.1620553 0.00000000
+ 8:                            Cambie 0.2873326 0.04222451
+ 9:                   South Granville 0.1934307 0.02919708
+10:                          Oakridge 0.2796781 0.03822938
+11:                           Marpole 0.3936652 0.10407240
+12:                         Grandview 0.3474576 0.22033898
+13:                     Cedar Cottage 0.3101604 0.08021390
+14:                     Main & Fraser 0.3313449 0.05748373
+15:                   South Vancouver 0.2405303 0.04431818
+16:                            Knight 0.3056680 0.05600540
+17:                     Hastings East 0.3757143 0.13142857
+18:                           Renfrew 0.3642801 0.09362707
+19:                   Renfrew Heights 0.3416185 0.07283237
+20:                       Collingwood 0.3077790 0.09470124
+21:                         Killarney 0.3091398 0.08019713
+22:                        Fraserview 0.2861635 0.07756813
                         NEIGHBOURHOOD        V1         V2
 > print(dnew[MB_Year_Built<2019,.(mean(spec),mean(type=="duplex")),by=.(NEIGHBOURHOOD)])
                         NEIGHBOURHOOD        V1         V2
                                <char>     <num>      <num>
- 1:                        Point Grey 0.3636364 0.00000000
- 2:                         Kitsilano 0.3052632 0.00000000
- 3:                            Dunbar 0.3849287 0.00000000
- 4: Arbutus Ridge - Mackenzie Heights 0.3727273 0.00000000
- 5:                        Kerrisdale 0.2879581 0.00000000
- 6:                        Southlands 0.4666667 0.00000000
- 7:                       Shaughnessy 0.2777778 0.00000000
- 8:                            Cambie 0.2904110 0.02739726
- 9:                   South Granville 0.5263158 0.00000000
-10:                          Oakridge 0.3027523 0.00000000
-11:                           Marpole 0.4047619 0.00000000
-12:                         Grandview 0.0000000 0.00000000
-13:                     Cedar Cottage 0.2750000 0.00000000
-14:                     Main & Fraser 0.3402778 0.00000000
-15:                   South Vancouver 0.2649800 0.00000000
-16:                            Knight 0.3497758 0.00000000
-17:                     Hastings East 0.4726891 0.00000000
-18:                           Renfrew 0.4025605 0.00000000
-19:                   Renfrew Heights 0.3433476 0.00000000
-20:                       Collingwood 0.4054054 0.00000000
-21:                         Killarney 0.3206107 0.00000000
-22:                        Fraserview 0.2619048 0.00000000
+ 1:                        Point Grey 0.2961039 0.00000000
+ 2:                         Kitsilano 0.3111546 0.00000000
+ 3:                            Dunbar 0.3246994 0.00000000
+ 4: Arbutus Ridge - Mackenzie Heights 0.3509061 0.00000000
+ 5:                        Kerrisdale 0.3205829 0.00000000
+ 6:                        Southlands 0.3123028 0.01261830
+ 7:                       Shaughnessy 0.1859296 0.00000000
+ 8:                            Cambie 0.3341677 0.02377972
+ 9:                   South Granville 0.2597403 0.00000000
+10:                          Oakridge 0.3009259 0.00000000
+11:                           Marpole 0.4314516 0.00000000
+12:                         Grandview 0.2835821 0.00000000
+13:                     Cedar Cottage 0.3186813 0.00000000
+14:                     Main & Fraser 0.3372093 0.00000000
+15:                   South Vancouver 0.2479924 0.00000000
+16:                            Knight 0.3276740 0.00000000
+17:                     Hastings East 0.4028986 0.00000000
+18:                           Renfrew 0.3453094 0.00000000
+19:                   Renfrew Heights 0.3692762 0.00000000
+20:                       Collingwood 0.3255132 0.00000000
+21:                         Killarney 0.3070326 0.00000000
+22:                        Fraserview 0.3249300 0.00000000
                         NEIGHBOURHOOD        V1         V2
 > 
 > # note individual reg actually lower t-stat than group level
@@ -1486,455 +1612,610 @@ Saving 7 x 7 in image
 > print(dnew[order(MB_year_built),.(.N,mean(spec)),by=.(MB_year_built)])
     MB_year_built     N         V2
             <int> <int>      <num>
- 1:          1905     3 0.00000000
+ 1:          1905     8 0.50000000
  2:          1906     4 0.00000000
- 3:          1907     2 0.00000000
- 4:          1908     7 0.00000000
- 5:          1910    25 0.44000000
- 6:          1911    10 0.50000000
- 7:          1912    34 0.67647059
- 8:          1913    17 0.52941176
- 9:          1914    20 0.40000000
-10:          1915     6 0.33333333
-11:          1916     3 0.00000000
-12:          1918     2 0.00000000
-13:          1919     2 0.00000000
-14:          1920     9 0.22222222
-15:          1921     8 0.87500000
-16:          1922    17 0.29411765
-17:          1923    15 0.00000000
-18:          1924     5 1.00000000
-19:          1925    14 0.00000000
-20:          1926    45 0.33333333
-21:          1927    46 0.30434783
-22:          1928    40 0.30000000
-23:          1929    16 0.37500000
-24:          1930    40 0.25000000
-25:          1931    28 0.35714286
-26:          1932    10 0.50000000
-27:          1935     1 0.00000000
-28:          1936     8 0.50000000
-29:          1937     6 0.00000000
-30:          1938    12 0.16666667
-31:          1939    25 0.28000000
-32:          1940    25 0.28000000
-33:          1941    24 0.33333333
-34:          1942    30 0.56666667
-35:          1943     5 0.20000000
-36:          1944    37 0.54054054
-37:          1945    32 0.34375000
-38:          1946    51 0.23529412
-39:          1947    30 0.30000000
-40:          1948    44 0.15909091
-41:          1949    21 0.42857143
-42:          1950    20 0.20000000
-43:          1951    16 0.31250000
-44:          1952    18 0.11111111
-45:          1953    36 0.33333333
-46:          1954     8 0.00000000
-47:          1955    30 0.43333333
-48:          1956    18 0.05555556
-49:          1957    13 0.15384615
-50:          1958    18 0.16666667
-51:          1959    10 0.60000000
-52:          1960     7 0.14285714
-53:          1961    10 0.20000000
-54:          1962    11 0.63636364
-55:          1963     8 0.12500000
-56:          1964    20 0.15000000
-57:          1965     9 0.00000000
-58:          1966    12 0.00000000
-59:          1967     2 1.00000000
-60:          1968     5 0.00000000
-61:          1969     1 0.00000000
-62:          1971     2 0.00000000
-63:          1972     8 0.25000000
-64:          1973     5 0.40000000
-65:          1974     7 0.00000000
-66:          1975     2 0.00000000
-67:          1976     6 0.00000000
-68:          1977     5 0.00000000
-69:          1978     4 0.00000000
-70:          1979     4 1.00000000
-71:          1980     4 0.00000000
-72:          1981     2 0.00000000
-73:          1983     3 0.00000000
-74:          1984     2 1.00000000
-75:          1987     2 0.00000000
-76:          1988     5 0.80000000
-77:          1989     6 0.00000000
-78:          1993     3 0.00000000
-79:          1997     1 0.00000000
-80:          1999     1 0.00000000
-81:          2011  1034 0.43133462
-82:          2012  1056 0.44602273
-83:          2013   920 0.40000000
-84:          2014   922 0.38828633
-85:          2015  1083 0.32779317
-86:          2016   504 0.24007937
-87:          2017   469 0.14925373
-88:          2018   572 0.16083916
-89:          2019   444 0.14639640
-90:          2020   194 0.36597938
-91:            NA    49 0.12244898
+ 3:          1907     3 0.33333333
+ 4:          1908    13 0.46153846
+ 5:          1909     6 0.66666667
+ 6:          1910    71 0.42253521
+ 7:          1911    16 0.43750000
+ 8:          1912    86 0.38372093
+ 9:          1913    20 0.60000000
+10:          1914    28 0.28571429
+11:          1915    18 0.22222222
+12:          1916     3 0.00000000
+13:          1918     5 0.00000000
+14:          1919     7 0.00000000
+15:          1920    25 0.40000000
+16:          1921    19 0.36842105
+17:          1922    37 0.21621622
+18:          1923    34 0.17647059
+19:          1924    30 0.36666667
+20:          1925    47 0.08510638
+21:          1926    70 0.28571429
+22:          1927    81 0.25925926
+23:          1928    78 0.29487179
+24:          1929    45 0.15555556
+25:          1930    71 0.14084507
+26:          1931    48 0.29166667
+27:          1932    16 0.31250000
+28:          1933     1 0.00000000
+29:          1934     7 0.00000000
+30:          1935    12 0.16666667
+31:          1936    23 0.17391304
+32:          1937    19 0.00000000
+33:          1938    59 0.06779661
+34:          1939    41 0.21951220
+35:          1940    49 0.28571429
+36:          1941    64 0.21875000
+37:          1942    56 0.51785714
+38:          1943    18 0.44444444
+39:          1944    96 0.35416667
+40:          1945    63 0.31746032
+41:          1946   139 0.23021583
+42:          1947    86 0.33720930
+43:          1948   138 0.16666667
+44:          1949    69 0.31884058
+45:          1950   108 0.21296296
+46:          1951    52 0.48076923
+47:          1952    66 0.25757576
+48:          1953   125 0.24800000
+49:          1954    63 0.30158730
+50:          1955    58 0.37931034
+51:          1956    58 0.13793103
+52:          1957    59 0.27118644
+53:          1958    79 0.34177215
+54:          1959    37 0.21621622
+55:          1960    35 0.14285714
+56:          1961    27 0.18518519
+57:          1962    60 0.35000000
+58:          1963    31 0.22580645
+59:          1964    70 0.20000000
+60:          1965    60 0.30000000
+61:          1966    50 0.00000000
+62:          1967    19 0.26315789
+63:          1968    14 0.00000000
+64:          1969     5 0.00000000
+65:          1971    17 0.23529412
+66:          1972    11 0.18181818
+67:          1973    19 0.10526316
+68:          1974    14 0.00000000
+69:          1975     5 0.60000000
+70:          1976    14 0.28571429
+71:          1977    16 0.12500000
+72:          1978     5 0.20000000
+73:          1979     8 0.50000000
+74:          1980    13 0.00000000
+75:          1981     2 0.00000000
+76:          1983     5 0.00000000
+77:          1984     2 1.00000000
+78:          1985     3 0.00000000
+79:          1986     5 0.00000000
+80:          1987     9 0.00000000
+81:          1988     8 0.62500000
+82:          1989    11 0.00000000
+83:          1990     4 0.00000000
+84:          1991     4 0.00000000
+85:          1992     4 0.00000000
+86:          1993    11 0.00000000
+87:          1997     5 0.00000000
+88:          1999     1 0.00000000
+89:          2011  2839 0.40225431
+90:          2012  2923 0.39958946
+91:          2013  2588 0.39026275
+92:          2014  2672 0.39520958
+93:          2015  2649 0.28463571
+94:          2016  1367 0.18800293
+95:          2017  1429 0.12876137
+96:          2018  1382 0.12301013
+97:          2019  1206 0.12354892
+98:          2020   439 0.29384966
+99:            NA   106 0.20754717
     MB_year_built     N         V2
 > print(dnew[order(MB_effective_year),.(.N,mean(spec)),by=.(MB_effective_year)])
-    MB_effective_year     N        V2
-                <int> <int>     <num>
- 1:              1910     1 0.0000000
- 2:              1922     2 1.0000000
- 3:              1926     5 0.2000000
- 4:              1927     2 1.0000000
- 5:              1928     3 1.0000000
- 6:              1931     7 0.5714286
- 7:              1936     4 1.0000000
- 8:              1939    13 0.5384615
- 9:              1940    12 0.3333333
-10:              1941    11 0.3636364
-11:              1942    21 0.7142857
-12:              1943     5 0.0000000
-13:              1944    18 0.6111111
-14:              1945    10 0.2000000
-15:              1946    19 0.0000000
-16:              1947    19 0.4736842
-17:              1948    26 0.1923077
-18:              1949    21 0.4285714
-19:              1950    25 0.2400000
-20:              1951    16 0.5000000
-21:              1952     3 0.6666667
-22:              1953    26 0.1923077
-23:              1954     2 0.0000000
-24:              1955    53 0.5471698
-25:              1956    11 0.0000000
-26:              1957    10 0.2000000
-27:              1958     6 0.5000000
-28:              1959    12 0.5000000
-29:              1960   149 0.2953020
-30:              1961     4 0.5000000
-31:              1962     7 0.8571429
-32:              1963     9 0.1111111
-33:              1964    17 0.1176471
-34:              1965   182 0.3516484
-35:              1966     6 0.5000000
-36:              1967     3 0.0000000
-37:              1968     7 0.0000000
-38:              1969     1 0.0000000
-39:              1970   117 0.2307692
-40:              1971     7 0.0000000
-41:              1972     8 0.2500000
-42:              1973     7 0.2857143
-43:              1974     6 0.1666667
-44:              1975    78 0.2435897
-45:              1976     3 0.0000000
-46:              1977     8 0.0000000
-47:              1978     4 0.0000000
-48:              1979     4 1.0000000
-49:              1980    49 0.1632653
-50:              1982     4 0.5000000
-51:              1983     3 0.0000000
-52:              1984     6 0.3333333
-53:              1985    28 0.1428571
-54:              1987     5 0.0000000
-55:              1988     4 1.0000000
-56:              1989     6 0.0000000
-57:              1990    10 0.1000000
-58:              1992     1 0.0000000
-59:              1993     3 0.0000000
-60:              1995     6 0.0000000
-61:              1997     1 0.0000000
-62:              1999     1 0.0000000
-63:              2000     3 0.0000000
-64:              2011   728 0.3983516
-65:              2012  1093 0.4409881
-66:              2013  1048 0.4045802
-67:              2014   691 0.4225760
-68:              2015  1112 0.3776978
-69:              2016   684 0.2602339
-70:              2017   413 0.1912833
-71:              2018   640 0.1453125
-72:              2019   579 0.1485320
-73:              2020   213 0.3427230
-74:                NA    49 0.1224490
-    MB_effective_year     N        V2
+    MB_effective_year     N         V2
+                <int> <int>      <num>
+ 1:              1910     3 0.00000000
+ 2:              1922     5 1.00000000
+ 3:              1925     1 0.00000000
+ 4:              1926     5 0.20000000
+ 5:              1927     2 1.00000000
+ 6:              1928     5 1.00000000
+ 7:              1929     3 0.00000000
+ 8:              1930     2 0.00000000
+ 9:              1931    17 0.23529412
+10:              1935     5 0.40000000
+11:              1936     8 0.50000000
+12:              1938    10 0.20000000
+13:              1939    21 0.42857143
+14:              1940    25 0.44000000
+15:              1941    23 0.26086957
+16:              1942    36 0.58333333
+17:              1943    13 0.15384615
+18:              1944    38 0.42105263
+19:              1945    21 0.23809524
+20:              1946    61 0.18032787
+21:              1947    47 0.34042553
+22:              1948    61 0.11475410
+23:              1949    59 0.27118644
+24:              1950   101 0.27722772
+25:              1951    60 0.46666667
+26:              1952    44 0.31818182
+27:              1953   104 0.25961538
+28:              1954    43 0.48837209
+29:              1955   131 0.36641221
+30:              1956    45 0.08888889
+31:              1957    41 0.34146341
+32:              1958    45 0.51111111
+33:              1959    20 0.35000000
+34:              1960   326 0.24233129
+35:              1961     9 0.55555556
+36:              1962    42 0.42857143
+37:              1963    20 0.35000000
+38:              1964    59 0.18644068
+39:              1965   425 0.28000000
+40:              1966    23 0.13043478
+41:              1967    19 0.26315789
+42:              1968    22 0.04545455
+43:              1969     5 0.00000000
+44:              1970   329 0.24012158
+45:              1971    13 0.00000000
+46:              1972    17 0.11764706
+47:              1973    18 0.11111111
+48:              1974    13 0.07692308
+49:              1975   215 0.21395349
+50:              1976    11 0.27272727
+51:              1977    16 0.12500000
+52:              1978     8 0.00000000
+53:              1979     8 0.50000000
+54:              1980   130 0.17692308
+55:              1982     4 0.50000000
+56:              1983     5 0.00000000
+57:              1984     9 0.22222222
+58:              1985    86 0.06976744
+59:              1986     5 0.00000000
+60:              1987    14 0.00000000
+61:              1988    11 0.36363636
+62:              1989    11 0.00000000
+63:              1990    51 0.27450980
+64:              1991     6 0.00000000
+65:              1992    12 0.00000000
+66:              1993    13 0.00000000
+67:              1994     1 1.00000000
+68:              1995    18 0.00000000
+69:              1996     2 0.00000000
+70:              1997     5 0.00000000
+71:              1999     1 0.00000000
+72:              2000    10 0.00000000
+73:              2005     1 1.00000000
+74:              2011  1999 0.39319660
+75:              2012  3065 0.39738989
+76:              2013  2795 0.38318426
+77:              2014  2064 0.39680233
+78:              2015  2850 0.36491228
+79:              2016  1819 0.20890599
+80:              2017  1198 0.15525876
+81:              2018  1681 0.11540750
+82:              2019  1531 0.12344873
+83:              2020   495 0.27474747
+84:                NA   106 0.20754717
+    MB_effective_year     N         V2
 > print(dnew[improvementValue>400000])
 Key: <ROLL_NUMBER24>
-       ROLL_NUMBER24           Roll  rollStart   FOLIO_ID
-               <i64>         <char>      <num>     <char>
-   1:  1040674670000  1040674670000  104067467 A000000081
-   2:  1040674670000  1040674670000  104067467 A000000081
-   3:  1040674670000  1040674670000  104067467 A000000081
-   4:  1040674670000  1040674670000  104067467 A000000081
-   5:  1634024360000  1634024360000  163402436 A0000000FG
-  ---                                                    
-4134: 25828251390000 25828251390000 2582825139 A000003GRA
-4135: 25828251390000 25828251390000 2582825139 A000003GRA
-4136: 25828251390000 25828251390000 2582825139 A000003GRA
-4137: 25828251390000 25828251390000 2582825139 A000003GRA
-4138: 25828251390000 25828251390000 2582825139 A000003GRA
-               ACTUAL_USE_DESCRIPTION JURISDICTION_CODE NEIGHBOURHOOD nchar
-                               <char>             <int>        <char> <int>
-   1: Residential Dwelling with Suite               200    Point Grey    15
-   2: Residential Dwelling with Suite               200    Point Grey    15
-   3: Residential Dwelling with Suite               200    Point Grey    15
-   4: Residential Dwelling with Suite               200    Point Grey    15
-   5:          Single Family Dwelling               200    Point Grey    15
-  ---                                                                      
-4134: Residential Dwelling with Suite               200    Fraserview    15
-4135: Residential Dwelling with Suite               200    Fraserview    15
-4136: Residential Dwelling with Suite               200    Fraserview    15
-4137: Residential Dwelling with Suite               200    Fraserview    15
-4138: Residential Dwelling with Suite               200    Fraserview    15
-      splitspot rollEnd24 Jurisdiction MB_Year_Built Zoning UNIT_NUMBER
-          <int>     <num>        <int>         <int> <char>      <char>
-   1:        11         0          200          2011    RS1            
-   2:        11         0          200          2011    RS1            
-   3:        11         0          200          2011    RS1            
-   4:        11         0          200          2011    RS1            
-   5:        11         0          200          2011    RS1            
-  ---                                                                  
-4134:        11         0          200          2013    RS1            
-4135:        11         0          200          2013    RS1            
-4136:        11         0          200          2013    RS1            
-4137:        11         0          200          2013    RS1            
-4138:        11         0          200          2013    RS1            
-      STREET_NUMBER STREET_DIRECTION_PREFIX STREET_NAME STREET_TYPE
-              <int>                  <char>      <char>      <char>
-   1:          2767                                ALMA          ST
-   2:          2767                                ALMA          ST
-   3:          2765                                ALMA          ST
-   4:          2765                                ALMA          ST
-   5:          4460                                 1ST         AVE
-  ---                                                              
-4134:          2127                            HARRISON          DR
-4135:          2127                            HARRISON          DR
-4136:          2129                            HARRISON          DR
-4137:          2129                            HARRISON          DR
-4138:          2129                            HARRISON          DR
-      STREET_DIRECTION_SUFFIX POSTAL_CODE      fullStreet24 streetNoNumber24
-                       <char>      <char>            <char>           <char>
-   1:                             V6R 3S3     2767  ALMA ST          ALMA ST
-   2:                             V6R 3S3     2767  ALMA ST          ALMA ST
-   3:                             V6R 3S3     2765  ALMA ST          ALMA ST
-   4:                             V6R 3S3     2765  ALMA ST          ALMA ST
-   5:                       W     V6R 4J4   4460  1ST AVE W        1ST AVE W
-  ---                                                                       
-4134:                             V5P 2P7 2127  HARRISON DR      HARRISON DR
-4135:                             V5P 2P7 2127  HARRISON DR      HARRISON DR
-4136:                             V5P 2P7 2129  HARRISON DR      HARRISON DR
-4137:                             V5P 2P7 2129  HARRISON DR      HARRISON DR
-4138:                             V5P 2P7 2129  HARRISON DR      HARRISON DR
-      streetNumber24    folioID    roll_number MB_year_built MB_effective_year
-               <int>     <char>          <i64>         <int>             <int>
-   1:           2767 A000000081  1040674670000          2011              2011
-   2:           2767 A000000081  1040674670000          2011              2011
-   3:           2765 A000000081  1040674670000          2011              2011
-   4:           2765 A000000081  1040674670000          2011              2011
-   5:           4460 A0000000FG  1634024360000          2011              2011
-  ---                                                                         
-4134:           2127 A000003GRA 25828251390000          2013              2013
-4135:           2127 A000003GRA 25828251390000          2013              2013
-4136:           2129 A000003GRA 25828251390000          2013              2013
-4137:           2129 A000003GRA 25828251390000          2013              2013
-4138:           2129 A000003GRA 25828251390000          2013              2013
-      landValue improvementValue streetNumber streetDirectionPrefix streetName
-          <int>            <int>        <int>                <lgcl>     <char>
-   1:   1356000           707000         2765                    NA       ALMA
-   2:   1356000           707000         2767                    NA       ALMA
-   3:   1356000           707000         2765                    NA       ALMA
-   4:   1356000           707000         2767                    NA       ALMA
-   5:   3624000          1149000         4460                    NA        1ST
-  ---                                                                         
-4134:   1302000          1016000         2127                    NA   HARRISON
-4135:   1302000          1016000         2129                    NA   HARRISON
-4136:   1302000          1016000         2125                    NA   HARRISON
-4137:   1302000          1016000         2127                    NA   HARRISON
-4138:   1302000          1016000         2129                    NA   HARRISON
-      streetType streetDirectionSuffix postalCode      city thirty  fifty
-          <char>                <char>     <char>    <char> <lgcl> <lgcl>
-   1:         ST                          V6R 3S3 VANCOUVER   TRUE  FALSE
-   2:         ST                          V6R 3S3 VANCOUVER   TRUE  FALSE
-   3:         ST                          V6R 3S3 VANCOUVER   TRUE  FALSE
-   4:         ST                          V6R 3S3 VANCOUVER   TRUE  FALSE
-   5:        AVE                     W    V6R 4J4 VANCOUVER  FALSE   TRUE
-  ---                                                                    
-4134:         DR                          V5P 2P7 VANCOUVER  FALSE   TRUE
-4135:         DR                          V5P 2P7 VANCOUVER  FALSE   TRUE
-4136:         DR                          V5P 2P7 VANCOUVER  FALSE   TRUE
-4137:         DR                          V5P 2P7 VANCOUVER  FALSE   TRUE
-4138:         DR                          V5P 2P7 VANCOUVER  FALSE   TRUE
-      laneok rollEnd16    Jur YearBuilt hasLaneway sale2010 sale2011 sale2012
-      <lgcl>     <i64> <char>    <char>      <num>    <int>    <int>    <int>
-   1:   TRUE         0   <NA>      <NA>          0        1        0        0
-   2:   TRUE         0   <NA>      <NA>          0        1        0        0
-   3:   TRUE         0   <NA>      <NA>          0        1        0        0
-   4:   TRUE         0   <NA>      <NA>          0        1        0        0
-   5:  FALSE         0   <NA>      <NA>          0        1        0        0
-  ---                                                                        
-4134:     NA         0    200      2014          1        0        0        1
-4135:     NA         0    200      2014          1        0        0        1
-4136:   TRUE         0    200      2014          1        0        0        1
-4137:     NA         0    200      2014          1        0        0        1
-4138:     NA         0    200      2014          1        0        0        1
-      sale2013 sale2014 sale2015 sale2016 sale2017 sale2018 sale2019 sale2020
-         <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>
-   1:        0        0        0        0        0        0        0        0
-   2:        0        0        0        0        0        0        0        0
-   3:        0        0        0        0        0        0        0        0
-   4:        0        0        0        0        0        0        0        0
-   5:        0        0        0        0        0        0        0        0
-  ---                                                                        
-4134:        0        0        0        0        0        0        0        0
-4135:        0        0        0        0        0        0        0        0
-4136:        0        0        0        0        0        0        0        0
-4137:        0        0        0        0        0        0        0        0
-4138:        0        0        0        0        0        0        0        0
-      sale2021 sale2022 sale2023 duplex basement single     type  spec sale2024
-         <int>    <int>    <int> <lgcl>   <lgcl> <lgcl>   <char> <num>    <num>
-   1:        0        0        0  FALSE     TRUE  FALSE basement     0        0
-   2:        0        0        0  FALSE     TRUE  FALSE basement     0        0
-   3:        0        0        0  FALSE     TRUE  FALSE basement     0        0
-   4:        0        0        0  FALSE     TRUE  FALSE basement     0        0
-   5:        0        0        0  FALSE    FALSE   TRUE   single     0        0
-  ---                                                                          
-4134:        0        0        0  FALSE     TRUE  FALSE  laneway     0        0
-4135:        0        0        0  FALSE     TRUE  FALSE  laneway     0        0
-4136:        0        0        0  FALSE     TRUE  FALSE  laneway     0        0
-4137:        0        0        0  FALSE     TRUE  FALSE  laneway     0        0
-4138:        0        0        0  FALSE     TRUE  FALSE  laneway     0        0
+        ROLL_NUMBER24           Roll  rollStart   FOLIO_ID
+                <i64>         <char>      <num>     <char>
+    1:  1019632760000  1019632760000  101963276 A00000000D
+    2:  1022632050000  1022632050000  102263205 A00000001K
+    3:  1022637610000  1022637610000  102263761 A00000001Q
+    4:  1023636270000  1023636270000  102363627 D0000GM3GA
+    5:  1023636370000  1023636370000  102363637 D0000GM3H5
+   ---                                                    
+11478: 25828251870000 25828251870000 2582825187 A000003GRG
+11479: 25828251870000 25828251870000 2582825187 A000003GRG
+11480: 25828251870000 25828251870000 2582825187 A000003GRG
+11481: 25828251870000 25828251870000 2582825187 A000003GRG
+11482: 25828251870000 25828251870000 2582825187 A000003GRG
+                ACTUAL_USE_DESCRIPTION JURISDICTION_CODE NEIGHBOURHOOD nchar
+                                <char>             <int>        <char> <int>
+    1:          Single Family Dwelling               200    Point Grey    15
+    2:          Single Family Dwelling               200    Point Grey    15
+    3:          Single Family Dwelling               200    Point Grey    15
+    4:          Single Family Dwelling               200    Point Grey    15
+    5:          Single Family Dwelling               200    Point Grey    15
+   ---                                                                      
+11478: Residential Dwelling with Suite               200    Fraserview    15
+11479: Residential Dwelling with Suite               200    Fraserview    15
+11480: Residential Dwelling with Suite               200    Fraserview    15
+11481: Residential Dwelling with Suite               200    Fraserview    15
+11482: Residential Dwelling with Suite               200    Fraserview    15
+       splitspot rollEnd24 Jurisdiction MB_Year_Built Zoning UNIT_NUMBER
+           <int>     <num>        <int>         <int> <char>      <char>
+    1:        11         0          200          2022    RS1            
+    2:        11         0          200          2012    RS1            
+    3:        11         0          200          2019    RS1            
+    4:        11         0          200          2012    RS1            
+    5:        11         0          200          2012    RS1            
+   ---                                                                  
+11478:        11         0          200          2012    RS1            
+11479:        11         0          200          2012    RS1            
+11480:        11         0          200          2012    RS1            
+11481:        11         0          200          2012    RS1            
+11482:        11         0          200          2012    RS1            
+       STREET_NUMBER STREET_DIRECTION_PREFIX STREET_NAME STREET_TYPE
+               <int>                  <char>      <char>      <char>
+    1:          4811                              FANNIN         AVE
+    2:          1505                              TOLMIE          ST
+    3:          1961                              TOLMIE          ST
+    4:          4588                            BELLEVUE          DR
+    5:          4568                            BELLEVUE          DR
+   ---                                                              
+11478:          2187                            HARRISON          DR
+11479:          2187                            HARRISON          DR
+11480:          2181                            HARRISON          DR
+11481:          2181                            HARRISON          DR
+11482:          2181                            HARRISON          DR
+       STREET_DIRECTION_SUFFIX POSTAL_CODE      fullStreet24 streetNoNumber24
+                        <char>      <char>            <char>           <char>
+    1:                             V6T 1B1  4811  FANNIN AVE       FANNIN AVE
+    2:                             V6R 4B5   1505  TOLMIE ST        TOLMIE ST
+    3:                             V6R 4C1   1961  TOLMIE ST        TOLMIE ST
+    4:                             V6R 1E5 4588  BELLEVUE DR      BELLEVUE DR
+    5:                             V6R 1E5 4568  BELLEVUE DR      BELLEVUE DR
+   ---                                                                       
+11478:                             V5P 2P7 2187  HARRISON DR      HARRISON DR
+11479:                             V5P 2P7 2187  HARRISON DR      HARRISON DR
+11480:                             V5P 2P7 2181  HARRISON DR      HARRISON DR
+11481:                             V5P 2P7 2181  HARRISON DR      HARRISON DR
+11482:                             V5P 2P7 2181  HARRISON DR      HARRISON DR
+       streetNumber24    folioID    roll_number MB_year_built MB_effective_year
+                <int>     <char>          <i64>         <int>             <int>
+    1:           4811 A00000000D  1019632760000          1976              2000
+    2:           1505 A00000001K  1022632050000          2012              2015
+    3:           1961 A00000001Q  1022637610000          2019              2019
+    4:           4588 D0000GM3GA  1023636270000          2012              2013
+    5:           4568 D0000GM3H5  1023636370000          2012              2013
+   ---                                                                         
+11478:           2187 A000003GRG 25828251870000          2012              2012
+11479:           2187 A000003GRG 25828251870000          2012              2012
+11480:           2181 A000003GRG 25828251870000          2012              2012
+11481:           2181 A000003GRG 25828251870000          2012              2012
+11482:           2181 A000003GRG 25828251870000          2012              2012
+       landValue improvementValue streetNumber streetDirectionPrefix streetName
+           <int>            <int>        <int>                <char>     <char>
+    1:  12864000          1358000         4811                           FANNIN
+    2:   4481000          1931000         1505                           TOLMIE
+    3:   5344000           498000         1961                           TOLMIE
+    4:   4072000          2326000         4588                         BELLEVUE
+    5:   3937000          2226000         4568                         BELLEVUE
+   ---                                                                         
+11478:   1262000           909000         2187                         HARRISON
+11479:   1262000           909000         2189                         HARRISON
+11480:   1262000           909000         2181                         HARRISON
+11481:   1262000           909000         2187                         HARRISON
+11482:   1262000           909000         2189                         HARRISON
+       streetType streetDirectionSuffix postalCode      city thirty  fifty
+           <char>                <char>     <char>    <char> <lgcl> <lgcl>
+    1:        AVE                          V6T 1B1 VANCOUVER  FALSE  FALSE
+    2:         ST                          V6R 4B5 VANCOUVER  FALSE  FALSE
+    3:         ST                          V6R 4C1 VANCOUVER  FALSE  FALSE
+    4:         DR                          V6R 1E5 VANCOUVER  FALSE  FALSE
+    5:         DR                          V6R 1E5 VANCOUVER  FALSE  FALSE
+   ---                                                                    
+11478:         DR                          V5P 2P7 VANCOUVER  FALSE  FALSE
+11479:         DR                          V5P 2P7 VANCOUVER  FALSE  FALSE
+11480:         DR                          V5P 2P7 VANCOUVER  FALSE  FALSE
+11481:         DR                          V5P 2P7 VANCOUVER  FALSE  FALSE
+11482:         DR                          V5P 2P7 VANCOUVER  FALSE  FALSE
+       laneok rollEnd16    Jur YearBuilt hasLaneway sale2010 sale2011 sale2012
+       <lgcl>     <i64> <char>    <char>      <num>    <int>    <int>    <int>
+    1:  FALSE         0   <NA>      <NA>          0        0        0        0
+    2:   TRUE         0   <NA>      <NA>          0        0        1        0
+    3:   TRUE         0   <NA>      <NA>          0        0        0        0
+    4:   TRUE         0   <NA>      <NA>          0        0        0        0
+    5:   TRUE         0   <NA>      <NA>          0        0        0        0
+   ---                                                                        
+11478:     NA         0    200      2012          1        0        1        1
+11479:   TRUE         0    200      2012          1        0        1        1
+11480:     NA         0    200      2012          1        0        1        1
+11481:     NA         0    200      2012          1        0        1        1
+11482:   TRUE         0    200      2012          1        0        1        1
+       sale2013 sale2014 sale2015 sale2016 sale2017 sale2018 sale2019 sale2020
+          <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>
+    1:        0        0        0        0        0        0        0        0
+    2:        0        0        0        0        0        1        0        0
+    3:        0        0        0        1        0        0        0        0
+    4:        1        0        0        0        0        0        0        0
+    5:        0        1        0        1        0        0        0        0
+   ---                                                                        
+11478:        0        0        0        0        0        0        0        0
+11479:        0        0        0        0        0        0        0        0
+11480:        0        0        0        0        0        0        0        0
+11481:        0        0        0        0        0        0        0        0
+11482:        0        0        0        0        0        0        0        0
+       sale2021 sale2022 sale2023 duplex basement single    type  spec sale2024
+          <int>    <int>    <int> <lgcl>   <lgcl> <lgcl>  <char> <num>    <num>
+    1:        0        0        0  FALSE    FALSE   TRUE  single     0        0
+    2:        1        0        0  FALSE    FALSE   TRUE  single     0        0
+    3:        0        0        0  FALSE    FALSE   TRUE  single     0        0
+    4:        0        0        0  FALSE    FALSE   TRUE  single     1        0
+    5:        1        0        0  FALSE    FALSE   TRUE  single     0        0
+   ---                                                                         
+11478:        0        0        0  FALSE     TRUE  FALSE laneway     1        0
+11479:        0        0        0  FALSE     TRUE  FALSE laneway     1        0
+11480:        0        0        0  FALSE     TRUE  FALSE laneway     1        0
+11481:        0        0        0  FALSE     TRUE  FALSE laneway     1        0
+11482:        0        0        0  FALSE     TRUE  FALSE laneway     1        0
 > 
 > print(summary(feols(typeSpec~shareType |year^nbhd^thirty + type^year ,data=shares,cluster="nbhd")))
-NOTE: 1,643 observations removed because of NA values (LHS: 1,643, RHS: 716, Fixed-effects: 112, vcov: 112).
+NOTE: 1,274 observations removed because of NA values (LHS: 1,274, RHS: 456, Fixed-effects: 112, vcov: 112).
 OLS estimation, Dep. Var.: typeSpec
-Observations: 933
-Fixed-effects: year^nbhd^thirty: 465,  type^year: 49
+Observations: 1,414
+Fixed-effects: year^nbhd^thirty: 558,  type^year: 51
 Standard-errors: Clustered (nbhd) 
-          Estimate Std. Error t value  Pr(>|t|)    
-shareType 0.147103   0.044878 3.27781 0.0035911 ** 
+          Estimate Std. Error t value Pr(>|t|)    
+shareType 0.087459   0.043097 2.02933  0.05529 .  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.199853     Adj. R2: 0.235263
-                 Within R2: 0.013226
+RMSE: 0.189241     Adj. R2: 0.275975
+                 Within R2: 0.00557 
 > shares[,nbhdType:=paste0(nbhd,"_",type)]
 > print(summary(feols(typeSpec~shareType |year^type + nbhd^year^thirty + nbhdType^thirty,data=shares,cluster="nbhdType")))
-NOTE: 1,643 observations removed because of NA values (LHS: 1,643, RHS: 716, Fixed-effects: 112).
+NOTE: 1,274 observations removed because of NA values (LHS: 1,274, RHS: 456, Fixed-effects: 112).
 OLS estimation, Dep. Var.: typeSpec
-Observations: 933
-Fixed-effects: year^type: 49,  nbhd^year^thirty: 465,  nbhdType^thirty: 145
+Observations: 1,414
+Fixed-effects: year^type: 51,  nbhd^year^thirty: 558,  nbhdType^thirty: 161
 Standard-errors: Clustered (nbhdType) 
-          Estimate Std. Error t value Pr(>|t|) 
-shareType  0.07303   0.067877 1.07592  0.28512 
+           Estimate Std. Error  t value Pr(>|t|) 
+shareType -0.028043   0.050623 -0.55395  0.58105 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.166591     Adj. R2: 0.190392
-                 Within R2: 0.003062
+RMSE: 0.167646     Adj. R2: 0.29084 
+                 Within R2: 4.288e-4
+> # anything funny with laneways?
+> for (y in 2009:2019) {
++ 	print(y)
++ 	print(shares[year==y & type=="laneway",.(mean(typeSpec,na.rm=TRUE),mean(specShare,na.rm=TRUE),mean(shareType,na.rm=TRUE),mean(priceLag,na.rm=TRUE)),by=.(thirty)])
++ }
+[1] 2009
+Empty data.table (0 rows and 5 cols): thirty,V1,V2,V3,V4
+[1] 2010
+   thirty        V1        V2        V3       V4
+    <num>     <num>     <num>     <num>    <num>
+1:      0 0.2738789 0.2631253 0.3908761 13.62177
+2:      1 0.2120321 0.1785425 0.3279845 13.49580
+[1] 2011
+   thirty        V1        V2        V3       V4
+    <num>     <num>     <num>     <num>    <num>
+1:      0 0.3421519 0.3452199 0.3833031 13.80606
+2:      1 0.3262208 0.3940099 0.5111599 13.62134
+[1] 2012
+   thirty        V1        V2        V3       V4
+    <num>     <num>     <num>     <num>    <num>
+1:      0 0.3754542 0.4305498 0.4542597 13.97828
+2:      1 0.3341413 0.2743710 0.3757860 13.78646
+[1] 2013
+   thirty        V1        V2        V3      V4
+    <num>     <num>     <num>     <num>   <num>
+1:      0 0.3982173 0.5097936 0.5232491 14.0933
+2:      1 0.3247909 0.3774021 0.5041237 13.7734
+[1] 2014
+   thirty        V1        V2        V3       V4
+    <num>     <num>     <num>     <num>    <num>
+1:      0 0.3984714 0.5436073 0.5663874 14.18378
+2:      1 0.2965919 0.4049276 0.6013132 13.89791
+[1] 2015
+   thirty        V1        V2        V3       V4
+    <num>     <num>     <num>     <num>    <num>
+1:      0 0.2595287 0.5685055 0.6171043 14.23505
+2:      1 0.3205827 0.6537537 0.6832991 14.01159
+[1] 2016
+   thirty        V1        V2        V3       V4
+    <num>     <num>     <num>     <num>    <num>
+1:      0 0.1864748 0.5666176 0.6399471 14.51389
+2:      1 0.2197078 0.5449656 0.6036508 14.24935
+[1] 2017
+   thirty         V1        V2        V3       V4
+    <num>      <num>     <num>     <num>    <num>
+1:      0 0.12768987 0.6132326 0.6092105 14.72659
+2:      1 0.08268503 0.6430070 0.6371595 14.47085
+[1] 2018
+   thirty         V1        V2        V3       V4
+    <num>      <num>     <num>     <num>    <num>
+1:      0 0.08155118 0.6226326 0.6978081 14.72086
+2:      1 0.24275212 0.8418883 0.7002398 14.53104
+[1] 2019
+   thirty         V1        V2        V3       V4
+    <num>      <num>     <num>     <num>    <num>
+1:      0 0.09119482 0.5542517 0.6035486 14.76958
+2:      1 0.12745569 0.8547009 0.7799233 14.52255
+> 
+> 
+> # mean laneway premium by year given nbhd
+> shares[,laneway:=ifelse(type=="laneway",1,0)]
+> print(summary(feols(priceLag ~ i(year)*laneway | nbhd,data=shares[thirty==1 & year>2010])))
+NOTE: 478 observations removed because of NA values (LHS: 478, Fixed-effects: 52).
+The variable 'laneway:year::2023' has been removed because of collinearity (see $collin.var).
+OLS estimation, Dep. Var.: priceLag
+Observations: 770
+Fixed-effects: nbhd: 21
+Standard-errors: Clustered (nbhd) 
+                    Estimate Std. Error  t value   Pr(>|t|)    
+year::2012          0.142598   0.019920  7.15850 6.2078e-07 ***
+year::2013          0.202351   0.021115  9.58315 6.4421e-09 ***
+year::2014          0.182578   0.025558  7.14363 6.3996e-07 ***
+year::2015          0.285322   0.026359 10.82428 8.2182e-10 ***
+year::2016          0.476550   0.024439 19.49993 1.7503e-14 ***
+year::2017          0.704898   0.020219 34.86248  < 2.2e-16 ***
+year::2018          0.739449   0.021759 33.98393  < 2.2e-16 ***
+year::2019          0.710304   0.022760 31.20780  < 2.2e-16 ***
+year::2020          0.611098   0.030207 20.23019 8.6794e-15 ***
+year::2021          0.698610   0.032312 21.62074 2.4277e-15 ***
+year::2022          0.765436   0.026118 29.30632  < 2.2e-16 ***
+year::2023          0.845601   0.028374 29.80212  < 2.2e-16 ***
+laneway             0.327962   0.050188  6.53469 2.2806e-06 ***
+laneway:year::2011 -0.495277   0.058276 -8.49881 4.5221e-08 ***
+laneway:year::2012 -0.422992   0.062770 -6.73878 1.4815e-06 ***
+laneway:year::2013 -0.485554   0.101768 -4.77119 1.1652e-04 ***
+laneway:year::2014 -0.366558   0.074856 -4.89685 8.7156e-05 ***
+laneway:year::2015 -0.375460   0.052264 -7.18395 5.8934e-07 ***
+laneway:year::2016 -0.314826   0.074167 -4.24480 3.9690e-04 ***
+laneway:year::2017 -0.324155   0.053847 -6.01998 6.9331e-06 ***
+laneway:year::2018 -0.275268   0.069466 -3.96263 7.6775e-04 ***
+laneway:year::2019 -0.256103   0.051498 -4.97311 7.3115e-05 ***
+laneway:year::2020 -0.166988   0.081879 -2.03944 5.4839e-02 .  
+laneway:year::2021 -0.135362   0.064797 -2.08901 4.9697e-02 *  
+laneway:year::2022 -0.102158   0.061508 -1.66090 1.1233e-01    
+... 1 variable was removed because of collinearity (laneway:year::2023)
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.15133     Adj. R2: 0.876661
+                Within R2: 0.814885
+> 
+> print(summary(feols(typeSpec~shareType |year+ nbhd ,data=shares[year>2012 & year<2019 & type=="laneway" & thirty==1],cluster="nbhdType")))
+NOTE: 47 observations removed because of NA values (LHS: 47, RHS: 34, Fixed-effects: 6).
+OLS estimation, Dep. Var.: typeSpec
+Observations: 97
+Fixed-effects: year: 6,  nbhd: 19
+Standard-errors: Clustered (nbhdType) 
+           Estimate Std. Error   t value Pr(>|t|) 
+shareType -0.076752   0.278154 -0.275933  0.78574 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.234039     Adj. R2: 0.066424
+                 Within R2: 0.001961
+> print(summary(feols(typeSpec~shareType |year+ nbhd ,data=shares[year>2015 & type=="laneway" & thirty==1],cluster="nbhdType")))
+NOTE: 70 observations removed because of NA values (LHS: 70, RHS: 51, Fixed-effects: 8).
+OLS estimation, Dep. Var.: typeSpec
+Observations: 122
+Fixed-effects: year: 8,  nbhd: 20
+Standard-errors: Clustered (nbhdType) 
+           Estimate Std. Error   t value Pr(>|t|) 
+shareType -0.016033   0.103457 -0.154968  0.87848 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.179131     Adj. R2: 0.194469
+                 Within R2: 3.021e-4
+> print(summary(feols(typeSpec~shareType |year+ nbhd ,data=shares[year>2016 & year < 2020 & type=="laneway" & thirty==1],cluster="nbhdType")))
+NOTE: 21 observations removed because of NA values (LHS: 21, RHS: 19, Fixed-effects: 3).
+OLS estimation, Dep. Var.: typeSpec
+Observations: 51
+Fixed-effects: year: 3,  nbhd: 19
+Standard-errors: Clustered (nbhdType) 
+          Estimate Std. Error t value Pr(>|t|) 
+shareType 0.080754   0.133933 0.60294  0.55407 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.129823     Adj. R2: 0.212521
+                 Within R2: 0.005851
+> 
 > print(summary(feols(typeSpec~shareType |year^type + nbhd^year^thirty + nbhdType^thirty,data=shares[year<2020 & type!="duplex"],cluster="nbhdType")))
-NOTE: 718 observations removed because of NA values (LHS: 718, RHS: 363, Fixed-effects: 60).
+NOTE: 482 observations removed because of NA values (LHS: 482, RHS: 240, Fixed-effects: 60).
 OLS estimation, Dep. Var.: typeSpec
-Observations: 662
-Fixed-effects: year^type: 30,  nbhd^year^thirty: 338,  nbhdType^thirty: 106
+Observations: 958
+Fixed-effects: year^type: 30,  nbhd^year^thirty: 400,  nbhdType^thirty: 120
 Standard-errors: Clustered (nbhdType) 
-          Estimate Std. Error t value Pr(>|t|) 
-shareType  0.14064   0.087753 1.60268  0.11426 
+           Estimate Std. Error   t value Pr(>|t|) 
+shareType -0.015396    0.08012 -0.192166  0.84821 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.170122     Adj. R2: 0.118125
-                 Within R2: 0.010192
+RMSE: 0.165371     Adj. R2: 0.222642
+                 Within R2: 1.232e-4
 > print(summary(feols(specShare~ priceLag |year^type + nbhd^year^thirty + nbhd^type^thirty,data=shares[type!="duplex"],cluster="nbhd")))
-NOTE: 1,146 observations removed because of NA values (LHS: 1,068, RHS: 545, Fixed-effects: 84, vcov: 84).
+NOTE: 688 observations removed because of NA values (LHS: 657, RHS: 327, Fixed-effects: 84, vcov: 84).
 OLS estimation, Dep. Var.: specShare
-Observations: 786
-Fixed-effects: year^type: 42,  nbhd^year^thirty: 286,  nbhd^type^thirty: 113
+Observations: 1,328
+Fixed-effects: year^type: 42,  nbhd^year^thirty: 453,  nbhd^type^thirty: 124
 Standard-errors: Clustered (nbhd) 
           Estimate Std. Error  t value Pr(>|t|)    
-priceLag -0.408803   0.133424 -3.06394 0.005892 ** 
+priceLag -0.239909   0.084841 -2.82775 0.010081 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.247223     Adj. R2: 0.071521
-                 Within R2: 0.031391
+RMSE: 0.233437     Adj. R2: 0.172191
+                 Within R2: 0.00961 
 > print(summary(feols(specShare~ priceLag |year^type + nbhd^year^thirty ,data=shares[type!="duplex"],cluster="nbhd")))
-NOTE: 1,146 observations removed because of NA values (LHS: 1,068, RHS: 545, Fixed-effects: 84, vcov: 84).
+NOTE: 688 observations removed because of NA values (LHS: 657, RHS: 327, Fixed-effects: 84, vcov: 84).
 OLS estimation, Dep. Var.: specShare
-Observations: 786
-Fixed-effects: year^type: 42,  nbhd^year^thirty: 286
+Observations: 1,328
+Fixed-effects: year^type: 42,  nbhd^year^thirty: 453
 Standard-errors: Clustered (nbhd) 
-          Estimate Std. Error  t value Pr(>|t|) 
-priceLag -0.148443   0.146627 -1.01238  0.32288 
+         Estimate Std. Error t value Pr(>|t|)    
+priceLag 0.233518   0.083429 2.79899 0.010754 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.320591     Adj. R2: -0.179525
-                 Within R2:  0.003251
+RMSE: 0.288119     Adj. R2: -0.074849
+                 Within R2:  0.008044
 > print(summary(feols(specShare~ priceLag |year^type+ nbhd^year^thirty + nbhd^type^thirty,data=shares[year<2020 & type!="duplex"],cluster="nbhd")))
-NOTE: 759 observations removed because of NA values (LHS: 705, RHS: 365, Fixed-effects: 60, vcov: 60).
+NOTE: 438 observations removed because of NA values (LHS: 417, RHS: 227, Fixed-effects: 60, vcov: 60).
 OLS estimation, Dep. Var.: specShare
-Observations: 621
-Fixed-effects: year^type: 30,  nbhd^year^thirty: 224,  nbhd^type^thirty: 111
+Observations: 1,002
+Fixed-effects: year^type: 30,  nbhd^year^thirty: 341,  nbhd^type^thirty: 122
 Standard-errors: Clustered (nbhd) 
-          Estimate Std. Error  t value Pr(>|t|)    
-priceLag -0.379019   0.149434 -2.53637 0.019643 *  
+          Estimate Std. Error  t value  Pr(>|t|)    
+priceLag -0.307439   0.095565 -3.21705 0.0041365 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 0.254511     Adj. R2: 0.027718
-                 Within R2: 0.024149
+RMSE: 0.229819     Adj. R2: 0.197526
+                 Within R2: 0.013983
 > # Funny sales result
 > print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,year)])
         type  year       V1
       <char> <num>    <num>
- 1:   single  2010 13.90410
- 2:   duplex  2010 13.12528
- 3:  laneway  2010 13.64382
- 4: basement  2010 13.81422
- 5:   single  2011 13.96621
- 6:   duplex  2011 13.52345
- 7:  laneway  2011 13.78047
- 8: basement  2011 13.91504
- 9:   single  2012 14.16372
-10:   duplex  2012 13.50061
-11:  laneway  2012 13.96643
-12: basement  2012 14.07325
-13:   single  2013 14.19745
-14:   duplex  2013 13.46595
-15:  laneway  2013 13.93102
-16: basement  2013 14.14325
-17:   single  2014 14.22347
-18:   duplex  2014 13.51176
-19:  laneway  2014 14.06765
-20: basement  2014 14.10597
-21:   single  2015 14.27639
-22:   duplex  2015 13.56062
-23:  laneway  2015 14.14283
-24: basement  2015 14.22343
-25:   single  2016 14.51123
-26:   duplex  2016 14.10547
-27:  laneway  2016 14.38768
-28: basement  2016 14.42492
-29:   single  2017 14.67559
-30:   duplex  2017 14.40794
-31:  laneway  2017 14.65227
-32: basement  2017 14.66024
-33:   single  2018 14.72403
-34:   duplex  2018 14.19120
-35:  laneway  2018 14.67944
-36: basement  2018 14.68135
-37:   single  2019 14.64576
-38:   duplex  2019 14.39701
-39:  laneway  2019 14.66494
-40: basement  2019 14.64879
-41:   single  2020 14.56685
-42:   duplex  2020 13.86905
-43:  laneway  2020 14.67243
-44: basement  2020 14.51643
-45:   single  2021 14.68580
-46:   duplex  2021 14.21309
-47:  laneway  2021 14.72981
-48: basement  2021 14.63282
-49:   single  2022 14.70824
-50:   duplex  2022 14.39208
-51:  laneway  2022 14.82641
-52: basement  2022 14.74360
-53:   single  2023 14.73514
-54:   duplex  2023 14.44768
-55:  laneway  2023 15.03271
-56: basement  2023 14.75564
+ 1:   single  2010 13.81050
+ 2:   duplex  2010 13.22680
+ 3:  laneway  2010 13.57070
+ 4: basement  2010 13.71804
+ 5:   single  2011 13.90242
+ 6:   duplex  2011 13.64433
+ 7:  laneway  2011 13.73117
+ 8: basement  2011 13.83180
+ 9:   single  2012 14.06994
+10:   duplex  2012 13.48413
+11:  laneway  2012 13.89752
+12: basement  2012 13.99117
+13:   single  2013 14.10522
+14:   duplex  2013 13.78332
+15:  laneway  2013 13.95860
+16: basement  2013 14.04904
+17:   single  2014 14.11272
+18:   duplex  2014 13.76245
+19:  laneway  2014 14.04799
+20: basement  2014 14.06327
+21:   single  2015 14.21418
+22:   duplex  2015 13.92654
+23:  laneway  2015 14.13149
+24: basement  2015 14.15700
+25:   single  2016 14.36123
+26:   duplex  2016 14.14117
+27:  laneway  2016 14.39858
+28: basement  2016 14.36830
+29:   single  2017 14.59012
+30:   duplex  2017 14.52266
+31:  laneway  2017 14.61151
+32: basement  2017 14.58943
+33:   single  2018 14.64907
+34:   duplex  2018 14.33368
+35:  laneway  2018 14.64093
+36: basement  2018 14.63226
+37:   single  2019 14.60198
+38:   duplex  2019 14.56248
+39:  laneway  2019 14.65257
+40: basement  2019 14.60371
+41:   single  2020 14.50439
+42:   duplex  2020 14.30549
+43:  laneway  2020 14.52798
+44: basement  2020 14.46511
+45:   single  2021 14.56501
+46:   duplex  2021 14.30751
+47:  laneway  2021 14.70266
+48: basement  2021 14.59014
+49:   single  2022 14.67791
+50:   duplex  2022 14.40405
+51:  laneway  2022 14.81283
+52: basement  2022 14.67973
+53:   single  2023 14.72897
+54:   duplex  2023 14.49436
+55:  laneway  2023 15.03321
+56: basement  2023 14.76576
         type  year       V1
 > print(shares[,mean(priceLag,na.rm=TRUE),by=.(type,nbhd)])
         type                              nbhd       V1
@@ -1943,94 +2224,98 @@ RMSE: 0.254511     Adj. R2: 0.027718
  2:   duplex                              <NA>      NaN
  3:  laneway                              <NA>      NaN
  4: basement                              <NA>      NaN
- 5:   single                        Point Grey 14.82674
- 6:   duplex                        Point Grey 14.74754
- 7:  laneway                        Point Grey 14.72999
- 8: basement                        Point Grey 14.81604
- 9:   single                         Kitsilano 14.70663
-10:   duplex                         Kitsilano 14.71381
-11:  laneway                         Kitsilano 14.59512
-12: basement                         Kitsilano 14.63108
-13:   single                            Dunbar 14.75880
-14:   duplex                            Dunbar      NaN
-15:  laneway                            Dunbar 14.71232
-16: basement                            Dunbar 14.77642
-17:   single Arbutus Ridge - Mackenzie Heights 14.79949
-18:   duplex Arbutus Ridge - Mackenzie Heights 14.76227
-19:  laneway Arbutus Ridge - Mackenzie Heights 14.68332
-20: basement Arbutus Ridge - Mackenzie Heights 14.73651
-21:   single                        Kerrisdale 14.75852
-22:   duplex                        Kerrisdale 14.68380
-23:  laneway                        Kerrisdale 14.77983
-24: basement                        Kerrisdale 14.67396
-25:   single                        Southlands 14.57897
-26:   duplex                        Southlands 14.79007
-27:  laneway                        Southlands 14.46841
-28: basement                        Southlands 14.46030
-29:   single                       Shaughnessy 14.93132
+ 5:   single                        Point Grey 14.85805
+ 6:   duplex                        Point Grey 14.77102
+ 7:  laneway                        Point Grey 14.79469
+ 8: basement                        Point Grey 14.75044
+ 9:   single                         Kitsilano 14.69694
+10:   duplex                         Kitsilano 14.71622
+11:  laneway                         Kitsilano 14.58204
+12: basement                         Kitsilano 14.57599
+13:   single                            Dunbar 14.74434
+14:   duplex                            Dunbar 14.37964
+15:  laneway                            Dunbar 14.67476
+16: basement                            Dunbar 14.67992
+17:   single Arbutus Ridge - Mackenzie Heights 14.77810
+18:   duplex Arbutus Ridge - Mackenzie Heights 14.86407
+19:  laneway Arbutus Ridge - Mackenzie Heights 14.70511
+20: basement Arbutus Ridge - Mackenzie Heights 14.73456
+21:   single                        Kerrisdale 14.75930
+22:   duplex                        Kerrisdale 14.79234
+23:  laneway                        Kerrisdale 14.72047
+24: basement                        Kerrisdale 14.67134
+25:   single                        Southlands 14.67184
+26:   duplex                        Southlands 14.68016
+27:  laneway                        Southlands 14.75678
+28: basement                        Southlands 14.59056
+29:   single                       Shaughnessy 15.27252
 30:   duplex                       Shaughnessy      NaN
-31:  laneway                       Shaughnessy 14.79283
-32: basement                       Shaughnessy 14.91275
-33:   single                            Cambie 14.60925
-34:   duplex                            Cambie 14.59850
-35:  laneway                            Cambie 14.45535
-36: basement                            Cambie 14.56924
-37:   single                   South Granville 14.78176
-38:   duplex                   South Granville      NaN
-39:  laneway                   South Granville 14.66614
-40: basement                   South Granville 14.72124
-41:   single                          Oakridge 14.55525
-42:   duplex                          Oakridge      NaN
-43:  laneway                          Oakridge 14.50543
-44: basement                          Oakridge 14.49198
-45:   single                           Marpole 14.45517
-46:   duplex                           Marpole 14.46762
-47:  laneway                           Marpole 14.47113
-48: basement                           Marpole 14.47145
-49:   single                         Grandview 14.01436
-50:   duplex                         Grandview 14.23591
-51:  laneway                         Grandview 14.12284
-52: basement                         Grandview 13.98294
-53:   single                     Cedar Cottage 14.21027
-54:   duplex                     Cedar Cottage 14.32472
-55:  laneway                     Cedar Cottage 14.18685
-56: basement                     Cedar Cottage 14.21476
-57:   single                     Main & Fraser 13.98372
-58:   duplex                     Main & Fraser 14.40397
-59:  laneway                     Main & Fraser 14.16457
-60: basement                     Main & Fraser 14.13191
-61:   single                   South Vancouver 13.95087
-62:   duplex                   South Vancouver 14.05704
-63:  laneway                   South Vancouver 14.12665
-64: basement                   South Vancouver 14.08560
-65:   single                            Knight 13.99523
-66:   duplex                            Knight 13.93490
-67:  laneway                            Knight 13.94878
-68: basement                            Knight 14.04303
-69:   single                     Hastings East 13.90494
-70:   duplex                     Hastings East 14.04563
-71:  laneway                     Hastings East 13.89853
-72: basement                     Hastings East 14.01560
-73:   single                           Renfrew 13.92103
-74:   duplex                           Renfrew 14.10750
-75:  laneway                           Renfrew 13.97197
-76: basement                           Renfrew 14.07051
-77:   single                   Renfrew Heights 13.96770
-78:   duplex                   Renfrew Heights 14.05342
-79:  laneway                   Renfrew Heights 14.02169
-80: basement                   Renfrew Heights 14.07548
-81:   single                       Collingwood 13.95843
-82:   duplex                       Collingwood 13.91509
-83:  laneway                       Collingwood 14.14062
-84: basement                       Collingwood 13.95582
-85:   single                         Killarney 14.05254
-86:   duplex                         Killarney 14.03818
-87:  laneway                         Killarney 14.14500
-88: basement                         Killarney 14.16333
-89:   single                        Fraserview 14.05455
-90:   duplex                        Fraserview 14.17473
-91:  laneway                        Fraserview 14.17078
-92: basement                        Fraserview 14.17422
+31:  laneway                       Shaughnessy 15.09385
+32: basement                       Shaughnessy 15.02282
+33:   single                            Cambie 14.60519
+34:   duplex                            Cambie 14.42952
+35:  laneway                            Cambie 14.53679
+36: basement                            Cambie 14.55311
+37:   single                   South Granville 14.89837
+38:   duplex                   South Granville 14.87281
+39:  laneway                   South Granville 14.85929
+40: basement                   South Granville 14.87097
+41:   single                          Oakridge 14.58472
+42:   duplex                          Oakridge 14.94877
+43:  laneway                          Oakridge 14.55632
+44: basement                          Oakridge 14.53794
+45:   single                           Marpole 14.41140
+46:   duplex                           Marpole 14.57285
+47:  laneway                           Marpole 14.42195
+48: basement                           Marpole 14.41146
+49:   single                         Grandview 14.01899
+50:   duplex                         Grandview 14.25004
+51:  laneway                         Grandview 13.94204
+52: basement                         Grandview 14.00536
+53:   single                     Cedar Cottage 14.08654
+54:   duplex                     Cedar Cottage 14.33818
+55:  laneway                     Cedar Cottage 14.07361
+56: basement                     Cedar Cottage 14.16322
+57:   single                     Main & Fraser 14.01257
+58:   duplex                     Main & Fraser 14.41384
+59:  laneway                     Main & Fraser 14.14980
+60: basement                     Main & Fraser 14.07757
+61:   single                   South Vancouver 13.97598
+62:   duplex                   South Vancouver 14.02309
+63:  laneway                   South Vancouver 14.04978
+64: basement                   South Vancouver 13.99793
+65:   single                      Marine Drive 14.54685
+66:   duplex                      Marine Drive      NaN
+67:  laneway                      Marine Drive      NaN
+68: basement                      Marine Drive 14.09054
+69:   single                            Knight 13.86614
+70:   duplex                            Knight 13.98213
+71:  laneway                            Knight 13.99955
+72: basement                            Knight 13.97164
+73:   single                     Hastings East 13.84554
+74:   duplex                     Hastings East 14.02774
+75:  laneway                     Hastings East 13.92378
+76: basement                     Hastings East 13.90074
+77:   single                           Renfrew 13.91261
+78:   duplex                           Renfrew 14.13496
+79:  laneway                           Renfrew 13.99613
+80: basement                           Renfrew 14.00837
+81:   single                   Renfrew Heights 13.91826
+82:   duplex                   Renfrew Heights 13.98437
+83:  laneway                   Renfrew Heights 13.99084
+84: basement                   Renfrew Heights 14.00316
+85:   single                       Collingwood 13.85216
+86:   duplex                       Collingwood 13.97142
+87:  laneway                       Collingwood 14.02599
+88: basement                       Collingwood 13.91626
+89:   single                         Killarney 14.01695
+90:   duplex                         Killarney 14.10975
+91:  laneway                         Killarney 14.11626
+92: basement                         Killarney 14.06907
+93:   single                        Fraserview 14.12345
+94:   duplex                        Fraserview 14.14478
+95:  laneway                        Fraserview 14.18497
+96: basement                        Fraserview 14.13550
         type                              nbhd       V1
 > # convergance?
 > print(shares[year==2017,mean(priceLag,na.rm=TRUE),by=.(type,thirty,nbhd)])
@@ -2042,30 +2327,30 @@ RMSE: 0.254511     Adj. R2: 0.027718
   4: basement      0       <NA>      NaN
   5:   single      1       <NA>      NaN
  ---                                    
-180: basement      0 Fraserview 14.66993
-181:   single      1 Fraserview      NaN
-182:   duplex      1 Fraserview      NaN
-183:  laneway      1 Fraserview      NaN
-184: basement      1 Fraserview 14.03062
+188: basement      0 Fraserview 14.48846
+189:   single      1 Fraserview      NaN
+190:   duplex      1 Fraserview      NaN
+191:  laneway      1 Fraserview      NaN
+192: basement      1 Fraserview 14.03062
 > # is it desirable to have neighbourhood-type dummies?
 > 
 > shares[,rr:=runif(nrow(shares))]
 > x <- feols(shareType ~ rr|type+year+nbhd,data=shares)
-NOTE: 716 observations removed because of NA values (LHS: 716, Fixed-effects: 112).
+NOTE: 456 observations removed because of NA values (LHS: 456, Fixed-effects: 112).
 > print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
-[1] 0.0853222 0.1123701
+[1] 0.05592418 0.08316227
 > x <- feols(shareType ~ rr|type^year + nbhd^year,data=shares)
-NOTE: 716 observations removed because of NA values (LHS: 716, Fixed-effects: 112).
+NOTE: 456 observations removed because of NA values (LHS: 456, Fixed-effects: 112).
 > print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
-[1] 0.07149417 0.11237014
+[1] 0.04313606 0.08316227
 > x <- feols(shareType ~ rr|type^year+type^nbhd+nbhd^year,data=shares)
-NOTE: 716 observations removed because of NA values (LHS: 716, Fixed-effects: 112).
+NOTE: 456 observations removed because of NA values (LHS: 456, Fixed-effects: 112).
 > print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
-[1] 0.05470487 0.11237014
+[1] 0.02972699 0.08316227
 > x <- feols(shareType ~ rr|nbhd^type,data=shares)
-NOTE: 716 observations removed because of NA values (LHS: 716, Fixed-effects: 112).
+NOTE: 456 observations removed because of NA values (LHS: 456, Fixed-effects: 112).
 > print(c(var(x$residuals),var(shares$shareType,na.rm=TRUE)))
-[1] 0.06800838 0.11237014
+[1] 0.04248318 0.08316227
 > 
 > for (y in 2010:2018) {
 + 	ggplot(shares[year==y & type=="laneway",.(type,shareType,typeSpec,year),],aes(x=shareType,y=typeSpec,color=year)) +
@@ -2082,37 +2367,36 @@ Saving 7 x 7 in image
 Saving 7 x 7 in image
 Saving 7 x 7 in image
 Warning messages:
-1: Removed 29 rows containing missing values or values outside the scale range
+1: Removed 15 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-2: Removed 19 rows containing missing values or values outside the scale range
+2: Removed 11 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-3: Removed 20 rows containing missing values or values outside the scale range
+3: Removed 15 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-4: Removed 23 rows containing missing values or values outside the scale range
+4: Removed 12 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-5: Removed 19 rows containing missing values or values outside the scale range
+5: Removed 12 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-6: Removed 16 rows containing missing values or values outside the scale range
+6: Removed 10 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-7: Removed 20 rows containing missing values or values outside the scale range
+7: Removed 12 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-8: Removed 16 rows containing missing values or values outside the scale range
+8: Removed 9 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-9: Removed 15 rows containing missing values or values outside the scale range
+9: Removed 9 rows containing missing values or values outside the scale range
 (`geom_point()`). 
 > 
 > ggplot(shares[,.(shareType,typeSpec,nbhd)],aes(x=shareType,y=typeSpec,color=nbhd)) + geom_point() 
 Warning message:
-Removed 1643 rows containing missing values or values outside the scale range
+Removed 1274 rows containing missing values or values outside the scale range
 (`geom_point()`). 
 > ggsave("text/shareSpecType.png")
 Saving 7 x 7 in image
 Warning message:
-Removed 1643 rows containing missing values or values outside the scale range
+Removed 1274 rows containing missing values or values outside the scale range
 (`geom_point()`). 
-> 
 > 
 > 
 > proc.time()
    user  system elapsed 
- 12.421   0.445  12.864 
+ 22.617   3.544  18.724 

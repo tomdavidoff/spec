@@ -1,6 +1,6 @@
 
-R version 4.4.1 (2024-06-14) -- "Race for Your Life"
-Copyright (C) 2024 The R Foundation for Statistical Computing
+R version 4.5.0 (2025-04-11) -- "How About a Twenty-Six"
+Copyright (C) 2025 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -35,7 +35,7 @@ Type 'q()' to quit R.
 > # read from sqlite3 file "~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3" "residentialInventory", get fields: RollNumber, zoning, land_width, land_depth, MB_year_built; and select on  jurisdiction=="City of Vancouver"
 > 
 > # open connection first
-> con <- dbConnect(RSQLite::SQLite(), "~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3")
+> con <- dbConnect(RSQLite::SQLite(), "~/OneDrive - UBC/Documents/data/bca/REVD16_and_inventory_extracts.sqlite3")
 > dI <- dbGetQuery(con, "SELECT  roll_number, zoning, land_width, land_depth, MB_year_built, MB_effective_year FROM residentialInventory WHERE jurisdiction=='200' AND (zoning=='RS1' OR zoning=='RS2' OR zoning=='RS3' OR zoning=='RS3A' OR zoning=='RS4' OR zoning=='RS5' OR zoning=='RS6' OR zoning=='RS7' )")
 > dI <- data.table(dI)
 > print(summary(dI[,as.numeric(land_depth)]))
@@ -48,7 +48,10 @@ Type 'q()' to quit R.
 thirty  FALSE  TRUE
   FALSE 41212  4625
   TRUE  19440     0
-> dI <- dI[thirty==TRUE | fifty==TRUE]
+> STANDARD_ONLY <- 0
+> if (STANDARD_ONLY) {
++   dI <- dI[thirty==TRUE | fifty==TRUE]
++ } 
 > 
 > 
 > da <- dbGetQuery(con, "SELECT folioID,streetNumber,streetDirectionPrefix,streetName,streetType,streetDirectionSuffix,postalCode,city FROM address ")
@@ -82,51 +85,67 @@ thirty  FALSE  TRUE
 > dLaneOk[,streetName:=NULL]
 > dI <- merge(dI,dLaneOk,by="addressForLaneway",all.x=TRUE,all.y=TRUE)
 > # deal with NA laneok approximation
-> print("IS IT A DATATABLE?")
-[1] "IS IT A DATATABLE?"
-> print(is.data.table(dI))
-[1] TRUE
 > dI[,madeupLaneok:=is.na(laneok)]
 > dI[,roundNumber:=floor(as.numeric(streetNumber)/100)]
 > dI[,meanLaneok:=mean(laneok,na.rm=TRUE),by=roundNumber]
 > dI[is.na(laneok) & meanLaneok==0,laneok:=0]
 > print(table(dI[,.(is.na(laneok),streetType)]))
        streetType
-V1               AV   AVE   CIR  CRES DIVERS    DR   HWY    PL    RD    ST
-  FALSE    86     0 15514     0    57      0   325     0    14    12  7855
-  TRUE     17     6  1256     1     1      1    30    33     3     0   711
+V1               AV   AVE   CIR  CRES DIVERS    DR   HWY  LANE    PL    RD
+  FALSE   272     0 37534     0   655      0  2669     0     0   319   204
+  TRUE     43    20  3301    11    45     13   204    65     1    17    18
+       streetType
+V1         ST   WAY
+  FALSE 22905    31
+  TRUE   2145     0
 > dI[is.na(laneok) & meanLaneok==1,laneok:=1]
 > print(table(dI[,.(is.na(laneok),streetType)]))
        streetType
-V1               AV   AVE   CIR  CRES DIVERS    DR   HWY    PL    RD    ST
-  FALSE    87     1 15688     0    57      1   331     0    14    12  8018
-  TRUE     16     5  1082     1     1      0    24    33     3     0   548
+V1               AV   AVE   CIR  CRES DIVERS    DR   HWY  LANE    PL    RD
+  FALSE   272     0 37534     0   655      0  2669     0     0   319   204
+  TRUE     43    20  3301    11    45     13   204    65     1    17    18
+       streetType
+V1         ST   WAY
+  FALSE 22905    31
+  TRUE   2145     0
 > print(table(dI[,actualUseDescription]))
 
-      Bed & Breakfast Operation 4 Or More Units 
-                                              2 
-    Bed & Breakfast Operation Less Than 4 Units 
-                                              5 
-Duplex, Non-Strata Side by Side or Front / Back 
-                                             18 
-                   Duplex, Non-Strata Up / Down 
-                                              3 
-                    Duplex, Strata Front / Back 
-                                             18 
-                    Duplex, Strata Side by Side 
-                                              2 
-                      Multi-Family (Conversion) 
-                                             25 
-              Property Subject To Section 19(8) 
-                                             28 
-                Residential Dwelling with Suite 
-                                          12658 
-                   Residential Outbuilding Only 
-                                              4 
-                         Single Family Dwelling 
-                                          12982 
-           Vacant Residential Less Than 2 Acres 
-                                            177 
+   2 Acres Or More (Single Family Dwelling, Duplex) 
+                                                 17 
+                           2 Acres Or More (Vacant) 
+                                                  2 
+          Bed & Breakfast Operation 4 Or More Units 
+                                                  2 
+        Bed & Breakfast Operation Less Than 4 Units 
+                                                 14 
+       Civic, Institutional & Recreational (Vacant) 
+                                                  1 
+    Duplex, Non-Strata Side by Side or Front / Back 
+                                                 93 
+                       Duplex, Non-Strata Up / Down 
+                                                  8 
+                        Duplex, Strata Front / Back 
+                                                 32 
+                        Duplex, Strata Side by Side 
+                                                 10 
+                           Duplex, Strata Up / Down 
+                                                  8 
+                          Multi-Family (Conversion) 
+                                                 86 
+                  Property Subject To Section 19(8) 
+                                                235 
+Recreational & Cultural Buildings (Includes Curling 
+                                                  1 
+                    Residential Dwelling with Suite 
+                                              31469 
+                       Residential Outbuilding Only 
+                                                 20 
+                             Single Family Dwelling 
+                                              38028 
+                                        Vacant IC&I 
+                                                  1 
+               Vacant Residential Less Than 2 Acres 
+                                                445 
 > dI <- dI[actualUseDescription== "Single Family Dwelling" | actualUseDescription=="Residential Dwelling with Suite"]
 > print(names(dI))
  [1] "addressForLaneway"     "roll_number"           "zoning"               
@@ -143,4 +162,4 @@ Duplex, Non-Strata Side by Side or Front / Back
 > 
 > proc.time()
    user  system elapsed 
- 24.995   0.711  26.085 
+ 23.907   2.119 454.649 

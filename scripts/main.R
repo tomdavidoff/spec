@@ -81,7 +81,7 @@ print(table(d24[thirty==0 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,
 
 # Main regression
 # Dummy for spec vs custom on property type dummies and share 
-shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric(),priceLag=numeric())
+shares <- data.table(nbhd=character(),year=numeric(),thirty=integer(),type=character(),shareType=numeric(),typeSpec=numeric(),specShare=numeric(),customShare=numeric(),priceLag=numeric())
 dsales <- fread("data/derived/sales.csv")
 dsales <- merge(dsales,d24[,.(ROLL_NUMBER24,MB_Year_Built,type,NEIGHBOURHOOD,thirty,spec)],by.x="ROLL_NUMBER",by.y="ROLL_NUMBER24")
 sales <- dsales[CONVEYANCE_DATE==MB_Year_Built | (CONVEYANCE_DATE==MB_Year_Built+1) ]
@@ -99,19 +99,28 @@ for (y in seq(FIRST_BUILT,LAST_BUILT)) {
 			for (t in c("single","duplex","laneway","basement")) {
 			#for (t in c("single","laneway","basement")) {
 				dss <- dsales[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction" & NEIGHBOURHOOD==n & CONVEYANCE_DATE<y & CONVEYANCE_DATE>=(y-KEEPLAG) & thirty==s & type==t]
-				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],priceLag=dss[,log(median(CONVEYANCE_PRICE,na.rm=TRUE))]))
+				shares <- rbind(shares,data.table(nbhd=n,year=y,thirty=s,type=t,shareType=dsub[,mean(type==t)],typeSpec=dsub[type==t,mean(spec==1)],specShare=dsub[spec==1,mean(type==t)],customShare=dsub[spec==0,mean(type==t)],priceLag=dss[,log(median(CONVEYANCE_PRICE,na.rm=TRUE))]))
 			}
 		    }
         }
 }
 print(summary(shares))
-print(quantile(shares[,specShare],seq(.1,.9,.1),na.rm=TRUE))
-print(quantile(shares[,shareType],seq(.1,.9,.1),na.rm=TRUE))
+
+print("Herf")
+print(summary(shares[,sum(shareType^2),by=.(year,nbhd,thirty)]))
+print(summary(shares[,sum(customShare^2),by=.(year,nbhd,thirty)]))
+print(summary(shares[,sum(specShare^2),by=.(year,nbhd,thirty)]))
 print("pre duplex")
-print(quantile(shares[year<2019,specShare],seq(.1,.9,.1),na.rm=TRUE))
-print(quantile(shares[year<2019,shareType],seq(.1,.9,.1),na.rm=TRUE))
+print(summary(shares[year<2019,sum(shareType^2),by=.(year,nbhd,thirty)]))
+print(summary(shares[year<2019,sum(customShare^2),by=.(year,nbhd,thirty)]))
+print(summary(shares[year<2019,sum(specShare^2),by=.(year,nbhd,thirty)]))
+print(summary(shares[thirty==1 &year<2019,sum(shareType^2),by=.(year,nbhd,thirty)]))
+print(summary(shares[thirty==1 &year<2019,sum(customShare^2),by=.(year,nbhd,thirty)]))
+print(summary(shares[thirty==1 &year<2019,sum(specShare^2),by=.(year,nbhd,thirty)]))
+
 
 dnew <- d24[MB_Year_Built>FIRST_BUILT & MB_Year_Built<2023]
+print(dnew[MB_Year_Built>2016,mean(spec),by=.(thirty,fifty)])
 print(dnew[MB_Year_Built>2016,mean(spec),by=type])
 print(dnew[MB_Year_Built>2016,mean(spec),by=MB_Year_Built])
 print(dnew[MB_Year_Built>2016,quantile(improvementValue,na.rm=TRUE),by=.(spec)])
@@ -144,6 +153,21 @@ print(dnew[improvementValue>400000])
 print(summary(feols(typeSpec~shareType |year^nbhd^thirty + type^year ,data=shares,cluster="nbhd")))
 shares[,nbhdType:=paste0(nbhd,"_",type)]
 print(summary(feols(typeSpec~shareType |year^type + nbhd^year^thirty + nbhdType^thirty,data=shares,cluster="nbhdType")))
+# anything funny with laneways?
+for (y in 2009:2019) {
+	print(y)
+	print(shares[year==y & type=="laneway",.(mean(typeSpec,na.rm=TRUE),mean(specShare,na.rm=TRUE),mean(shareType,na.rm=TRUE),mean(priceLag,na.rm=TRUE)),by=.(thirty)])
+}
+
+
+# mean laneway premium by year given nbhd
+shares[,laneway:=ifelse(type=="laneway",1,0)]
+print(summary(feols(priceLag ~ i(year)*laneway | nbhd,data=shares[thirty==1 & year>2010])))
+
+print(summary(feols(typeSpec~shareType |year+ nbhd ,data=shares[year>2012 & year<2019 & type=="laneway" & thirty==1],cluster="nbhdType")))
+print(summary(feols(typeSpec~shareType |year+ nbhd ,data=shares[year>2015 & type=="laneway" & thirty==1],cluster="nbhdType")))
+print(summary(feols(typeSpec~shareType |year+ nbhd ,data=shares[year>2016 & year < 2020 & type=="laneway" & thirty==1],cluster="nbhdType")))
+
 print(summary(feols(typeSpec~shareType |year^type + nbhd^year^thirty + nbhdType^thirty,data=shares[year<2020 & type!="duplex"],cluster="nbhdType")))
 print(summary(feols(specShare~ priceLag |year^type + nbhd^year^thirty + nbhd^type^thirty,data=shares[type!="duplex"],cluster="nbhd")))
 print(summary(feols(specShare~ priceLag |year^type + nbhd^year^thirty ,data=shares[type!="duplex"],cluster="nbhd")))
@@ -173,5 +197,4 @@ for (y in 2010:2018) {
 
 ggplot(shares[,.(shareType,typeSpec,nbhd)],aes(x=shareType,y=typeSpec,color=nbhd)) + geom_point() 
 ggsave("text/shareSpecType.png")
-
 
