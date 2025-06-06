@@ -32,6 +32,7 @@ d16[,rollEnd16:=roll_number %% 10000]
 
 d24 <- merge(d24,d16,by.x=c("rollStart"),by.y=c("rollStart")) 
 print(summary(d24))
+d24 <- d24[laneok==1]
 
 dLaneway <- openxlsx::read.xlsx("data/raw/20250401_UBC_CustomLanewayReport.xlsx")
 #dLaneway <- read.dta13("data/raw/Laneway list 2015-23.dta")
@@ -47,7 +48,6 @@ d24 <- merge(d24,dLaneway,by="Roll",all.x=TRUE,all.y=TRUE)
 print(table(d24[,.(is.na(hasLaneway),is.na(rollEnd24))])) # about 50% of laneways -- not bad as all 30 50
 print(summary(d24[hasLaneway==1]))
 print(summary(d24[,YearBuilt==MB_Year_Built]))
-print(d24[hasLaneway==1 & YearBuilt!=MB_Year_Built])
 d24[,hasLaneway:=ifelse(is.na(hasLaneway),0,hasLaneway)]
 
 # get max transaction date by roll rumber
@@ -62,16 +62,29 @@ print(summary(d24[,MB_Year_Built]))
 d24[,spec:=0]
 d24[,sale2024:=0]
 FIRST_BUILT <- 2010 # Note can do early for the non-duplex stuff, and no duplex really pre-18
-LAST_BUILT <- 2023 # pre-duplex era?
+LAST_BUILT <- 2018 # pre-duplex era?
 for (y in seq(FIRST_BUILT,LAST_BUILT)) {
-    #d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1 | get(paste0("sale",y+2))==1  ),spec:=1]
     d24[MB_Year_Built==y & (get(paste0("sale",y))==1 | get(paste0("sale",y+1))==1  ),spec:=1]
-    #d24[MB_Year_Built==y & ( get(paste0("sale",y+1))==1  ),spec:=1]
 }
+
+d24[,laneway:=ifelse(type=="laneway",1,0)]
+print("mean spec by year")
 for (y in seq(FIRST_BUILT,LAST_BUILT)) {
-    print(y)
-    print(table(d24[MB_Year_Built==y,.(type,spec)]))
+	print(y)
+	print(d24[MB_Year_Built==y , mean(spec)])
+	print(d24[MB_Year_Built==y  & thirty==1, mean(spec)])
+	print(table(d24[MB_Year_Built==y,.(type,spec)]))
+	print(d24[MB_Year_Built==y,mean(laneway),by=spec])
+	print(d24[MB_Year_Built==y & thirty==1,mean(laneway),by=spec])
 }
+
+d24 <- d24[MB_Year_Built>=FIRST_BUILT & MB_Year_Built<=LAST_BUILT]
+print("were spec late to laneway?")
+print(summary(feols(type=="laneway" ~ spec | MB_Year_Built ^ NEIGHBOURHOOD ^ thirty,data=d24[MB_Year_Built>2008])))
+print(summary(feols(type=="laneway" ~ spec*MB_Year_Built|NEIGHBOURHOOD ,data=d24[MB_Year_Built>2008])))
+print(summary(d24[,.(laneway,spec)]))
+
+q("no")
 
 print(table(d24[MB_Year_Built>2016 & MB_Year_Built<2023,.(type,spec,STREET_DIRECTION_SUFFIX)]))
 print(table(d24[thirty==1 & MB_Year_Built>2016 & MB_Year_Built<2022,.(type,spec,STREET_DIRECTION_SUFFIX)]))
