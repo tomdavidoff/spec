@@ -20,19 +20,15 @@ DOCOMPILE <- FALSE
 
 if (DOCOMPILE==TRUE) {
 	dd25 <- fread("~/OneDrive\ -\ UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_descriptions_20250331_REVD25.csv",select=c("JURISDICTION_CODE","ROLL_NUMBER","FOLIO_ID","ACTUAL_USE_DESCRIPTION","REGIONAL_DISTRICT"),colClasses=c(ROLL_NUMBER="character"))
-	print(summary(dd25))
-	print(summary(dd25))
 	dj25 <- unique(dd25[,.(JURISDICTION_CODE,ROLL_NUMBER,FOLIO_ID)]) # for sales data uniformity
-	print(dj25[1:20])
 	names(dj25) <- c("JURISDICTION_CODE","ROLL_NUMBER","FOLIO_ID")
-	print(dj25[1:20])
 
 	diri <- "~/OneDrive - UBC/Documents/data/bca/Residential_inventory_202501/"
 	dirf <- list.files(diri)
 
-	di25 <- data.table(Jurisdiction=numeric(),Roll_Number=character(),MB_Year_Built=numeric(),MB_Effective_Year=numeric())
+	di25 <- data.table(Jurisdiction=numeric(),Roll_Number=character(),MB_Year_Built=numeric())
 	for (f in paste0(diri,dirf)) {
-		d <- fread(f,select=c("Jurisdiction","Roll_Number","MB_Year_Built","MB_Effective_Year"),colClasses=c(Roll_Number="character",Jurisdiction="numeric") )
+		d <- fread(f,select=c("Jurisdiction","Roll_Number","MB_Year_Built"),colClasses=c(Roll_Number="character",Jurisdiction="numeric") )
 		di25 <- rbind(di25,d)
 	}
 	di25 <- di25[!is.na(MB_Year_Built)]
@@ -44,11 +40,6 @@ if (DOCOMPILE==TRUE) {
 	ds25 <- fread("~/OneDrive - UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_sales_20250331_REVD25.csv",select=c("FOLIO_ID","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION"),colClasses=c(CONVEYANCE_DATE="character"))
 	# convert folioID to jurisdiction/roll_number as pre-redevelopment sales will have often same jurisd/roll_number, different FOLIO_ID. Certainly same rollStart
 	ds25[,CONVEYANCE_DATE:=as.Date(CONVEYANCE_DATE,format="%Y%m%d%H%M%S")]
-	print("probnlem 25")
-	print(summary(ds25))
-	print(summary(dj25))
-	print(ds25[1:10])
-	print(dj25[1:10])
 	ds25 <- merge(ds25,dj25,by="FOLIO_ID") # add jurisdiction code and roll number
 
 	# get sales data from 2016 to maximize chain of sales
@@ -74,18 +65,11 @@ if (DOCOMPILE==TRUE) {
 	df16 <- df16[ner==1]
 	df16[,ner:=NULL] # drop count
 	ds16 <- dbGetQuery(db16, "SELECT folioID, conveyanceDate, conveyancePrice, conveyanceTypeDescription FROM sales")
-	print(summary(df16))
-	print(summary(ds16))
-	print("DD?")
 	ds16 <- data.table(merge(df16,ds16,by="folioID"))
 	ds16[,folioID:=NULL] # drop folioID
 	setnames(ds16,c("jurisdictionCode","rollNumber","conveyanceDate","conveyancePrice","conveyanceTypeDescription"),c("JURISDICTION_CODE","ROLL_NUMBER","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION"))
 	print(ds16[1:10,CONVEYANCE_DATE])
 	ds16[,CONVEYANCE_DATE:=as.Date(CONVEYANCE_DATE,format="%Y-%m-%d")]
-	print("ds16then25")
-	print(ds16[1:20,])
-	print(summary(ds25))
-	print(ds25[1:20])
 	ds25[,FOLIO_ID:=NULL] # drop FOLIO_ID
 	ds25[,rollStart:=substring(ROLL_NUMBER,1,nchar(ROLL_NUMBER)-1)] # create rollStart
 	ds16[,in16:=1] # mark as in 2016
@@ -94,19 +78,19 @@ if (DOCOMPILE==TRUE) {
 	# only want stuff that had roll start in 2016
 	ds25 <- unique(rbind(ds25,ds16)) # note this procedure should allow duplexes as of 2025 -- but also note in 16 makes unique not happen
 	ds25[,max16:=max(in16),by=c("JURISDICTION_CODE","rollStart")]
-	ds25 <- ds25[max16==1] # keep only those with a 2016 sale
+	ds25 <- ds25[max16==1] # keep only those with a 2016 data sale (know was single family use in 2016)
 	ds25[,max16:=NULL] # drop max16 now redundant
 	ds25[,in16:=NULL] # drop in16 now redundant
-	ds25 <- ds25[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction"]
+	IMPROVEDONLY <- 0
+	if (IMPROVEDONLY==1) {
+		ds25 <- ds25[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction"] # only keep improved single property transactions
+	} 
 	ds25[,CONVEYANCE_TYPE_DESCRIPTION:=NULL] # drop conveyance type description now redundant
-	print("winner!")
 	ds25[,JURISDICTION_CODE:=as.numeric(JURISDICTION_CODE)]
 	print(d25[1:20,])
 	print(ds25[1:20,])
 	print(table(d25[,JURISDICTION_CODE]))
 	d25[,rollStart:=substring(ROLL_NUMBER,1,nchar(ROLL_NUMBER)-1)]
-	print(names(d25))
-	print(summary(d25))
 	d25[,maxBuilt:=max(MB_Year_Built),by=c("JURISDICTION_CODE","rollStart")] # in case of e.g. duplexes
 	d25[,lastDigit:=substring(ROLL_NUMBER,nchar(ROLL_NUMBER),nchar(ROLL_NUMBER))]	
 	d25[,minLastDigit:=min(lastDigit),by=c("JURISDICTION_CODE","rollStart")]
@@ -124,7 +108,9 @@ if (DOCOMPILE==TRUE) {
 }
 
 d25 <- fread("data/derived/specHold25.csv")
-d25 <- unique(d25) # shouldn't be, but are duplicates
+d25 <- unique(d25) # shouldn't be, but are duplicates (overlaps in sales data?)
+d25 <- d25[REGIONAL_DISTRICT=="Metro Vancouver",]
+#d25 <- d25[JURISDICTION_CODE==200,]
 
 # how to observe prior sales?
 
@@ -134,11 +120,11 @@ print(PUNISHMENT)
 print(summary(d25))
 d25[,firstPost:=min(CONVEYANCE_DATE+PUNISHMENT*(year(CONVEYANCE_DATE) < MB_Year_Built)),by=c("JURISDICTION_CODE","rollStart")] # first sale post-construction but what if tie? see saleYearBuilt stuff
 d25[,saleYearBuilt:=year(CONVEYANCE_DATE)==MB_Year_Built]
+print(summary(d25[,length(unique(FOLIO_ID)),by=c("JURISDICTION_CODE","rollStart")])) # note this is correct, always 1, so equivalent
 d25[,nSaleYearBuilt:=sum(saleYearBuilt),by="FOLIO_ID"]
 print(table(d25[,nSaleYearBuilt])) # how many sales in year built typically
 d25[,lastSaleYearBuilt:=0]
-d25[nSaleYearBuilt>1,lastSaleYearBuilt:=max(CONVEYANCE_DATE),by=c("JURISDICTION_CODE","rollStart")] # last sale in year built
-d25[nSaleYearBuilt>1,firstPost:=lastSaleYearBuilt] # if multiple sales in year built, use last sale in year built and this assumes spec
+d25[nSaleYearBuilt>1,firstPost:=max(CONVEYANCE_DATE),by=c("FOLIO_ID")] # last sale in year built if multiple
 d25[,preDate:=as.Date("1600-01-01",format="%Y-%m-%d")] # last sale before year built
 d25[CONVEYANCE_DATE < firstPost, preDate:=CONVEYANCE_DATE] 
 d25[,lastPre:=max(preDate),by=FOLIO_ID]
@@ -146,6 +132,24 @@ d25[,yfpost:=year(firstPost)]
 d25[,lastSale:=max(CONVEYANCE_DATE),by="FOLIO_ID"] # last sale date
 print(summary(d25))
 d25[,spec:=yfpost < (MB_Year_Built+2)]
+#d25[,firstObs:=min(CONVEYANCE_DATE),by=FOLIO_ID] # first observation date
+d25[,firstObs:=min(CONVEYANCE_DATE),by=c("JURISDICTION_CODE","rollStart")] # first observation date
+print(table(d25[MB_Year_Built>2000 & (CONVEYANCE_DATE==firstObs),year(firstObs)]))
+print(table(d25[MB_Year_Built>2000 & (CONVEYANCE_DATE==firstObs),year(firstObs)>=MB_Year_Built]))
+MAXPRE <- 6 # maximum number of years before year built to consider a spec builder, arbitraryish
+d25[,specStrict:= spec*(year(lastPre)>(MB_Year_Built-MAXPRE))] # spec if last sale before year built is less than MAXPRE years before year built
+d25[,specAlt:=spec*(yfpost==(MB_Year_Built+1) | month(firstPost)>6)] # alternative spec definition, if first sale after year built is one year after year built
+d25[,customStrict:=yfpost>(MB_Year_Built+1)]
+# strict definition -- pre-purchase not too long before built
+print(summary(d25[spec==1,max(MB_Year_Built-year(lastPre)),by=FOLIO_ID])) # how long before year built did they buy? should be 1 or 2 years
+print(table(d25[spec==1 & (CONVEYANCE_DATE==lastSale),MB_Year_Built-year(lastPre)])) # how long before year built did they buy? should be 1 or 2 years
+print(table(d25[spec==1 & (CONVEYANCE_DATE==lastSale) & (yfpost==MB_Year_Built),month(firstPost)])) # are these custom builds bought early in year?
+print(d25[MB_Year_Built>2000 & (lastSale==CONVEYANCE_DATE),.(specShare=mean(spec)),by=MB_Year_Built][order(MB_Year_Built)])
+print(d25[MB_Year_Built>2000 & (lastSale==CONVEYANCE_DATE),.(specShare=mean(specStrict)),by=MB_Year_Built][order(MB_Year_Built)])
+print(d25[MB_Year_Built>2000 & (lastSale==CONVEYANCE_DATE),.(specShare=mean(specAlt)),by=MB_Year_Built][order(MB_Year_Built)])
+print(d25[(JURISDICTION_CODE==200) & MB_Year_Built>2000 & (lastSale==CONVEYANCE_DATE),.(specShare=mean(specAlt)),by=MB_Year_Built][order(MB_Year_Built)]) # Vancouver
+print(d25[MB_Year_Built>2000 & (lastSale==CONVEYANCE_DATE),.(specShare=1-mean(customStrict)),by=MB_Year_Built][order(MB_Year_Built)])
+q("no")
 d25[,specBuy:=(CONVEYANCE_DATE==lastPre)*spec] # spec buy is last sale before year built
 d25[,specSale:=(CONVEYANCE_DATE==firstPost)*spec] # spec sale is first sale after year built
 print(table(d25[specBuy==1,MB_Year_Built-year(CONVEYANCE_DATE)])) # approximates how long spec builders held ; last sale to one per obs
@@ -211,7 +215,11 @@ ggplot(ris[numericDate>2000], aes(x=numericDate, y=value, color=measure)) +
 ggsave("text/specSalesTiming.png", width=10, height=6)
 
 # print share of all MB_Year_Built that are spec by year -- get this right
-x <- dv[ (MB_Year_Built>2000) & (lastSale==CONVEYANCE_DATE),.(specShare=sum(spec*yfpost==MB_Year_Built)/.N,count=.N),by=MB_Year_Built]
+print(dv[MB_Year_Built>2000 & (lastSale==CONVEYANCE_DATE),.(specShare=mean(spec)),by=MB_Year_Built][order(MB_Year_Built)])
+print(dv[MB_Year_Built>2000 & (lastSale==CONVEYANCE_DATE),.(specShare=mean(specStrict)),by=MB_Year_Built][order(MB_Year_Built)])
+x <- dv[ (MB_Year_Built>2000) & (lastSale==CONVEYANCE_DATE),.(specShare=sum(spec*(yfpost==MB_Year_Built))/.N,count=.N),by=MB_Year_Built]
+print(x[order(MB_Year_Built)])
+x <- dv[ (MB_Year_Built>2000) & (lastSale==CONVEYANCE_DATE),.(specShare=sum(specStrict*(yfpost==MB_Year_Built))/.N,count=.N),by=MB_Year_Built]
 print(x[order(MB_Year_Built)])
 print(dv[MB_Year_Built>2017,.N,by=c("spec","ACTUAL_USE_DESCRIPTION")])
 
