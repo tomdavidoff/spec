@@ -117,14 +117,48 @@ d25 <- d25[REGIONAL_DISTRICT=="Metro Vancouver",]
 PUNISHMENT <- 10^9
 print(PUNISHMENT)
 # reshape to horizontal with dcast to see all three sales
-print(summary(d25))
+# Write data.table code with the following outline: divide into (a) strictCustom: no sale in year built or after, unless sale in first 3 months so no way completed then; (b) strict spec: sale in year built or after, unless sale in first 3 months so no way completed then, and also a sale within crititcal value prior to that sale; (c) grey area, neither strict spec nor strict custom
+MAXPRE <- 5 # maximum number of years before year built to consider a spec builder, arbitraryish
+print(summary(d25[,length(unique(FOLIO_ID)),by=c("JURISDICTION_CODE","rollStart")])) # note this is correct, always 1, so FOLIO_ID and combo (jurisdiction rollStart) are equivalent
+d25 <- d25[MB_Year_Built>1999 & MB_Year_Built<2024]
+d25[,saleMonth:=month(CONVEYANCE_DATE)] # add sale month
+d25[,saleYear:=year(CONVEYANCE_DATE)] # add sale year
+MINBUILD <- 4 # presume can't build in less than this N months from start
+d25[,specPrePurchase:= (saleYear<MB_Year_Built | (saleYear==MB_Year_Built & saleMonth<MINBUILD)) &   (saleYear >= (MB_Year_Built-MAXPRE))  ] # spec if sale before year built minus MAXPRE years
+d25[,specSale:=(saleYear>=MB_Year_Built) & (saleYear<=(MB_Year_Built+1))]
+d25[saleYear==MB_Year_Built & saleMonth<MINBUILD,specSale:=0] # if sale in year built, but before MINBUILD, not a spec sale
+d25[,specPreDate:=as.Date("2500-01-01",format="%Y-%m-%d")] # pre purchase date
+d25[,specPostDate:=as.Date("1600-01-01",format="%Y-%m-%d")] # post sale date
+d25[specPrePurchase==1,specPreDate:=CONVEYANCE_DATE] # if spec pre purchase, set pre date to conveyance date
+d25[specSale==1,specPostDate:=CONVEYANCE_DATE] # if spec sale, set post date to conveyance date
+d25[,maxPost:=max(specPostDate),by=FOLIO_ID] # max post date for each folio ID
+d25[,minPre:=min(specPreDate),by=FOLIO_ID] # min pre date for each folio ID
+d25[,specStrict:=(maxPost>minPre) ]
+d25[,customStrict:=year(maxPost)<MB_Year_Built]
+d25[,grey:=(!specStrict & !customStrict)] # neither strict spec nor strict custom
+d25[,lastSale:=max(CONVEYANCE_DATE),by=FOLIO_ID] # last sale date for each folio ID
+print(summary(d25[CONVEYANCE_DATE==lastSale,.(specStrict,customStrict,grey)]))
+print(d25[CONVEYANCE_DATE==lastSale,sum(specStrict & customStrict)]) # how many are both spec and custom?
+d25 <- d25[CONVEYANCE_DATE==lastSale] # keep only last sale date
+d25 <- d25[order(MB_Year_Built)]
+# All
+print(d25[order(MB_Year_Built),.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
+# Vancouver
+print(d25[JURISDICTION_CODE==200,.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
+# West Vancouver
+print(d25[JURISDICTION_CODE==328,.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
+# Maple Ridge
+print(d25[JURISDICTION_CODE==312,.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
+# Richmond
+print(d25[ JURISDICTION_CODE==320,.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
+q("no")
 d25[,firstPost:=min(CONVEYANCE_DATE+PUNISHMENT*(year(CONVEYANCE_DATE) < MB_Year_Built)),by=c("JURISDICTION_CODE","rollStart")] # first sale post-construction but what if tie? see saleYearBuilt stuff
 d25[,saleYearBuilt:=year(CONVEYANCE_DATE)==MB_Year_Built]
-print(summary(d25[,length(unique(FOLIO_ID)),by=c("JURISDICTION_CODE","rollStart")])) # note this is correct, always 1, so equivalent
 d25[,nSaleYearBuilt:=sum(saleYearBuilt),by="FOLIO_ID"]
 print(table(d25[,nSaleYearBuilt])) # how many sales in year built typically
-d25[,lastSaleYearBuilt:=0]
-d25[nSaleYearBuilt>1,firstPost:=max(CONVEYANCE_DATE),by=c("FOLIO_ID")] # last sale in year built if multiple
+d25[,lastSaleYearBuilt:=max(CONVEYANCE_DATE),by=c("FOLIO_ID","saleYearBuilt")] # last sale in year built
+d25[,lastSaleYearBuilt:=max(lastSaleYearBuilt),by=c("FOLIO_ID")] # last sale in year built
+d25[nSaleYearBuilt>1,firstPost:=max(CONVEYANCE_DATE*(year(CONVEYANCE_DATE)==MB_Year_Built)),by=c("FOLIO_ID")] # last sale in year built if multiple
 d25[,preDate:=as.Date("1600-01-01",format="%Y-%m-%d")] # last sale before year built
 d25[CONVEYANCE_DATE < firstPost, preDate:=CONVEYANCE_DATE] 
 d25[,lastPre:=max(preDate),by=FOLIO_ID]
@@ -136,7 +170,6 @@ d25[,spec:=yfpost < (MB_Year_Built+2)]
 d25[,firstObs:=min(CONVEYANCE_DATE),by=c("JURISDICTION_CODE","rollStart")] # first observation date
 print(table(d25[MB_Year_Built>2000 & (CONVEYANCE_DATE==firstObs),year(firstObs)]))
 print(table(d25[MB_Year_Built>2000 & (CONVEYANCE_DATE==firstObs),year(firstObs)>=MB_Year_Built]))
-MAXPRE <- 6 # maximum number of years before year built to consider a spec builder, arbitraryish
 d25[,specStrict:= spec*(year(lastPre)>(MB_Year_Built-MAXPRE))] # spec if last sale before year built is less than MAXPRE years before year built
 d25[,specAlt:=spec*(yfpost==(MB_Year_Built+1) | month(firstPost)>6)] # alternative spec definition, if first sale after year built is one year after year built
 d25[,customStrict:=yfpost>(MB_Year_Built+1)]
