@@ -1,6 +1,6 @@
 
-R version 4.4.0 (2024-04-24) -- "Puppy Cup"
-Copyright (C) 2024 The R Foundation for Statistical Computing
+R version 4.5.0 (2025-04-11) -- "How About a Twenty-Six"
+Copyright (C) 2025 The R Foundation for Statistical Computing
 Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -22,10 +22,12 @@ Type 'q()' to quit R.
 > # Also, when do they buy?
 > # Tom Davidoff
 > # 06/04/25
+> # Modified as mergeRoll20052025.R does a lot
 > 
-> # strategy: find last sale before year built for single family homes
-> # consider doing for all teardowns class of 2016, but see how long hold is first
-> # do this for each metro area
+> # Steps:
+> # 1. do mergeRoll20052025.R to get homes built after 2005 and their 2005 characterstics
+> # 2. Do this script and get sales for each property
+> # 3. Merge the sales data with the 2005 data and learn about spec vs custom
 > 
 > library(data.table)
 > library(fixest)	
@@ -35,290 +37,111 @@ Type 'q()' to quit R.
 > # get dates of construction for single family homes 
 > # see if roll number ends in zero and no other by lot start works
 > 
+> # obtain static year built
+> 
 > DOCOMPILE <- FALSE
 > 
 > if (DOCOMPILE==TRUE) {
 + 	dd25 <- fread("~/OneDrive\ -\ UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_descriptions_20250331_REVD25.csv",select=c("JURISDICTION_CODE","ROLL_NUMBER","FOLIO_ID","ACTUAL_USE_DESCRIPTION","REGIONAL_DISTRICT"),colClasses=c(ROLL_NUMBER="character"))
++ 	print(table(dd25[,REGIONAL_DISTRICT])) # see what actual use descriptions are
++ 	dd25 <- dd25[REGIONAL_DISTRICT=="Metro Vancouver"] # drop empty regional districts
++ 	print("moo")
++ 	print(dd25)
 + 	dj25 <- unique(dd25[,.(JURISDICTION_CODE,ROLL_NUMBER,FOLIO_ID)]) # for sales data uniformity
 + 	names(dj25) <- c("JURISDICTION_CODE","ROLL_NUMBER","FOLIO_ID")
-+ 
-+ 	diri <- "~/OneDrive - UBC/Documents/data/bca/Residential_inventory_202501/"
-+ 	dirf <- list.files(diri)
-+ 
-+ 	di25 <- data.table(Jurisdiction=numeric(),Roll_Number=character(),MB_Year_Built=numeric())
-+ 	for (f in paste0(diri,dirf)) {
-+ 		d <- fread(f,select=c("Jurisdiction","Roll_Number","MB_Year_Built"),colClasses=c(Roll_Number="character",Jurisdiction="numeric") )
-+ 		di25 <- rbind(di25,d)
-+ 	}
-+ 	di25 <- di25[!is.na(MB_Year_Built)]
-+ 	# to date 20250312000000
-+ 
-+ 	d25 <- merge(dd25,di25,by.x=c("JURISDICTION_CODE","ROLL_NUMBER"),by.y=c("Jurisdiction","Roll_Number"))
-+ 	print(summary(d25))
 + 
 + 	ds25 <- fread("~/OneDrive - UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_sales_20250331_REVD25.csv",select=c("FOLIO_ID","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION"),colClasses=c(CONVEYANCE_DATE="character"))
 + 	# convert folioID to jurisdiction/roll_number as pre-redevelopment sales will have often same jurisd/roll_number, different FOLIO_ID. Certainly same rollStart
 + 	ds25[,CONVEYANCE_DATE:=as.Date(CONVEYANCE_DATE,format="%Y%m%d%H%M%S")]
++ 	print(head(dd25))
++ 	print(head(dj25))
++ 	print(head(ds25))
++ 	print("foo")
 + 	ds25 <- merge(ds25,dj25,by="FOLIO_ID") # add jurisdiction code and roll number
++ 	print(head(ds25))
++ 	print("foofoo")
 + 
-+ 	# get sales data from 2016 to maximize chain of sales
-+ 	# open an sqlite connection to ~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3
-+ 
-+ 	# get only single family lots as of 2016
++ 	# Now get 2016 data
 + 	db16 <- dbConnect(RSQLite::SQLite(), "~/OneDrive - UBC/Documents/data/bca/REVD16_and_inventory_extracts.sqlite3")
 + 	df16 <- dbGetQuery(db16, "SELECT folioID, jurisdictionCode, rollNumber FROM folio") 
-+ 	du16 <- dbGetQuery(db16, "SELECT folioID FROM folioDescription WHERE actualUseDescription IN ('Single Family Dwelling','Residential Dwelling with Suite')") #1.	“Single Family Dwelling” and “Residential Dwelling with Suite” are almost certainly SFHs. from ChatGPT, and is right_use
-+ 	du16 <- data.table(du16) # convert to data.table
-+ 	names(du16) <- "folioID" # rename to folioID
-+ 	df16 <- data.table(merge(df16,du16,by="folioID")) # keep only the valid single family
-+ 	# verify last digit of roll number is always zero, and only one observation per rollStart
-+ 	df16[,rollStart:=substring(rollNumber,1,nchar(rollNumber)-1)]
-+ 	print(summary(df16[,.N,by=rollStart]))
-+ 	# now the last digit thing
-+ 	df16[,lastDigit:=substring(rollNumber,nchar(rollNumber),nchar(rollNumber))]
-+ 	print(table(df16[,lastDigit])) # not true always 1
-+ 	df16[,lastDigit:=NULL]
-+ 	df16[,ner:=.N,by=c("rollStart","jurisdictionCode")] 
-+ 	print(df16[ner>1]) # these seem to be luxury
-+ 	print(table(df16[,ner]))
-+ 	df16 <- df16[ner==1]
-+ 	df16[,ner:=NULL] # drop count
-+ 	ds16 <- dbGetQuery(db16, "SELECT folioID, conveyanceDate, conveyancePrice, conveyanceTypeDescription FROM sales")
++ 		ds16 <- dbGetQuery(db16, "SELECT folioID, conveyanceDate, conveyancePrice, conveyanceTypeDescription FROM sales")
 + 	ds16 <- data.table(merge(df16,ds16,by="folioID"))
-+ 	ds16[,folioID:=NULL] # drop folioID
++ 	setnames(ds16,"folioID","FOLIO_ID") # rename folioID to FOLIO_ID
 + 	setnames(ds16,c("jurisdictionCode","rollNumber","conveyanceDate","conveyancePrice","conveyanceTypeDescription"),c("JURISDICTION_CODE","ROLL_NUMBER","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION"))
-+ 	print(ds16[1:10,CONVEYANCE_DATE])
 + 	ds16[,CONVEYANCE_DATE:=as.Date(CONVEYANCE_DATE,format="%Y-%m-%d")]
-+ 	ds25[,FOLIO_ID:=NULL] # drop FOLIO_ID
-+ 	ds25[,rollStart:=substring(ROLL_NUMBER,1,nchar(ROLL_NUMBER)-1)] # create rollStart
-+ 	ds16[,in16:=1] # mark as in 2016
-+ 	ds25[,in16:=0] # mark as not in 2016
-+ 	print("namediff")
-+ 	# only want stuff that had roll start in 2016
-+ 	ds25 <- unique(rbind(ds25,ds16)) # note this procedure should allow duplexes as of 2025 -- but also note in 16 makes unique not happen
-+ 	ds25[,max16:=max(in16),by=c("JURISDICTION_CODE","rollStart")]
-+ 	ds25 <- ds25[max16==1] # keep only those with a 2016 data sale (know was single family use in 2016)
-+ 	ds25[,max16:=NULL] # drop max16 now redundant
-+ 	ds25[,in16:=NULL] # drop in16 now redundant
-+ 	IMPROVEDONLY <- 0
-+ 	if (IMPROVEDONLY==1) {
-+ 		ds25 <- ds25[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction"] # only keep improved single property transactions
-+ 	} 
-+ 	ds25[,CONVEYANCE_TYPE_DESCRIPTION:=NULL] # drop conveyance type description now redundant
-+ 	ds25[,JURISDICTION_CODE:=as.numeric(JURISDICTION_CODE)]
-+ 	print(d25[1:20,])
-+ 	print(ds25[1:20,])
-+ 	print(table(d25[,JURISDICTION_CODE]))
-+ 	d25[,rollStart:=substring(ROLL_NUMBER,1,nchar(ROLL_NUMBER)-1)]
-+ 	d25[,maxBuilt:=max(MB_Year_Built),by=c("JURISDICTION_CODE","rollStart")] # in case of e.g. duplexes
-+ 	d25[,lastDigit:=substring(ROLL_NUMBER,nchar(ROLL_NUMBER),nchar(ROLL_NUMBER))]	
-+ 	d25[,minLastDigit:=min(lastDigit),by=c("JURISDICTION_CODE","rollStart")]
-+ 	d25 <- d25[lastDigit==minLastDigit] # keep only lowest digit of set in event multiple same year built
-+ 	print(summary(d25))
-+ 	d25 <- d25[MB_Year_Built == maxBuilt] # drop earlier of duplexes if any
-+ 	setnames(ds25,"ROLL_NUMBER","rollSales") # rename roll number to rollSales
-+ 	d25 <- merge(d25,ds25,by=c("JURISDICTION_CODE","rollStart")) # add sales data
-+ 	print(summary(d25))
-+ 	d25[,nRoll:=.N,by=rollStart]
-+ 	print(table(d25[,nRoll]))
++ 	print(head(ds16))
++ 	print(head(ds25))
 + 
-+ 	fwrite(d25,"data/derived/specHold25.csv")
-+ 
++ 	ds1625 <- unique(rbind(ds25,ds16)) # note this procedure should allow duplexes as of 2025 -- but also note in 16 makes unique not happen
++ 	print(nrow(ds25))
++ 	print(nrow(ds16))
++ 	print(nrow(ds1625))
++ 	fwrite(ds1625,"data/derived/sales20162025.csv") # save sales data
 + }
+> ds <- fread("data/derived/sales20162025.csv")
+> db <- fread("data/derived/newBuilds.csv")
+> print(head(ds))
+     FOLIO_ID CONVEYANCE_DATE CONVEYANCE_PRICE
+       <char>          <IDat>            <num>
+1: A000000009      2019-04-05         17309000
+2: A000000009      2014-06-16          9450000
+3: A000000009      2014-06-05                1
+4: A00000000A      2013-02-08          8800000
+5: A00000000A      1991-07-09          1700000
+6: A00000000B      2006-12-04          3850000
+                CONVEYANCE_TYPE_DESCRIPTION JURISDICTION_CODE     ROLL_NUMBER
+                                     <char>             <int>          <char>
+1: Reject - Not Suitable for Sales Analysis               200 001019632060000
+2:     Improved Single Property Transaction               200 001019632060000
+3: Reject - Not Suitable for Sales Analysis               200 001019632060000
+4:     Improved Single Property Transaction               200 001019632290000
+5:     Improved Single Property Transaction               200 001019632290000
+6:     Improved Single Property Transaction               200 001019632450000
+> print(head(db))
+   Jurisdiction  Roll_Number MB_Year_Built value_stru05   FOLIO_ID
+          <int>       <char>         <int>        <int>     <char>
+1:          328 100081000000          2015        50500 A0000296QK
+2:          328 100082000000          2015       132000 A0000296QL
+3:          328 100089000000          2014        16100 A0000296QV
+4:          328 100090000000          2014        32800 A0000296QW
+5:          328 100112000000          2014         9100 A0000296RK
+6:          328 100113000000          2018        14000 A0000296RL
+> ds[,rollNumeric:=as.numeric(ROLL_NUMBER)] # convert roll number to numeric
+Warning message:
+In eval(jsub, SDenv, parent.frame()) : NAs introduced by coercion
+> db[,rollNumeric:=as.numeric(Roll_Number)] # convert roll number to numeric
+Warning message:
+In eval(jsub, SDenv, parent.frame()) : NAs introduced by coercion
 > 
-> d25 <- fread("data/derived/specHold25.csv")
-> d25 <- unique(d25) # shouldn't be, but are duplicates (overlaps in sales data?)
-> d25 <- d25[REGIONAL_DISTRICT=="Metro Vancouver",]
-> #d25 <- d25[JURISDICTION_CODE==200,]
+> df <- merge(ds,db,by.x=c("JURISDICTION_CODE","rollNumeric"),by.y=c("Jurisdiction","rollNumeric"))
+> print(head(df))
+Key: <JURISDICTION_CODE, rollNumeric>
+   JURISDICTION_CODE  rollNumeric FOLIO_ID.x CONVEYANCE_DATE CONVEYANCE_PRICE
+               <int>        <num>     <char>          <IDat>            <num>
+1:               200 1.019633e+12 A00000000C      2021-09-10         14000000
+2:               200 1.019633e+12 A00000000C      2021-09-10         14000000
+3:               200 1.019633e+12 A00000000C      1991-09-03          2308000
+4:               200 1.019633e+12 A00000000C      1991-09-03          2308000
+5:               200 1.019633e+12 A00000000C      1981-07-15           875000
+6:               200 1.019633e+12 A00000000C      1981-07-15           875000
+                CONVEYANCE_TYPE_DESCRIPTION     ROLL_NUMBER     Roll_Number
+                                     <char>          <char>          <char>
+1: Reject - Not Suitable for Sales Analysis 001019632650000 001019632650000
+2: Reject - Not Suitable for Sales Analysis 001019632650000 001019632650000
+3:     Improved Single Property Transaction 001019632650000 001019632650000
+4:     Improved Single Property Transaction 001019632650000 001019632650000
+5:     Improved Single Property Transaction 001019632650000 001019632650000
+6:     Improved Single Property Transaction 001019632650000 001019632650000
+   MB_Year_Built value_stru05 FOLIO_ID.y
+           <int>        <int>     <char>
+1:          2008       142000 A00000000C
+2:          2008       142000 A00000000C
+3:          2008       142000 A00000000C
+4:          2008       142000 A00000000C
+5:          2008       142000 A00000000C
+6:          2008       142000 A00000000C
 > 
-> # how to observe prior sales?
-> 
-> PUNISHMENT <- 10^9
-> print(PUNISHMENT)
-[1] 1e+09
-> # reshape to horizontal with dcast to see all three sales
-> # Write data.table code with the following outline: divide into (a) strictCustom: no sale in year built or after, unless sale in first 3 months so no way completed then; (b) strict spec: sale in year built or after, unless sale in first 3 months so no way completed then, and also a sale within crititcal value prior to that sale; (c) grey area, neither strict spec nor strict custom
-> MAXPRE <- 5 # maximum number of years before year built to consider a spec builder, arbitraryish
-> print(summary(d25[,length(unique(FOLIO_ID)),by=c("JURISDICTION_CODE","rollStart")])) # note this is correct, always 1, so FOLIO_ID and combo (jurisdiction rollStart) are equivalent
- JURISDICTION_CODE  rollStart               V1   
- Min.   :200.0     Length:303839      Min.   :1  
- 1st Qu.:220.0     Class :character   1st Qu.:1  
- Median :311.0     Mode  :character   Median :1  
- Mean   :284.5                        Mean   :1  
- 3rd Qu.:326.0                        3rd Qu.:1  
- Max.   :745.0                        Max.   :1  
-> d25 <- d25[MB_Year_Built>1999 & MB_Year_Built<2024]
-> d25[,saleMonth:=month(CONVEYANCE_DATE)] # add sale month
-> d25[,saleYear:=year(CONVEYANCE_DATE)] # add sale year
-> MINBUILD <- 4 # presume can't build in less than this N months from start
-> d25[,specPrePurchase:= (saleYear<MB_Year_Built | (saleYear==MB_Year_Built & saleMonth<MINBUILD)) &   (saleYear >= (MB_Year_Built-MAXPRE))  ] # spec if sale before year built minus MAXPRE years
-> d25[,specSale:=(saleYear>=MB_Year_Built) & (saleYear<=(MB_Year_Built+1))]
-> d25[saleYear==MB_Year_Built & saleMonth<MINBUILD,specSale:=0] # if sale in year built, but before MINBUILD, not a spec sale
-> d25[,specPreDate:=as.Date("2500-01-01",format="%Y-%m-%d")] # pre purchase date
-> d25[,specPostDate:=as.Date("1600-01-01",format="%Y-%m-%d")] # post sale date
-> d25[specPrePurchase==1,specPreDate:=CONVEYANCE_DATE] # if spec pre purchase, set pre date to conveyance date
-> d25[specSale==1,specPostDate:=CONVEYANCE_DATE] # if spec sale, set post date to conveyance date
-> d25[,maxPost:=max(specPostDate),by=FOLIO_ID] # max post date for each folio ID
-> d25[,minPre:=min(specPreDate),by=FOLIO_ID] # min pre date for each folio ID
-> d25[,specStrict:=(maxPost>minPre) ]
-> d25[,customStrict:=year(maxPost)<MB_Year_Built]
-> d25[,grey:=(!specStrict & !customStrict)] # neither strict spec nor strict custom
-> d25[,lastSale:=max(CONVEYANCE_DATE),by=FOLIO_ID] # last sale date for each folio ID
-> print(summary(d25[CONVEYANCE_DATE==lastSale,.(specStrict,customStrict,grey)]))
- specStrict      customStrict       grey        
- Mode :logical   Mode :logical   Mode :logical  
- FALSE:59742     FALSE:37276     FALSE:50288    
- TRUE :13911     TRUE :36377     TRUE :23365    
-> print(d25[CONVEYANCE_DATE==lastSale,sum(specStrict & customStrict)]) # how many are both spec and custom?
-[1] 0
-> d25 <- d25[CONVEYANCE_DATE==lastSale] # keep only last sale date
-> d25 <- d25[order(MB_Year_Built)]
-> # All
-> print(d25[order(MB_Year_Built),.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
-    MB_Year_Built       spec    custom       grey
-            <int>      <num>     <num>      <num>
- 1:          2000 0.13817771 0.4612199 0.40060241
- 2:          2001 0.13654050 0.3799080 0.48355147
- 3:          2002 0.16641221 0.3974555 0.43613232
- 4:          2003 0.15874064 0.3738441 0.46741524
- 5:          2004 0.18164597 0.4108609 0.40749316
- 6:          2005 0.16821372 0.3346163 0.49717002
- 7:          2006 0.25345622 0.3879745 0.35856923
- 8:          2007 0.22546419 0.4137931 0.36074271
- 9:          2008 0.24710910 0.3986928 0.35419809
-10:          2009 0.19784047 0.3315918 0.47056775
-11:          2010 0.21977773 0.4259469 0.35427535
-12:          2011 0.19898089 0.4853503 0.31566879
-13:          2012 0.19835180 0.5601023 0.24154589
-14:          2013 0.21101526 0.5242203 0.26476443
-15:          2014 0.26860142 0.4739117 0.25748688
-16:          2015 0.25320140 0.5125146 0.23428405
-17:          2016 0.18418418 0.7432432 0.07257257
-18:          2017 0.14534637 0.8062048 0.04844879
-19:          2018 0.12247016 0.8266736 0.05085625
-20:          2019 0.14239897 0.7960231 0.06157793
-21:          2020 0.15020747 0.7651452 0.08464730
-22:          2021 0.12390572 0.7723906 0.10370370
-23:          2022 0.07995951 0.8026316 0.11740891
-24:          2023 0.08097785 0.7799847 0.13903743
-    MB_Year_Built       spec    custom       grey
-> # Vancouver
-> print(d25[JURISDICTION_CODE==200,.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
-    MB_Year_Built       spec    custom       grey
-            <int>      <num>     <num>      <num>
- 1:          2000 0.18655462 0.4655462 0.34789916
- 2:          2001 0.19237750 0.4137931 0.39382940
- 3:          2002 0.17896010 0.4957678 0.32527207
- 4:          2003 0.20574163 0.4688995 0.32535885
- 5:          2004 0.17391304 0.5158637 0.31022327
- 6:          2005 0.14748784 0.4878444 0.36466775
- 7:          2006 0.21304348 0.5391304 0.24782609
- 8:          2007 0.19959267 0.5987780 0.20162933
- 9:          2008 0.25588697 0.5478807 0.19623234
-10:          2009 0.21415608 0.5390200 0.24682396
-11:          2010 0.17385257 0.6662031 0.15994437
-12:          2011 0.17068063 0.6680628 0.16125654
-13:          2012 0.16720955 0.6905537 0.14223670
-14:          2013 0.20076726 0.6636829 0.13554987
-15:          2014 0.21798365 0.6907357 0.09128065
-16:          2015 0.20375335 0.7426273 0.05361930
-17:          2016 0.16636197 0.8117002 0.02193784
-18:          2017 0.13492063 0.8492063 0.01587302
-19:          2018 0.10093168 0.8726708 0.02639752
-20:          2019 0.12757974 0.7973734 0.07504690
-21:          2020 0.14141414 0.7247475 0.13383838
-22:          2021 0.07392197 0.7330595 0.19301848
-23:          2022 0.03476821 0.7135762 0.25165563
-24:          2023 0.02298851 0.6896552 0.28735632
-    MB_Year_Built       spec    custom       grey
-> # West Vancouver
-> print(d25[JURISDICTION_CODE==328,.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
-    MB_Year_Built       spec    custom        grey
-            <int>      <num>     <num>       <num>
- 1:          2000 0.11250000 0.5875000 0.300000000
- 2:          2001 0.07777778 0.7555556 0.166666667
- 3:          2002 0.09482759 0.6465517 0.258620690
- 4:          2003 0.11475410 0.7213115 0.163934426
- 5:          2004 0.10483871 0.7177419 0.177419355
- 6:          2005 0.16190476 0.6285714 0.209523810
- 7:          2006 0.13821138 0.6260163 0.235772358
- 8:          2007 0.17977528 0.7528090 0.067415730
- 9:          2008 0.21774194 0.7338710 0.048387097
-10:          2009 0.26086957 0.6086957 0.130434783
-11:          2010 0.14102564 0.7435897 0.115384615
-12:          2011 0.21259843 0.7086614 0.078740157
-13:          2012 0.17241379 0.7586207 0.068965517
-14:          2013 0.19379845 0.7751938 0.031007752
-15:          2014 0.17204301 0.7849462 0.043010753
-16:          2015 0.20238095 0.7619048 0.035714286
-17:          2016 0.10691824 0.8867925 0.006289308
-18:          2017 0.03636364 0.9636364 0.000000000
-19:          2018 0.02631579 0.9473684 0.026315789
-20:          2019 0.02500000 0.9750000 0.000000000
-21:          2020 0.03030303 0.9696970 0.000000000
-22:          2021 0.08108108 0.9189189 0.000000000
-23:          2022 0.00000000 1.0000000 0.000000000
-24:          2023 0.05084746 0.9491525 0.000000000
-    MB_Year_Built       spec    custom        grey
-> # Maple Ridge
-> print(d25[JURISDICTION_CODE==312,.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
-    MB_Year_Built       spec     custom       grey
-            <int>      <num>      <num>      <num>
- 1:          2000 0.14909091 0.38545455 0.46545455
- 2:          2001 0.13559322 0.32203390 0.54237288
- 3:          2002 0.20185185 0.27037037 0.52777778
- 4:          2003 0.13529412 0.23725490 0.62745098
- 5:          2004 0.15748031 0.19422572 0.64829396
- 6:          2005 0.16791980 0.14035088 0.69172932
- 7:          2006 0.18372703 0.14173228 0.67454068
- 8:          2007 0.23843416 0.16725979 0.59430605
- 9:          2008 0.22164948 0.17525773 0.60309278
-10:          2009 0.19531250 0.14062500 0.66406250
-11:          2010 0.19791667 0.21527778 0.58680556
-12:          2011 0.22916667 0.22916667 0.54166667
-13:          2012 0.26229508 0.34426230 0.39344262
-14:          2013 0.33552632 0.17763158 0.48684211
-15:          2014 0.21844660 0.12135922 0.66019417
-16:          2015 0.13714286 0.09142857 0.77142857
-17:          2016 0.27272727 0.63636364 0.09090909
-18:          2017 0.30000000 0.70000000 0.00000000
-19:          2018 0.17647059 0.82352941 0.00000000
-20:          2019 0.11111111 0.88888889 0.00000000
-21:          2020 0.25000000 0.66666667 0.08333333
-22:          2021 0.00000000 0.83333333 0.16666667
-23:          2022 0.05882353 0.94117647 0.00000000
-24:          2023 0.17647059 0.82352941 0.00000000
-    MB_Year_Built       spec     custom       grey
-> # Richmond
-> print(d25[ JURISDICTION_CODE==320,.(spec=mean(specStrict),custom=mean(customStrict),grey=mean(grey)),by=MB_Year_Built]) # share of each
-    MB_Year_Built       spec    custom       grey
-            <int>      <num>     <num>      <num>
- 1:          2000 0.13043478 0.5869565 0.28260870
- 2:          2001 0.15853659 0.4634146 0.37804878
- 3:          2002 0.16964286 0.5446429 0.28571429
- 4:          2003 0.14736842 0.5473684 0.30526316
- 5:          2004 0.16923077 0.5846154 0.24615385
- 6:          2005 0.18000000 0.4800000 0.34000000
- 7:          2006 0.17142857 0.4785714 0.35000000
- 8:          2007 0.17419355 0.3806452 0.44516129
- 9:          2008 0.25949367 0.4303797 0.31012658
-10:          2009 0.37647059 0.4000000 0.22352941
-11:          2010 0.34899329 0.3993289 0.25167785
-12:          2011 0.20000000 0.5630769 0.23692308
-13:          2012 0.20077220 0.6254826 0.17374517
-14:          2013 0.25118483 0.5118483 0.23696682
-15:          2014 0.35937500 0.4687500 0.17187500
-16:          2015 0.31402439 0.5335366 0.15243902
-17:          2016 0.19867550 0.6291391 0.17218543
-18:          2017 0.10139860 0.7622378 0.13636364
-19:          2018 0.10344828 0.8017241 0.09482759
-20:          2019 0.14634146 0.7682927 0.08536585
-21:          2020 0.19480519 0.7142857 0.09090909
-22:          2021 0.18548387 0.7096774 0.10483871
-23:          2022 0.08235294 0.8294118 0.08823529
-24:          2023 0.14772727 0.7159091 0.13636364
-    MB_Year_Built       spec    custom       grey
 > q("no")
 > proc.time()
    user  system elapsed 
-  4.847   0.219   5.063 
+  9.649   3.635   3.171 

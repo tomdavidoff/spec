@@ -3,10 +3,12 @@
 # Also, when do they buy?
 # Tom Davidoff
 # 06/04/25
+# Modified as mergeRoll20052025.R does a lot
 
-# strategy: find last sale before year built for single family homes
-# consider doing for all teardowns class of 2016, but see how long hold is first
-# do this for each metro area
+# Steps:
+# 1. do mergeRoll20052025.R to get homes built after 2005 and their 2005 characterstics
+# 2. Do this script and get sales for each property
+# 3. Merge the sales data with the 2005 data and learn about spec vs custom
 
 library(data.table)
 library(fixest)	
@@ -16,76 +18,64 @@ library(ggplot2)
 # get dates of construction for single family homes 
 # see if roll number ends in zero and no other by lot start works
 
+# obtain static year built
+
 DOCOMPILE <- FALSE
 
 if (DOCOMPILE==TRUE) {
 	dd25 <- fread("~/OneDrive\ -\ UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_descriptions_20250331_REVD25.csv",select=c("JURISDICTION_CODE","ROLL_NUMBER","FOLIO_ID","ACTUAL_USE_DESCRIPTION","REGIONAL_DISTRICT"),colClasses=c(ROLL_NUMBER="character"))
+	print(table(dd25[,REGIONAL_DISTRICT])) # see what actual use descriptions are
+	dd25 <- dd25[REGIONAL_DISTRICT=="Metro Vancouver"] # drop empty regional districts
+	print("moo")
+	print(dd25)
 	dj25 <- unique(dd25[,.(JURISDICTION_CODE,ROLL_NUMBER,FOLIO_ID)]) # for sales data uniformity
 	names(dj25) <- c("JURISDICTION_CODE","ROLL_NUMBER","FOLIO_ID")
-
-	diri <- "~/OneDrive - UBC/Documents/data/bca/Residential_inventory_202501/"
-	dirf <- list.files(diri)
-
-	di25 <- data.table(Jurisdiction=numeric(),Roll_Number=character(),MB_Year_Built=numeric())
-	for (f in paste0(diri,dirf)) {
-		d <- fread(f,select=c("Jurisdiction","Roll_Number","MB_Year_Built"),colClasses=c(Roll_Number="character",Jurisdiction="numeric") )
-		di25 <- rbind(di25,d)
-	}
-	di25 <- di25[!is.na(MB_Year_Built)]
-	# to date 20250312000000
-
-	d25 <- merge(dd25,di25,by.x=c("JURISDICTION_CODE","ROLL_NUMBER"),by.y=c("Jurisdiction","Roll_Number"))
-	print(summary(d25))
 
 	ds25 <- fread("~/OneDrive - UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_sales_20250331_REVD25.csv",select=c("FOLIO_ID","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION"),colClasses=c(CONVEYANCE_DATE="character"))
 	# convert folioID to jurisdiction/roll_number as pre-redevelopment sales will have often same jurisd/roll_number, different FOLIO_ID. Certainly same rollStart
 	ds25[,CONVEYANCE_DATE:=as.Date(CONVEYANCE_DATE,format="%Y%m%d%H%M%S")]
+	print(head(dd25))
+	print(head(dj25))
+	print(head(ds25))
+	print("foo")
 	ds25 <- merge(ds25,dj25,by="FOLIO_ID") # add jurisdiction code and roll number
+	print(head(ds25))
+	print("foofoo")
 
-	# get sales data from 2016 to maximize chain of sales
-	# open an sqlite connection to ~/docs/data/bca/REVD16_and_inventory_extracts.sqlite3
-
-	# get only single family lots as of 2016
+	# Now get 2016 data
 	db16 <- dbConnect(RSQLite::SQLite(), "~/OneDrive - UBC/Documents/data/bca/REVD16_and_inventory_extracts.sqlite3")
 	df16 <- dbGetQuery(db16, "SELECT folioID, jurisdictionCode, rollNumber FROM folio") 
-	du16 <- dbGetQuery(db16, "SELECT folioID FROM folioDescription WHERE actualUseDescription IN ('Single Family Dwelling','Residential Dwelling with Suite')") #1.	“Single Family Dwelling” and “Residential Dwelling with Suite” are almost certainly SFHs. from ChatGPT, and is right_use
-	du16 <- data.table(du16) # convert to data.table
-	names(du16) <- "folioID" # rename to folioID
-	df16 <- data.table(merge(df16,du16,by="folioID")) # keep only the valid single family
-	# verify last digit of roll number is always zero, and only one observation per rollStart
-	df16[,rollStart:=substring(rollNumber,1,nchar(rollNumber)-1)]
-	print(summary(df16[,.N,by=rollStart]))
-	# now the last digit thing
-	df16[,lastDigit:=substring(rollNumber,nchar(rollNumber),nchar(rollNumber))]
-	print(table(df16[,lastDigit])) # not true always 1
-	df16[,lastDigit:=NULL]
-	df16[,ner:=.N,by=c("rollStart","jurisdictionCode")] 
-	print(df16[ner>1]) # these seem to be luxury
-	print(table(df16[,ner]))
-	df16 <- df16[ner==1]
-	df16[,ner:=NULL] # drop count
-	ds16 <- dbGetQuery(db16, "SELECT folioID, conveyanceDate, conveyancePrice, conveyanceTypeDescription FROM sales")
+		ds16 <- dbGetQuery(db16, "SELECT folioID, conveyanceDate, conveyancePrice, conveyanceTypeDescription FROM sales")
 	ds16 <- data.table(merge(df16,ds16,by="folioID"))
-	ds16[,folioID:=NULL] # drop folioID
+	setnames(ds16,"folioID","FOLIO_ID") # rename folioID to FOLIO_ID
 	setnames(ds16,c("jurisdictionCode","rollNumber","conveyanceDate","conveyancePrice","conveyanceTypeDescription"),c("JURISDICTION_CODE","ROLL_NUMBER","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION"))
-	print(ds16[1:10,CONVEYANCE_DATE])
 	ds16[,CONVEYANCE_DATE:=as.Date(CONVEYANCE_DATE,format="%Y-%m-%d")]
-	ds25[,FOLIO_ID:=NULL] # drop FOLIO_ID
-	ds25[,rollStart:=substring(ROLL_NUMBER,1,nchar(ROLL_NUMBER)-1)] # create rollStart
-	ds16[,in16:=1] # mark as in 2016
-	ds25[,in16:=0] # mark as not in 2016
-	print("namediff")
-	# only want stuff that had roll start in 2016
-	ds25 <- unique(rbind(ds25,ds16)) # note this procedure should allow duplexes as of 2025 -- but also note in 16 makes unique not happen
-	ds25[,max16:=max(in16),by=c("JURISDICTION_CODE","rollStart")]
-	ds25 <- ds25[max16==1] # keep only those with a 2016 data sale (know was single family use in 2016)
-	ds25[,max16:=NULL] # drop max16 now redundant
-	ds25[,in16:=NULL] # drop in16 now redundant
-	IMPROVEDONLY <- 0
-	if (IMPROVEDONLY==1) {
-		ds25 <- ds25[CONVEYANCE_TYPE_DESCRIPTION=="Improved Single Property Transaction"] # only keep improved single property transactions
-	} 
-	ds25[,CONVEYANCE_TYPE_DESCRIPTION:=NULL] # drop conveyance type description now redundant
+	print(head(ds16))
+	print(head(ds25))
+
+	ds1625 <- unique(rbind(ds25,ds16)) # note this procedure should allow duplexes as of 2025 -- but also note in 16 makes unique not happen
+	print(nrow(ds25))
+	print(nrow(ds16))
+	print(nrow(ds1625))
+	fwrite(ds1625,"data/derived/sales20162025.csv") # save sales data
+}
+ds <- fread("data/derived/sales20162025.csv")
+db <- fread("data/derived/newBuilds.csv")
+print(head(ds))
+print(head(db))
+ds[,rollNumeric:=as.numeric(ROLL_NUMBER)] # convert roll number to numeric
+db[,rollNumeric:=as.numeric(Roll_Number)] # convert roll number to numeric
+
+df <- merge(ds,db,by.x=c("JURISDICTION_CODE","rollNumeric"),by.y=c("Jurisdiction","rollNumeric"))
+print(head(df))
+# this may delete some spec duplex...
+
+
+q("no")
+
+
+
+	ds25[,max16:=max(in16),by=c("JURISDICTION_CODE","ROLL_NUMBER")]
 	ds25[,JURISDICTION_CODE:=as.numeric(JURISDICTION_CODE)]
 	print(d25[1:20,])
 	print(ds25[1:20,])
