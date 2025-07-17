@@ -1,8 +1,7 @@
-# mergeRoll20052016.R
-# merge 2005 and 2016 rolls for Greater Vancouver
+# mergeRoll20052025
+# merge 2005 and 2025 rolls for Greater Vancouver
 # Identify properties that were built in 2005 or later
 # Note Tsur's conversion code from stata "Landcor Roll+Transactions 2005.do"
-# Tom Davidoff
 # 07/11/25
 
 library(data.table)
@@ -21,14 +20,15 @@ dirf <- list.files(diri)
 di25 <- data.table(Jurisdiction=numeric(),Roll_Number=character(),MB_Year_Built=numeric())
 for (f in paste0(diri,dirf)) {
 	d <- fread(f,select=c("Jurisdiction","Roll_Number","MB_Year_Built"),colClasses=c(Roll_Number="character",Jurisdiction="numeric") )
-	di25 <- rbind(di25,d)
+	d <- d[Jurisdiction %in% jurList & !is.na(MB_Year_Built) ]
+	if (nrow(d)>0) {
+		di25 <- rbind(di25,d)
+	}
 }
 di25 <- di25[!is.na(MB_Year_Built)]
 di25[,numericRoll:=as.numeric(gsub("[^0-9]","",Roll_Number))]
 di25[,rollStart:=substring(numericRoll,1,nchar(numericRoll)-1)]
-di25 <- di25[Jurisdiction %in% jurList]
 # confine to single family and duplexes
-# confine to single famil
 
 dd25 <- fread("~/OneDrive - UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_descriptions_20250331_REVD25.csv",select=c("FOLIO_ID","ROLL_NUMBER","ACTUAL_USE_DESCRIPTION","JURISDICTION_CODE"))
 useList <- c("Single Family Dwelling","Duplex, Strata Side by Side","Duplex, Strata Front / Back","Duplex, Strata Up / Down","Duplex, Non-Strata Side by Side or Front / Back","Duplex, Non-Strata Up / Down","Residential Dwelling with Suite")
@@ -50,34 +50,17 @@ print(head(d2005))
 setnames(d2005,"juris_id","Jurisdiction")
 
 di25 <- merge(di25,d2005,by=c("rollStart","Jurisdiction"),all.x=TRUE,all.y=TRUE)
-print(nrow(di25))
-print(head(di25))
-print(nrow(di25))
-print(table(di25[,.(Jurisdiction,is.na(year_built))]))
-print(table(di25[,.(Jurisdiction,is.na(MB_Year_Built))]))
-print(table(di25[Jurisdiction==200,is.na(year_built)]))
-print(table(di25[Jurisdiction==200,is.na(MB_Year_Built)]))
-print(table(di25[Jurisdiction==200,single,is.na(MB_Year_Built)]))
 # drop non-singles from 2005 roll
-print(summary(di25))
 di25 <- di25[single==1 & !is.na(single) & !is.na(MB_Year_Built)]
-print(summary(di25[,year_built==MB_Year_Built]))
+# get ratio from 2005 as moment to match with spec indicator
 di25[,structureLand:=value_stru05/value_land05]
-summary(di25[MB_Year_Built==year_built,structureLand])
-summary(di25[MB_Year_Built!=year_built,structureLand])
 # are there mess ups of *older*
-print(summary(di25[MB_Year_Built!=year_built,MB_Year_Built]))
-print(summary(di25[MB_Year_Built!=year_built,year_built]))
 print(di25[MB_Year_Built!=year_built & MB_Year_Built<year_built,.(psh_rollnum,Roll_Number)])
 print(summary(di25[MB_Year_Built!=year_built & (as.numeric(psh_rollnum)==as.numeric(Roll_Number)),.(MB_Year_Built,year_built)]))
-print(table(di25[MB_Year_Built<2005 & MB_Year_Built!=year_built,ACTUAL_USE_DESCRIPTION]))
-print(table(di25[MB_Year_Built<2005 & MB_Year_Built!=year_built & (as.numeric(psh_rollnum)==as.numeric(Roll_Number)),MB_Year_Built-year_built]))
 di25[,duplex:=grepl("Duplex",ACTUAL_USE_DESCRIPTION)]
 di25 <- di25[as.numeric(psh_rollnum)==as.numeric(Roll_Number) | duplex]
-print("Post-purge")
-print(summary(di25[MB_Year_Built!=year_built & (as.numeric(psh_rollnum)==as.numeric(Roll_Number)),.(MB_Year_Built,year_built)]))
-print(summary(di25))
-print(summary(di25[duplex==1 ,.(MB_Year_Built)]))
-print(summary(di25[MB_Year_Built==year_built,.(structureLand,year_built)]))
-print(summary(di25[MB_Year_Built!=year_built,.(structureLand,year_built)]))
-fwrite(di25[MB_Year_Built>2005,.(Jurisdiction,Roll_Number,MB_Year_Built,value_stru05,FOLIO_ID)],"data/derived/newBuilds.csv")
+# only keep first post-2005 by 2005 roll number
+di25[,minNew:=min(MB_Year_Built+3000*(MB_Year_Built<=2005),na.rm=TRUE),by=.(Jurisdiction,psh_rollnum)]
+di25 <- di25[MB_Year_Built==minNew | MB_Year_Built<=2005]
+di25 <- unique(di25[,.(Jurisdiction,Roll_Number,MB_Year_Built,year_built,value_stru05,value_land05,FOLIO_ID)])
+fwrite(di25,"data/derived/newBuilds.csv")

@@ -24,23 +24,14 @@ DOCOMPILE <- FALSE
 
 if (DOCOMPILE==TRUE) {
 	dd25 <- fread("~/OneDrive\ -\ UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_descriptions_20250331_REVD25.csv",select=c("JURISDICTION_CODE","ROLL_NUMBER","FOLIO_ID","ACTUAL_USE_DESCRIPTION","REGIONAL_DISTRICT"),colClasses=c(ROLL_NUMBER="character"))
-	print(table(dd25[,REGIONAL_DISTRICT])) # see what actual use descriptions are
 	dd25 <- dd25[REGIONAL_DISTRICT=="Metro Vancouver"] # drop empty regional districts
-	print("moo")
-	print(dd25)
 	dj25 <- unique(dd25[,.(JURISDICTION_CODE,ROLL_NUMBER,FOLIO_ID)]) # for sales data uniformity
 	names(dj25) <- c("JURISDICTION_CODE","ROLL_NUMBER","FOLIO_ID")
 
 	ds25 <- fread("~/OneDrive - UBC/Documents/data/bca/data_advice_REVD25_20250331/bca_folio_sales_20250331_REVD25.csv",select=c("FOLIO_ID","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION"),colClasses=c(CONVEYANCE_DATE="character"))
 	# convert folioID to jurisdiction/roll_number as pre-redevelopment sales will have often same jurisd/roll_number, different FOLIO_ID. Certainly same rollStart
 	ds25[,CONVEYANCE_DATE:=as.Date(CONVEYANCE_DATE,format="%Y%m%d%H%M%S")]
-	print(head(dd25))
-	print(head(dj25))
-	print(head(ds25))
-	print("foo")
 	ds25 <- merge(ds25,dj25,by="FOLIO_ID") # add jurisdiction code and roll number
-	print(head(ds25))
-	print("foofoo")
 
 	# Now get 2016 data
 	db16 <- dbConnect(RSQLite::SQLite(), "~/OneDrive - UBC/Documents/data/bca/REVD16_and_inventory_extracts.sqlite3")
@@ -50,26 +41,67 @@ if (DOCOMPILE==TRUE) {
 	setnames(ds16,"folioID","FOLIO_ID") # rename folioID to FOLIO_ID
 	setnames(ds16,c("jurisdictionCode","rollNumber","conveyanceDate","conveyancePrice","conveyanceTypeDescription"),c("JURISDICTION_CODE","ROLL_NUMBER","CONVEYANCE_DATE","CONVEYANCE_PRICE","CONVEYANCE_TYPE_DESCRIPTION"))
 	ds16[,CONVEYANCE_DATE:=as.Date(CONVEYANCE_DATE,format="%Y-%m-%d")]
-	print(head(ds16))
-	print(head(ds25))
 
-	ds1625 <- unique(rbind(ds25,ds16)) # note this procedure should allow duplexes as of 2025 -- but also note in 16 makes unique not happen
-	print(nrow(ds25))
-	print(nrow(ds16))
-	print(nrow(ds1625))
+	ds1625 <- rbind(ds25,ds16) # note this procedure should allow duplexes as of 2025; note can't make unique here as "" and ,, same
 	fwrite(ds1625,"data/derived/sales20162025.csv") # save sales data
 }
 ds <- fread("data/derived/sales20162025.csv")
+ds <- unique(ds[,.(FOLIO_ID,CONVEYANCE_DATE,CONVEYANCE_PRICE,ROLL_NUMBER) ]) # remove duplicates with different conveyanceTypeDescription, see inside construction loop
 db <- fread("data/derived/newBuilds.csv")
+setkey(ds,FOLIO_ID)
+setkey(db,FOLIO_ID)
+# identify duplicates
+print(ds[duplicated(ds),]) # should be none
+print(db[duplicated(db) ,]) # should be none
 print(head(ds))
 print(head(db))
 ds[,rollNumeric:=as.numeric(ROLL_NUMBER)] # convert roll number to numeric
 db[,rollNumeric:=as.numeric(Roll_Number)] # convert roll number to numeric
-
-df <- merge(ds,db,by.x=c("JURISDICTION_CODE","rollNumeric"),by.y=c("Jurisdiction","rollNumeric"))
+print(db[duplicated(FOLIO_ID)& MB_Year_Built>2005,])  # these appear to be assemblies and rarely built post-2005
+db <- db[duplicated(FOLIO_ID)==FALSE ] # drop duplicates, keep only those built before 2005
+df <- merge(ds,db)
 print(head(df))
-# this may delete some spec duplex...
 
+# get maximal transaction date on or before year built, then minimal after that transaction
+df[,conveyanceDateContinuous:=year(CONVEYANCE_DATE) + (month(CONVEYANCE_DATE)-1)/12 + mday(CONVEYANCE_DATE-1)/365.25] # convert to continuous date
+df[,soldBuilt:= year(CONVEYANCE_DATE)==MB_Year_Built]
+# create the maximal and minimal dates conditional on soldBuilt within FOLIO_ID, set to zero if none
+df[,nIn:=sum(soldBuilt),by=FOLIO_ID] # number of sales in year built
+df[,maxIn:=max(conveyanceDateContinuous*soldBuilt),by=FOLIO_ID] # max conveyance date in year built
+df[,minIn:=min(conveyanceDateContinuous*soldBuilt+100000*(1-soldBuilt)),by=FOLIO_ID] # min conveyance date in year built
+df[,maxPre:=max(conveyanceDateContinuous*(year(CONVEYANCE_DATE)<=MB_Year_Built)),by=FOLIO_ID] # max conveyance date before year built
+df[nIn>1, maxPre:=minIn] # if multiple sales in year built, set maxPre to the minimal
+df[,minPost:=min(conveyanceDateContinuous+3000*(year(CONVEYANCE_DATE)<MB_Year_Built )),by=FOLIO_ID] # can be same as maxPre
+df[nIn>1, minPost:=maxIn] # if sales in year built, set minPost to maxIn
+# handle minPost==maxPre.
+print(df[nIn>1 & minPost==maxPre,.(FOLIO_ID,MB_Year_Built,CONVEYANCE_DATE,CONVEYANCE_PRICE,nIn,maxPre,minPost,minIn,maxIn,ROLL_NUMBER)])
+df[,structureShare:= value_stru05/(value_stru05+value_land05)] # share of structure value in 2005
+print(summary(df[MB_Year_Built>2005,])) 
+dNew <- unique(df[MB_Year_Built>2005,.(maxPre=maxPre,minPost=minPost,MB_Year_Built=max(MB_Year_Built),structureShare,maxIn,minIn,nIn),by=FOLIO_ID])
+print(head(dNew))
+SPECDELTA <- 1 #1 vs 2 vs 3 appears little diff on structureShare results
+dNew[,spec:=(floor(minPost)<=(MB_Year_Built+SPECDELTA))] # spec if first sale after year built is one year after year built
+MAXHOLD <- 4 # maximum number of years before year built to consider a spec builder, arbitraryish, but see spec distro, 49-25 then flat
+MAXHOLDEXTRA <- 1
+dNew[,specStrict:=spec & (maxPre>=(MB_Year_Built-MAXHOLD)) & (maxPre<minPost)] # spec if last sale before year built is less than MAXHOLD years before year built also different sale dates
+dNew[,specStrictExtra:=spec & (maxPre>=(MB_Year_Built-MAXHOLDEXTRA)) & (maxPre<minPost)] # spec if last sale before year built is less than MAXHOLD years before year built also different sale dates
+print(table(dNew[,.(spec,nIn)]))
+print(table(dNew[,.(spec,floor(maxPre)-MB_Year_Built)]))
+print(table(dNew[,.(specStrict,floor(maxPre)-MB_Year_Built)]))
+print(summary(dNew[spec==1 & specStrict==0,structureShare]))
+print(summary(dNew[specStrict==1 & specStrictExtra==0,structureShare]))
+print(summary(dNew[specStrictExtra==1,structureShare]))
+print(summary(dNew[spec==0,structureShare]))
+
+# problem diagnostic
+df[, yr := year(CONVEYANCE_DATE)]
+lateSpecs <- df[, .(
+  nIn = sum(yr == MB_Year_Built),
+  soldNextYr = any(yr == MB_Year_Built + 1)
+), by = FOLIO_ID][nIn == 0 & soldNextYr == TRUE]
+
+nrow(lateSpecs)  # how many are being missed?
+table(is.na(dNew$minPost), dNew$nIn)
 
 q("no")
 
